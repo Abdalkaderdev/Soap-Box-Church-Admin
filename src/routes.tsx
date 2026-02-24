@@ -9,6 +9,7 @@ const AddMember = lazy(() => import("./pages/members/AddMember"));
 const DonationsDashboard = lazy(() => import("./pages/donations/DonationsDashboard"));
 const DonationsList = lazy(() => import("./pages/donations/DonationsList"));
 const RecordDonation = lazy(() => import("./pages/donations/RecordDonation"));
+const DonorDetails = lazy(() => import("./pages/donations/DonorDetails"));
 const EventsList = lazy(() => import("./pages/events/EventsList"));
 const Communications = lazy(() => import("./pages/communications/Communications"));
 const Volunteers = lazy(() => import("./pages/volunteers/Volunteers"));
@@ -40,6 +41,7 @@ export const routes = {
     dashboard: "/donations",
     list: "/donations/list",
     new: "/donations/new",
+    donor: "/donations/donor/:id",
   },
   events: "/events",
   communications: "/communications",
@@ -52,6 +54,11 @@ export const routes = {
 // Helper function to generate member details URL
 export function getMemberDetailsUrl(id: string | number): string {
   return `/members/${id}`;
+}
+
+// Helper function to generate donor details URL
+export function getDonorDetailsUrl(id: string | number): string {
+  return `/donations/donor/${id}`;
 }
 
 // Main routes component
@@ -68,6 +75,7 @@ export function AppRoutes() {
         <Route path="/members" component={MembersList} />
 
         {/* Donations */}
+        <Route path="/donations/donor/:id" component={DonorDetails} />
         <Route path="/donations/list" component={DonationsList} />
         <Route path="/donations/new" component={RecordDonation} />
         <Route path="/donations" component={DonationsDashboard} />

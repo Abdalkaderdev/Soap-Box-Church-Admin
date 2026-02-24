@@ -21,7 +21,6 @@ import {
   DollarSign,
   Users,
   TrendingUp,
-  Calendar,
   Plus,
   ArrowUpRight,
   ArrowDownRight,
@@ -32,8 +31,6 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -99,7 +96,6 @@ const weeklyData = [
   { day: "Sat", amount: 220 },
 ];
 
-const COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 export default function DonationsDashboard() {
   const [timeRange, setTimeRange] = useState("year");
@@ -237,7 +233,7 @@ export default function DonationsDashboard() {
                     <XAxis dataKey="month" className="text-xs" />
                     <YAxis className="text-xs" tickFormatter={(value) => `$${value / 1000}k`} />
                     <Tooltip
-                      formatter={(value: number) => [`$${value.toLocaleString()}`, ""]}
+                      formatter={(value: number | string | undefined) => [`$${Number(value ?? 0).toLocaleString()}`, ""]}
                       contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
                     />
                     <Legend />
@@ -264,7 +260,7 @@ export default function DonationsDashboard() {
                     <XAxis dataKey="month" className="text-xs" />
                     <YAxis className="text-xs" tickFormatter={(value) => `$${value / 1000}k`} />
                     <Tooltip
-                      formatter={(value: number) => [`$${value.toLocaleString()}`, "Amount"]}
+                      formatter={(value: number | string | undefined) => [`$${Number(value ?? 0).toLocaleString()}`, "Amount"]}
                       contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
                     />
                     <Bar dataKey="amount" fill="#6366f1" radius={[4, 4, 0, 0]} />
@@ -299,7 +295,7 @@ export default function DonationsDashboard() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, ""]}
+                    formatter={(value: number | string | undefined) => [`$${Number(value ?? 0).toLocaleString()}`, ""]}
                     contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
                   />
                 </PieChart>
@@ -438,7 +434,7 @@ export default function DonationsDashboard() {
                 <XAxis dataKey="day" className="text-xs" />
                 <YAxis className="text-xs" tickFormatter={(value) => `$${value}`} />
                 <Tooltip
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, "Amount"]}
+                  formatter={(value: number | string | undefined) => [`$${Number(value ?? 0).toLocaleString()}`, "Amount"]}
                   contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
                 />
                 <Line

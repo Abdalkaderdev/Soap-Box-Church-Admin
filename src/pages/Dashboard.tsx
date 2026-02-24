@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "wouter";
 import {
   Card,
@@ -13,7 +14,16 @@ import { routes } from "@/routes";
 // Placeholder data
 const churchName = "Grace Community Church";
 
-const stats = [
+type ChangeType = "positive" | "negative" | "neutral";
+
+const stats: Array<{
+  title: string;
+  value: string;
+  change: string;
+  changeType: ChangeType;
+  description: string;
+  icon: React.ReactNode;
+}> = [
   {
     title: "Total Members",
     value: "1,247",
@@ -281,7 +291,7 @@ const quickActions = [
 
 export default function Dashboard() {
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-primary to-primary/80 p-6 text-primary-foreground">
         <div className="relative z-10">
@@ -345,8 +355,8 @@ export default function Dashboard() {
                   className={
                     stat.changeType === "positive"
                       ? "text-green-600"
-                      : stat.changeType === "negative"
-                      ? "text-red-600"
+                      : stat.changeType === "neutral"
+                      ? "text-muted-foreground"
                       : "text-muted-foreground"
                   }
                 >

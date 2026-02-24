@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useLocation } from 'wouter';
 import {
   LayoutDashboard,
   Users,
@@ -100,7 +100,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
-  const location = useLocation();
+  const [location] = useLocation();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const toggleExpand = (name: string) => {
@@ -112,7 +112,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   };
 
   const isActive = (href: string) => {
-    return location.pathname === href || location.pathname.startsWith(href + '/');
+    return location === href || location.startsWith(href + '/');
   };
 
   const isParentActive = (item: NavItem) => {
@@ -180,7 +180,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       {item.children.map((child) => (
                         <li key={child.name}>
                           <Link
-                            to={child.href}
+                            href={child.href}
                             className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
                               isActive(child.href)
                                 ? 'bg-slate-700 text-white'
@@ -196,7 +196,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 </div>
               ) : (
                 <Link
-                  to={item.href}
+                  href={item.href}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                     isParentActive(item)
                       ? 'bg-blue-600 text-white'
