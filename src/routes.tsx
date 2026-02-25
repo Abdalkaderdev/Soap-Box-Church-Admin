@@ -23,7 +23,6 @@ const CheckIn = lazy(() => import("./pages/checkin/CheckIn"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Landing = lazy(() => import("./pages/Landing"));
 const Features = lazy(() => import("./pages/Features"));
-const Pricing = lazy(() => import("./pages/Pricing"));
 
 // Loading fallback component
 function PageLoader() {
@@ -41,7 +40,6 @@ function PageLoader() {
 export const routes = {
   landing: "/",
   features: "/features",
-  pricing: "/pricing",
   dashboard: "/dashboard",
   members: {
     list: "/members",
@@ -85,9 +83,8 @@ export function AppRoutes() {
         {/* Landing Page */}
         <Route path="/" component={Landing} />
 
-        {/* Features & Pricing */}
+        {/* Features */}
         <Route path="/features" component={Features} />
-        <Route path="/pricing" component={Pricing} />
 
         {/* Dashboard */}
         <Route path="/dashboard" component={Dashboard} />

@@ -186,8 +186,8 @@ export default function Features() {
             {/* Navigation Links */}
             <div className="hidden md:flex items-center space-x-8">
               <Link href="/features" className="text-sage-700 font-medium">Features</Link>
-              <Link href="/pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</Link>
               <Link href="/#testimonials" className="text-gray-600 hover:text-gray-900 transition-colors">Testimonials</Link>
+              <a href="https://soapboxsuperapp.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 transition-colors">SoapBox</a>
             </div>
 
             {/* CTA Buttons */}

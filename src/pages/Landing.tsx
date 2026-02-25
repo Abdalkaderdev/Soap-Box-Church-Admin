@@ -8,8 +8,6 @@ import {
   Mail,
   Heart,
   BookOpen,
-  Shield,
-  Zap,
   ChevronRight,
   Play,
 } from "lucide-react";
@@ -26,9 +24,8 @@ export default function Landing() {
             {/* Navigation Links */}
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
-              <Link href="/pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</Link>
               <a href="#testimonials" className="text-gray-600 hover:text-gray-900 transition-colors">Testimonials</a>
-              <a href="#contact" className="text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
+              <a href="https://soapboxsuperapp.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 transition-colors">SoapBox</a>
             </div>
 
             {/* CTA Buttons */}
@@ -280,7 +277,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
-              <Logo size="sm" variant="light" className="mb-4" />
+              <Logo size="sm" className="mb-4" />
               <p className="text-gray-400 mb-4">
                 The complete church management platform powered by SoapBox Super App.
                 Helping churches shepherd their congregations with excellence.
@@ -291,7 +288,7 @@ export default function Landing() {
               <h4 className="text-lg font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><a href="https://soapboxsuperapp.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">SoapBox App</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
               </ul>
             </div>
