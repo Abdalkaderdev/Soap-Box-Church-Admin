@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Logo, LogoIcon } from "@/components/Logo";
-import { ExternalLink, Shield, Church, Users, Heart, Calendar, Sparkles } from "lucide-react";
+import { ExternalLink, Shield, Church, Users, Heart, Calendar, Sparkles, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 
 // Get base API URL for SoapBox Super App
 const getSoapBoxApiUrl = () => {
@@ -15,7 +17,13 @@ const getSoapBoxApiUrl = () => {
 export default function Login() {
   const [, navigate] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
-  const [ssoError, setSsoError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loginMethod, setLoginMethod] = useState<'sso' | 'credentials'>('credentials');
+
+  // Credentials form state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Handle SSO token on page load
   useEffect(() => {
@@ -25,7 +33,7 @@ export default function Login() {
 
       if (ssoToken) {
         setIsLoading(true);
-        setSsoError(null);
+        setError(null);
 
         try {
           // Validate the SSO token with the SoapBox API
@@ -51,12 +59,12 @@ export default function Login() {
             // Redirect to dashboard
             navigate("/dashboard");
           } else {
-            setSsoError(data.message || "SSO authentication failed");
+            setError(data.message || "SSO authentication failed");
             window.history.replaceState({}, document.title, "/login");
           }
-        } catch (error) {
-          console.error("SSO validation error:", error);
-          setSsoError("Failed to validate SSO token. Please try again.");
+        } catch (err) {
+          console.error("SSO validation error:", err);
+          setError("Failed to validate SSO token. Please try again.");
           window.history.replaceState({}, document.title, "/login");
         } finally {
           setIsLoading(false);
@@ -69,7 +77,7 @@ export default function Login() {
 
   const handleSSOLogin = async () => {
     setIsLoading(true);
-    setSsoError(null);
+    setError(null);
 
     // Redirect to the main SoapBox app for authentication
     const soapboxAuthUrl = window.location.origin.includes("localhost")
@@ -78,6 +86,48 @@ export default function Login() {
 
     // Redirect to SoapBox for SSO
     window.location.href = soapboxAuthUrl;
+  };
+
+  const handleCredentialsLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      setError("Please enter both email and password");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Authenticate with SoapBox API
+      const response = await fetch(`${getSoapBoxApiUrl()}/api/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.user) {
+        // Store user info in localStorage
+        localStorage.setItem("soapbox_user", JSON.stringify(data.user));
+        localStorage.setItem("soapbox_authenticated", "true");
+
+        // Redirect to dashboard
+        navigate("/dashboard");
+      } else {
+        setError(data.message || "Invalid email or password");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Failed to sign in. Please check your connection and try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const features = [
@@ -175,68 +225,160 @@ export default function Login() {
               </div>
               <CardTitle className="font-serif text-2xl text-walnut-900">Welcome Back</CardTitle>
               <CardDescription className="text-walnut-600">
-                Sign in with your SoapBox account to continue
+                Sign in to access your church dashboard
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* SSO Error Message */}
-              {ssoError && (
+            <CardContent className="space-y-5">
+              {/* Login Method Toggle */}
+              <div className="flex rounded-xl bg-ivory-100 p-1">
+                <button
+                  type="button"
+                  onClick={() => setLoginMethod('credentials')}
+                  className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+                    loginMethod === 'credentials'
+                      ? 'bg-white text-burgundy-700 shadow-sm'
+                      : 'text-walnut-500 hover:text-walnut-700'
+                  }`}
+                >
+                  Email & Password
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoginMethod('sso')}
+                  className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+                    loginMethod === 'sso'
+                      ? 'bg-white text-burgundy-700 shadow-sm'
+                      : 'text-walnut-500 hover:text-walnut-700'
+                  }`}
+                >
+                  SoapBox SSO
+                </button>
+              </div>
+
+              {/* Error Message */}
+              {error && (
                 <div className="bg-burgundy-50 border border-burgundy-200 rounded-lg p-3 text-center">
-                  <p className="text-sm text-burgundy-700">{ssoError}</p>
+                  <p className="text-sm text-burgundy-700">{error}</p>
                 </div>
               )}
 
-              {/* SSO Login Button */}
-              <Button
-                onClick={handleSSOLogin}
-                disabled={isLoading}
-                className="w-full h-12 bg-gradient-to-r from-burgundy-700 to-burgundy-800 hover:from-burgundy-800 hover:to-burgundy-900 text-ivory-50 font-semibold shadow-warm transition-all duration-300 hover:shadow-warm-lg hover:scale-[1.01] rounded-xl"
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-3">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-ivory-200 border-t-transparent" />
-                    <span>Authenticating...</span>
+              {loginMethod === 'credentials' ? (
+                /* Email/Password Login Form */
+                <form onSubmit={handleCredentialsLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-walnut-700 font-medium">
+                      Email
+                    </Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-walnut-400" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10 h-11 bg-white border-ivory-200 focus:border-burgundy-300 focus:ring-burgundy-200"
+                        disabled={isLoading}
+                      />
+                    </div>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <LogoIcon size="sm" className="h-5 w-5" />
-                    <span>Sign in with SoapBox</span>
-                    <ExternalLink className="h-4 w-4 opacity-70" />
-                  </div>
-                )}
-              </Button>
 
-              {/* Security note */}
-              <div className="flex items-center justify-center gap-2 text-sm text-walnut-500">
-                <Shield className="h-4 w-4 text-sage-600" />
-                <span>Secured by SoapBox SSO</span>
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-walnut-700 font-medium">
+                      Password
+                    </Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-walnut-400" />
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10 pr-10 h-11 bg-white border-ivory-200 focus:border-burgundy-300 focus:ring-burgundy-200"
+                        disabled={isLoading}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-walnut-400 hover:text-walnut-600"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full h-11 bg-gradient-to-r from-burgundy-700 to-burgundy-800 hover:from-burgundy-800 hover:to-burgundy-900 text-ivory-50 font-semibold shadow-warm transition-all duration-300 hover:shadow-warm-lg rounded-xl"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Signing in...</span>
+                      </div>
+                    ) : (
+                      "Sign In"
+                    )}
+                  </Button>
+                </form>
+              ) : (
+                /* SSO Login */
+                <div className="space-y-4">
+                  <p className="text-sm text-walnut-500 text-center">
+                    Sign in using your existing SoapBox account
+                  </p>
+                  <Button
+                    onClick={handleSSOLogin}
+                    disabled={isLoading}
+                    className="w-full h-11 bg-gradient-to-r from-burgundy-700 to-burgundy-800 hover:from-burgundy-800 hover:to-burgundy-900 text-ivory-50 font-semibold shadow-warm transition-all duration-300 hover:shadow-warm-lg rounded-xl"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Redirecting...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <LogoIcon size="sm" className="h-5 w-5" />
+                        <span>Continue with SoapBox</span>
+                        <ExternalLink className="h-4 w-4 opacity-70" />
+                      </div>
+                    )}
+                  </Button>
+                </div>
+              )}
 
               {/* Divider */}
-              <div className="relative">
+              <div className="relative pt-2">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t border-ivory-200" />
                 </div>
                 <div className="relative flex justify-center text-xs">
                   <span className="bg-white px-3 text-walnut-400">
-                    Your data is protected
+                    Secured connection
                   </span>
                 </div>
               </div>
 
               {/* Security Features */}
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="space-y-1.5 p-3 rounded-lg bg-ivory-50/50">
-                  <div className="text-lg text-burgundy-700 font-bold font-serif">256-bit</div>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="space-y-1 p-2.5 rounded-lg bg-ivory-50/50">
+                  <div className="text-sm text-burgundy-700 font-bold font-serif">256-bit</div>
                   <div className="text-xs text-walnut-500">Encryption</div>
                 </div>
-                <div className="space-y-1.5 p-3 rounded-lg bg-ivory-50/50">
-                  <div className="text-lg text-burgundy-700 font-bold font-serif">SSO</div>
-                  <div className="text-xs text-walnut-500">Single Sign-On</div>
-                </div>
-                <div className="space-y-1.5 p-3 rounded-lg bg-ivory-50/50">
-                  <div className="text-lg text-burgundy-700 font-bold font-serif">2FA</div>
+                <div className="space-y-1 p-2.5 rounded-lg bg-ivory-50/50">
+                  <div className="text-sm text-burgundy-700 font-bold font-serif">SSO</div>
                   <div className="text-xs text-walnut-500">Supported</div>
+                </div>
+                <div className="space-y-1 p-2.5 rounded-lg bg-ivory-50/50">
+                  <div className="text-sm text-burgundy-700 font-bold font-serif">2FA</div>
+                  <div className="text-xs text-walnut-500">Available</div>
                 </div>
               </div>
             </CardContent>
@@ -245,9 +387,14 @@ export default function Login() {
           {/* Footer */}
           <div className="text-center space-y-3">
             <p className="text-sm text-walnut-500">
-              Need help?{" "}
-              <a href="#" className="text-burgundy-700 hover:text-burgundy-800 font-medium underline-offset-4 hover:underline">
-                Contact Support
+              Don't have an account?{" "}
+              <a
+                href="https://soapboxsuperapp.com/quick-signup"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-burgundy-700 hover:text-burgundy-800 font-medium underline-offset-4 hover:underline"
+              >
+                Sign up on SoapBox
               </a>
             </p>
             <div className="flex items-center justify-center gap-2">
