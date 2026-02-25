@@ -1,20 +1,13 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Logo } from "@/components/Logo";
 import {
   Users,
   DollarSign,
-  Calendar,
   Mail,
-  Heart,
-  BookOpen,
   BarChart3,
-  Shield,
-  Globe,
-  Smartphone,
   ArrowRight,
-  CheckCircle2,
   Database,
   Bell,
   FileText,
