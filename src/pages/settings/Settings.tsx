@@ -376,7 +376,7 @@ export default function Settings() {
 
   // API key display state
   const [showApiKey, setShowApiKey] = useState(false);
-  const apiKey = integrationSettings?.stripePublicKey || "Not configured"; // Fetched from API
+  const apiKey = integrationSettings?.stripePublishableKey || "Not configured"; // Fetched from API
 
   // ===================================================================
   // Initialize form with fetched data
