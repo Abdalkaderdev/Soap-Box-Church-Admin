@@ -32,12 +32,14 @@ import {
   Gift,
   Heart,
   CreditCard,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,94 +54,159 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useDonorDetails, useGenerateGivingStatements } from "@/hooks/useDonations";
 
-// Mock donor data
-const mockDonor = {
-  id: 1,
-  name: "Michael Johnson",
-  email: "michael.johnson@email.com",
-  phone: "(555) 123-4567",
-  address: "123 Main Street, Springfield, IL 62701",
-  memberSince: "2019-03-15",
-  avatar: null,
-  status: "active",
-  preferredMethod: "Online",
-  isRecurring: true,
-  recurringAmount: 500,
-  recurringFrequency: "Monthly",
-};
-
-// Mock donation history
-const mockDonationHistory = [
-  { id: 1, date: "2024-01-15", amount: 500, category: "Tithes", method: "Online", status: "completed" },
-  { id: 2, date: "2024-01-08", amount: 2500, category: "Building Fund", method: "Check", status: "completed" },
-  { id: 3, date: "2023-12-15", amount: 500, category: "Tithes", method: "Online", status: "completed" },
-  { id: 4, date: "2023-12-10", amount: 200, category: "Missions", method: "Online", status: "completed" },
-  { id: 5, date: "2023-11-15", amount: 500, category: "Tithes", method: "Online", status: "completed" },
-  { id: 6, date: "2023-11-01", amount: 1000, category: "Youth Ministry", method: "Check", status: "completed" },
-  { id: 7, date: "2023-10-15", amount: 500, category: "Tithes", method: "Online", status: "completed" },
-  { id: 8, date: "2023-09-15", amount: 500, category: "Tithes", method: "Online", status: "completed" },
-  { id: 9, date: "2023-08-15", amount: 500, category: "Tithes", method: "Online", status: "completed" },
-  { id: 10, date: "2023-07-15", amount: 500, category: "Tithes", method: "Online", status: "completed" },
-  { id: 11, date: "2023-06-20", amount: 750, category: "General Offering", method: "Cash", status: "completed" },
-  { id: 12, date: "2023-06-15", amount: 500, category: "Tithes", method: "Online", status: "completed" },
-];
-
-// Monthly giving data
-const monthlyGivingData = [
-  { month: "Jan '23", amount: 500 },
-  { month: "Feb '23", amount: 500 },
-  { month: "Mar '23", amount: 750 },
-  { month: "Apr '23", amount: 500 },
-  { month: "May '23", amount: 650 },
-  { month: "Jun '23", amount: 1250 },
-  { month: "Jul '23", amount: 500 },
-  { month: "Aug '23", amount: 500 },
-  { month: "Sep '23", amount: 500 },
-  { month: "Oct '23", amount: 500 },
-  { month: "Nov '23", amount: 1500 },
-  { month: "Dec '23", amount: 700 },
-  { month: "Jan '24", amount: 3000 },
-];
-
-// Category breakdown
-const categoryBreakdown = [
-  { name: "Tithes", value: 6000, color: "#6366f1" },
-  { name: "Building Fund", value: 2500, color: "#22c55e" },
-  { name: "Youth Ministry", value: 1000, color: "#f59e0b" },
-  { name: "General Offering", value: 750, color: "#ef4444" },
-  { name: "Missions", value: 200, color: "#8b5cf6" },
-];
-
-// Year-over-year comparison
-const yearComparison = [
-  { year: "2021", amount: 8500 },
-  { year: "2022", amount: 9200 },
-  { year: "2023", amount: 8350 },
-  { year: "2024", amount: 3000 },
-];
+const CHART_COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
 
 export default function DonorDetails() {
-  // Note: params.id will be used when connecting to API
-  useParams();
+  const params = useParams();
+  const memberId = params.id;
 
   const [timeRange, setTimeRange] = useState("all");
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Calculate stats
-  const totalLifetimeGiving = 12500;
-  const thisYearGiving = 3000;
-  const lastYearGiving = 8350;
-  const averageDonation = 520;
-  const totalDonations = 24;
-  const yearOverYearChange = ((thisYearGiving / 12 * 12 - lastYearGiving) / lastYearGiving * 100);
+  // Fetch donor details from API
+  const { data: donorDetails, isLoading, error } = useDonorDetails(memberId);
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
+  // Generate statements mutation
+  const generateStatementsMutation = useGenerateGivingStatements();
+
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-10" />
+          <Skeleton className="h-16 w-16 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+        <Skeleton className="h-20 w-full" />
+        <div className="grid grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
+        </div>
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !donorDetails) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Link href="/donations/list">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-bold">Donor Not Found</h1>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground text-center py-8">
+              The donor you are looking for could not be found.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const { member, donations, recurringDonations, totalAmount, totalDonations, averageAmount, firstDonationDate } = donorDetails;
+
+  // Calculate stats
+  const currentYear = new Date().getFullYear();
+  const thisYearDonations = donations.filter(d => new Date(d.date).getFullYear() === currentYear);
+  const lastYearDonations = donations.filter(d => new Date(d.date).getFullYear() === currentYear - 1);
+
+  const thisYearTotal = thisYearDonations.reduce((sum, d) => sum + d.amount, 0);
+  const lastYearTotal = lastYearDonations.reduce((sum, d) => sum + d.amount, 0);
+
+  const yearOverYearChange = lastYearTotal > 0
+    ? ((thisYearTotal - lastYearTotal) / lastYearTotal) * 100
+    : 0;
+
+  // Build monthly giving data
+  const monthlyGivingMap = new Map<string, number>();
+  donations.forEach((d) => {
+    const date = new Date(d.date);
+    const key = `${date.toLocaleDateString("en-US", { month: "short" })} '${date.getFullYear().toString().slice(-2)}`;
+    monthlyGivingMap.set(key, (monthlyGivingMap.get(key) || 0) + d.amount);
+  });
+  const monthlyGivingData = Array.from(monthlyGivingMap.entries())
+    .map(([month, amount]) => ({ month, amount }))
+    .slice(-13); // Last 13 months
+
+  // Build category breakdown
+  const categoryMap = new Map<string, number>();
+  donations.forEach((d) => {
+    categoryMap.set(d.fund, (categoryMap.get(d.fund) || 0) + d.amount);
+  });
+  const categoryBreakdown = Array.from(categoryMap.entries())
+    .map(([name, value], index) => ({
+      name,
+      value,
+      color: CHART_COLORS[index % CHART_COLORS.length],
+    }))
+    .sort((a, b) => b.value - a.value);
+
+  // Build year-over-year comparison
+  const yearMap = new Map<number, number>();
+  donations.forEach((d) => {
+    const year = new Date(d.date).getFullYear();
+    yearMap.set(year, (yearMap.get(year) || 0) + d.amount);
+  });
+  const yearComparison = Array.from(yearMap.entries())
+    .map(([year, amount]) => ({ year: year.toString(), amount }))
+    .sort((a, b) => parseInt(a.year) - parseInt(b.year))
+    .slice(-4); // Last 4 years
+
+  // Filter donations by time range
+  const filteredDonations = donations.filter((d) => {
+    if (timeRange === "all") return true;
+    const date = new Date(d.date);
+    const now = new Date();
+    if (timeRange === "year") {
+      return date.getFullYear() === now.getFullYear();
+    }
+    if (timeRange === "quarter") {
+      const quarter = Math.floor(now.getMonth() / 3);
+      const donationQuarter = Math.floor(date.getMonth() / 3);
+      return date.getFullYear() === now.getFullYear() && donationQuarter === quarter;
+    }
+    if (timeRange === "month") {
+      return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+    }
+    return true;
+  });
+
+  const hasRecurring = recurringDonations && recurringDonations.length > 0;
+  const activeRecurring = recurringDonations?.find(r => r.status === "active");
+
+  const handleGenerateStatement = async (year: number) => {
+    await generateStatementsMutation.mutateAsync({
+      year,
+      sendEmail: true,
+      memberIds: [memberId!],
+    });
   };
 
   return (
@@ -153,25 +220,25 @@ export default function DonorDetails() {
             </Button>
           </Link>
           <Avatar className="h-16 w-16">
-            <AvatarImage src={mockDonor.avatar || undefined} />
+            <AvatarImage src={member.photoUrl || undefined} />
             <AvatarFallback className="text-lg">
-              {getInitials(mockDonor.name)}
+              {getInitials(member.firstName, member.lastName)}
             </AvatarFallback>
           </Avatar>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold">{mockDonor.name}</h1>
-              <Badge variant={mockDonor.status === "active" ? "default" : "secondary"}>
-                {mockDonor.status === "active" ? "Active Donor" : "Inactive"}
+              <h1 className="text-3xl font-bold">{member.firstName} {member.lastName}</h1>
+              <Badge variant={member.membershipStatus === "active" ? "default" : "secondary"}>
+                {member.membershipStatus === "active" ? "Active Donor" : "Inactive"}
               </Badge>
-              {mockDonor.isRecurring && (
+              {hasRecurring && (
                 <Badge variant="outline" className="border-green-500 text-green-600">
                   Recurring Donor
                 </Badge>
               )}
             </div>
             <p className="text-muted-foreground mt-1">
-              Member since {new Date(mockDonor.memberSince).toLocaleDateString()}
+              Member since {new Date(member.memberSince || member.createdAt).toLocaleDateString()}
             </p>
           </div>
         </div>
@@ -187,7 +254,7 @@ export default function DonorDetails() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleGenerateStatement(currentYear)}>
                 <Send className="h-4 w-4 mr-2" />
                 Send Year-End Statement
               </DropdownMenuItem>
@@ -209,23 +276,33 @@ export default function DonorDetails() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-wrap gap-6">
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <a href={`mailto:${mockDonor.email}`} className="hover:text-primary">
-                {mockDonor.email}
-              </a>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-muted-foreground" />
-              <span>{mockDonor.phone}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span>{mockDonor.address}</span>
-            </div>
+            {member.email && (
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <a href={`mailto:${member.email}`} className="hover:text-primary">
+                  {member.email}
+                </a>
+              </div>
+            )}
+            {member.phone && (
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-muted-foreground" />
+                <span>{member.phone}</span>
+              </div>
+            )}
+            {member.address && (
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <span>
+                  {[member.address.street, member.address.city, member.address.state, member.address.zipCode]
+                    .filter(Boolean)
+                    .join(", ")}
+                </span>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <CreditCard className="h-4 w-4 text-muted-foreground" />
-              <span>Preferred: {mockDonor.preferredMethod}</span>
+              <span>Preferred: Online</span>
             </div>
           </div>
         </CardContent>
@@ -241,9 +318,9 @@ export default function DonorDetails() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${totalLifetimeGiving.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{formatCurrency(totalAmount)}</div>
             <p className="text-sm text-muted-foreground mt-1">
-              Since {new Date(mockDonor.memberSince).getFullYear()}
+              Since {new Date(firstDonationDate).getFullYear()}
             </p>
           </CardContent>
         </Card>
@@ -256,18 +333,20 @@ export default function DonorDetails() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${thisYearGiving.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{formatCurrency(thisYearTotal)}</div>
             <div className="flex items-center text-sm mt-1">
               {yearOverYearChange > 0 ? (
                 <>
                   <ArrowUpRight className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-green-500">Trending up</span>
+                  <span className="text-green-500">{Math.abs(yearOverYearChange).toFixed(1)}% vs last year</span>
+                </>
+              ) : yearOverYearChange < 0 ? (
+                <>
+                  <ArrowDownRight className="h-4 w-4 text-red-500 mr-1" />
+                  <span className="text-red-500">{Math.abs(yearOverYearChange).toFixed(1)}% vs last year</span>
                 </>
               ) : (
-                <>
-                  <ArrowDownRight className="h-4 w-4 text-amber-500 mr-1" />
-                  <span className="text-amber-500">Year in progress</span>
-                </>
+                <span className="text-muted-foreground">Year in progress</span>
               )}
             </div>
           </CardContent>
@@ -281,7 +360,7 @@ export default function DonorDetails() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${averageDonation.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{formatCurrency(averageAmount)}</div>
             <p className="text-sm text-muted-foreground mt-1">
               Across {totalDonations} donations
             </p>
@@ -296,12 +375,23 @@ export default function DonorDetails() {
             <Heart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              ${mockDonor.recurringAmount.toLocaleString()}
-            </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              {mockDonor.recurringFrequency} - Tithes
-            </p>
+            {activeRecurring ? (
+              <>
+                <div className="text-2xl font-bold">
+                  {formatCurrency(activeRecurring.amount)}
+                </div>
+                <p className="text-sm text-muted-foreground mt-1 capitalize">
+                  {activeRecurring.frequency} - {activeRecurring.fund}
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-muted-foreground">-</div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  No active recurring
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -324,20 +414,26 @@ export default function DonorDetails() {
                 <CardDescription>Donation amounts over the past 13 months</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={monthlyGivingData}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis dataKey="month" className="text-xs" angle={-45} textAnchor="end" height={60} />
-                      <YAxis className="text-xs" tickFormatter={(value) => `$${value}`} />
-                      <Tooltip
-                        formatter={(value) => [`$${(value ?? 0).toLocaleString()}`, "Amount"]}
-                        contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
-                      />
-                      <Bar dataKey="amount" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+                {monthlyGivingData.length === 0 ? (
+                  <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                    No donation history
+                  </div>
+                ) : (
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={monthlyGivingData}>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis dataKey="month" className="text-xs" angle={-45} textAnchor="end" height={60} />
+                        <YAxis className="text-xs" tickFormatter={(value) => `$${value}`} />
+                        <Tooltip
+                          formatter={(value) => [formatCurrency(value as number), "Amount"]}
+                          contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                        />
+                        <Bar dataKey="amount" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -348,43 +444,51 @@ export default function DonorDetails() {
                 <CardDescription>Distribution of donations by fund</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[200px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={categoryBreakdown}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={80}
-                        paddingAngle={2}
-                        dataKey="value"
-                      >
-                        {categoryBreakdown.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        formatter={(value) => [`$${(value ?? 0).toLocaleString()}`, ""]}
-                        contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="grid grid-cols-2 gap-2 mt-4">
-                  {categoryBreakdown.map((category, index) => (
-                    <div key={index} className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: category.color }}
-                        />
-                        <span>{category.name}</span>
-                      </div>
-                      <span className="font-medium">${category.value.toLocaleString()}</span>
+                {categoryBreakdown.length === 0 ? (
+                  <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+                    No category data
+                  </div>
+                ) : (
+                  <>
+                    <div className="h-[200px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={categoryBreakdown}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={80}
+                            paddingAngle={2}
+                            dataKey="value"
+                          >
+                            {categoryBreakdown.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            formatter={(value) => [formatCurrency(value as number), ""]}
+                            contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
                     </div>
-                  ))}
-                </div>
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      {categoryBreakdown.map((category, index) => (
+                        <div key={index} className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: category.color }}
+                            />
+                            <span>{category.name}</span>
+                          </div>
+                          <span className="font-medium">{formatCurrency(category.value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -396,26 +500,32 @@ export default function DonorDetails() {
               <CardDescription>Annual giving totals</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={yearComparison}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="year" className="text-xs" />
-                    <YAxis className="text-xs" tickFormatter={(value) => `$${value / 1000}k`} />
-                    <Tooltip
-                      formatter={(value) => [`$${(value ?? 0).toLocaleString()}`, "Total"]}
-                      contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="amount"
-                      stroke="#22c55e"
-                      strokeWidth={2}
-                      dot={{ fill: "#22c55e", strokeWidth: 2 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+              {yearComparison.length === 0 ? (
+                <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+                  No year-over-year data
+                </div>
+              ) : (
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={yearComparison}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="year" className="text-xs" />
+                      <YAxis className="text-xs" tickFormatter={(value) => `$${value / 1000}k`} />
+                      <Tooltip
+                        formatter={(value) => [formatCurrency(value as number), "Total"]}
+                        contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="amount"
+                        stroke="#22c55e"
+                        strokeWidth={2}
+                        dot={{ fill: "#22c55e", strokeWidth: 2 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -433,32 +543,38 @@ export default function DonorDetails() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {mockDonationHistory.slice(0, 5).map((donation) => (
-                  <div key={donation.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                        <Gift className="h-5 w-5 text-primary" />
+              {donations.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No donations recorded
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {donations.slice(0, 5).map((donation) => (
+                    <div key={donation.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                          <Gift className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{donation.fund}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(donation.date).toLocaleDateString()} - <span className="capitalize">{donation.method}</span>
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">{donation.category}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(donation.date).toLocaleDateString()} - {donation.method}
-                        </p>
+                      <div className="text-right">
+                        <p className="font-semibold">{formatCurrency(donation.amount)}</p>
+                        <Badge
+                          variant="secondary"
+                          className="bg-green-100 text-green-700"
+                        >
+                          {donation.status}
+                        </Badge>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">${donation.amount.toLocaleString()}</p>
-                      <Badge
-                        variant="secondary"
-                        className="bg-green-100 text-green-700"
-                      >
-                        {donation.status}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -469,7 +585,7 @@ export default function DonorDetails() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Complete Donation History</CardTitle>
-                  <CardDescription>All donations from {mockDonor.name}</CardDescription>
+                  <CardDescription>All donations from {member.firstName} {member.lastName}</CardDescription>
                 </div>
                 <Select value={timeRange} onValueChange={setTimeRange}>
                   <SelectTrigger className="w-[150px]">
@@ -485,51 +601,57 @@ export default function DonorDetails() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium">Date</th>
-                      <th className="text-left py-3 px-4 font-medium">Amount</th>
-                      <th className="text-left py-3 px-4 font-medium">Category</th>
-                      <th className="text-left py-3 px-4 font-medium">Method</th>
-                      <th className="text-left py-3 px-4 font-medium">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mockDonationHistory.map((donation) => (
-                      <tr key={donation.id} className="border-b hover:bg-muted/50">
-                        <td className="py-3 px-4">
-                          {new Date(donation.date).toLocaleDateString()}
+              {filteredDonations.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No donations found for the selected period
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-3 px-4 font-medium">Date</th>
+                        <th className="text-left py-3 px-4 font-medium">Amount</th>
+                        <th className="text-left py-3 px-4 font-medium">Fund</th>
+                        <th className="text-left py-3 px-4 font-medium">Method</th>
+                        <th className="text-left py-3 px-4 font-medium">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredDonations.map((donation) => (
+                        <tr key={donation.id} className="border-b hover:bg-muted/50">
+                          <td className="py-3 px-4">
+                            {new Date(donation.date).toLocaleDateString()}
+                          </td>
+                          <td className="py-3 px-4 font-semibold">
+                            {formatCurrency(donation.amount)}
+                          </td>
+                          <td className="py-3 px-4">
+                            <Badge variant="outline">{donation.fund}</Badge>
+                          </td>
+                          <td className="py-3 px-4 capitalize">{donation.method}</td>
+                          <td className="py-3 px-4">
+                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+                              {donation.status}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t-2 bg-muted/50">
+                        <td className="py-3 px-4 font-semibold">Total</td>
+                        <td className="py-3 px-4 font-bold text-lg">
+                          {formatCurrency(filteredDonations.reduce((sum, d) => sum + d.amount, 0))}
                         </td>
-                        <td className="py-3 px-4 font-semibold">
-                          ${donation.amount.toLocaleString()}
-                        </td>
-                        <td className="py-3 px-4">
-                          <Badge variant="outline">{donation.category}</Badge>
-                        </td>
-                        <td className="py-3 px-4">{donation.method}</td>
-                        <td className="py-3 px-4">
-                          <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-                            {donation.status}
-                          </Badge>
+                        <td colSpan={3} className="py-3 px-4 text-muted-foreground">
+                          {filteredDonations.length} donations
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t-2 bg-muted/50">
-                      <td className="py-3 px-4 font-semibold">Total</td>
-                      <td className="py-3 px-4 font-bold text-lg">
-                        ${mockDonationHistory.reduce((sum, d) => sum + d.amount, 0).toLocaleString()}
-                      </td>
-                      <td colSpan={3} className="py-3 px-4 text-muted-foreground">
-                        {mockDonationHistory.length} donations
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+                    </tfoot>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -542,34 +664,47 @@ export default function DonorDetails() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {[2024, 2023, 2022, 2021].map((year) => (
-                  <div
-                    key={year}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div className="flex items-center gap-3">
-                      <FileText className="h-8 w-8 text-muted-foreground" />
-                      <div>
-                        <p className="font-medium">{year} Year-End Statement</p>
-                        <p className="text-sm text-muted-foreground">
-                          Total: ${year === 2024 ? thisYearGiving.toLocaleString() :
-                                  year === 2023 ? lastYearGiving.toLocaleString() :
-                                  year === 2022 ? "9,200" : "8,500"}
-                        </p>
+                {[currentYear, currentYear - 1, currentYear - 2, currentYear - 3].map((year) => {
+                  const yearTotal = donations
+                    .filter(d => new Date(d.date).getFullYear() === year)
+                    .reduce((sum, d) => sum + d.amount, 0);
+
+                  return (
+                    <div
+                      key={year}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-8 w-8 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">{year} Year-End Statement</p>
+                          <p className="text-sm text-muted-foreground">
+                            Total: {formatCurrency(yearTotal)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm">
+                          <Download className="h-4 w-4 mr-2" />
+                          Download PDF
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleGenerateStatement(year)}
+                          disabled={generateStatementsMutation.isPending}
+                        >
+                          {generateStatementsMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Send className="h-4 w-4 mr-2" />
+                          )}
+                          Email
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Download PDF
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Send className="h-4 w-4 mr-2" />
-                        Email
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

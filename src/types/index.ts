@@ -511,3 +511,382 @@ export interface ReportParams {
   endDate: string;
   groupBy?: 'day' | 'week' | 'month' | 'quarter' | 'year';
 }
+
+// ============================================================================
+// SERMON PREP TYPES
+// ============================================================================
+
+export interface SermonSeries {
+  id: string;
+  churchId: string;
+  title: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  imageUrl?: string;
+  status: 'planning' | 'active' | 'completed' | 'archived';
+  sermonCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Sermon {
+  id: string;
+  churchId: string;
+  seriesId?: string;
+  series?: SermonSeries;
+  title: string;
+  scriptureReferences: string[];
+  description?: string;
+  notes?: string;
+  outline?: SermonOutlineItem[];
+  speaker?: string;
+  speakerId?: string;
+  scheduledDate?: string;
+  duration?: number;
+  videoUrl?: string;
+  audioUrl?: string;
+  slidesUrl?: string;
+  status: 'draft' | 'review' | 'approved' | 'delivered' | 'archived';
+  collaborators?: SermonCollaborator[];
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SermonOutlineItem {
+  id: string;
+  title: string;
+  content?: string;
+  scripture?: string;
+  orderIndex: number;
+  children?: SermonOutlineItem[];
+}
+
+export interface SermonCollaborator {
+  id: string;
+  sermonId: string;
+  userId: string;
+  user?: User;
+  role: 'author' | 'reviewer' | 'contributor';
+  canEdit: boolean;
+  addedAt: string;
+}
+
+export interface SermonResource {
+  id: string;
+  sermonId: string;
+  type: 'document' | 'video' | 'audio' | 'image' | 'link';
+  title: string;
+  url: string;
+  description?: string;
+  orderIndex: number;
+  createdAt: string;
+}
+
+export interface SermonFeedback {
+  id: string;
+  sermonId: string;
+  memberId?: string;
+  memberName?: string;
+  rating?: number;
+  comment?: string;
+  isAnonymous: boolean;
+  createdAt: string;
+}
+
+export interface SermonCreateInput {
+  seriesId?: string;
+  title: string;
+  scriptureReferences?: string[];
+  description?: string;
+  notes?: string;
+  outline?: SermonOutlineItem[];
+  speaker?: string;
+  speakerId?: string;
+  scheduledDate?: string;
+  duration?: number;
+  tags?: string[];
+  status?: Sermon['status'];
+}
+
+export interface SermonUpdateInput extends Partial<SermonCreateInput> {
+  videoUrl?: string;
+  audioUrl?: string;
+  slidesUrl?: string;
+}
+
+// ============================================================================
+// PRAYER REQUEST TYPES
+// ============================================================================
+
+export interface PrayerRequest {
+  id: string;
+  churchId: string;
+  memberId?: string;
+  member?: Member;
+  submitterName?: string;
+  submitterEmail?: string;
+  title: string;
+  description: string;
+  category: PrayerCategory;
+  isAnonymous: boolean;
+  isPrivate: boolean;
+  isUrgent: boolean;
+  status: PrayerStatus;
+  prayerCount: number;
+  followUps?: PrayerFollowUp[];
+  prayedBy?: string[];
+  expiresAt?: string;
+  answeredAt?: string;
+  answeredNote?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PrayerCategory = 'health' | 'family' | 'finances' | 'spiritual' | 'relationships' | 'work' | 'grief' | 'thanksgiving' | 'other';
+export type PrayerStatus = 'active' | 'answered' | 'ongoing' | 'closed';
+
+export interface PrayerFollowUp {
+  id: string;
+  prayerRequestId: string;
+  userId?: string;
+  userName?: string;
+  content: string;
+  isUpdate: boolean;
+  createdAt: string;
+}
+
+export interface PrayerCreateInput {
+  title: string;
+  description: string;
+  category: PrayerCategory;
+  isAnonymous?: boolean;
+  isPrivate?: boolean;
+  isUrgent?: boolean;
+  memberId?: string;
+  submitterName?: string;
+  submitterEmail?: string;
+  expiresAt?: string;
+}
+
+export interface PrayerUpdateInput {
+  title?: string;
+  description?: string;
+  category?: PrayerCategory;
+  isPrivate?: boolean;
+  isUrgent?: boolean;
+  status?: PrayerStatus;
+  answeredNote?: string;
+}
+
+// ============================================================================
+// SMALL GROUPS TYPES
+// ============================================================================
+
+export interface SmallGroup {
+  id: string;
+  churchId: string;
+  name: string;
+  description?: string;
+  category: SmallGroupCategory;
+  leaderId?: string;
+  leader?: Member;
+  coLeaderId?: string;
+  coLeader?: Member;
+  members: SmallGroupMember[];
+  memberCount: number;
+  maxMembers?: number;
+  meetingDay?: string;
+  meetingTime?: string;
+  meetingFrequency: 'weekly' | 'biweekly' | 'monthly';
+  meetingLocation?: string;
+  meetingType: 'in_person' | 'online' | 'hybrid';
+  virtualMeetingUrl?: string;
+  imageUrl?: string;
+  status: 'forming' | 'active' | 'full' | 'paused' | 'closed';
+  isPublic: boolean;
+  requiresApproval: boolean;
+  currentStudy?: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type SmallGroupCategory = 'bible_study' | 'fellowship' | 'mens' | 'womens' | 'young_adults' | 'couples' | 'parents' | 'seniors' | 'recovery' | 'other';
+
+export interface SmallGroupMember {
+  id: string;
+  groupId: string;
+  memberId: string;
+  member?: Member;
+  role: 'leader' | 'co_leader' | 'member' | 'apprentice';
+  joinedAt: string;
+  status: 'active' | 'inactive' | 'pending';
+}
+
+export interface SmallGroupMeeting {
+  id: string;
+  groupId: string;
+  title?: string;
+  date: string;
+  startTime: string;
+  endTime?: string;
+  location?: string;
+  topic?: string;
+  notes?: string;
+  attendance: SmallGroupAttendance[];
+  attendanceCount: number;
+  createdAt: string;
+}
+
+export interface SmallGroupAttendance {
+  id: string;
+  meetingId: string;
+  memberId: string;
+  member?: Member;
+  isPresent: boolean;
+  checkedInAt?: string;
+}
+
+export interface SmallGroupJoinRequest {
+  id: string;
+  groupId: string;
+  memberId: string;
+  member?: Member;
+  message?: string;
+  status: 'pending' | 'approved' | 'denied';
+  respondedBy?: string;
+  respondedAt?: string;
+  createdAt: string;
+}
+
+export interface SmallGroupCreateInput {
+  name: string;
+  description?: string;
+  category: SmallGroupCategory;
+  leaderId?: string;
+  coLeaderId?: string;
+  maxMembers?: number;
+  meetingDay?: string;
+  meetingTime?: string;
+  meetingFrequency?: 'weekly' | 'biweekly' | 'monthly';
+  meetingLocation?: string;
+  meetingType?: 'in_person' | 'online' | 'hybrid';
+  virtualMeetingUrl?: string;
+  isPublic?: boolean;
+  requiresApproval?: boolean;
+  tags?: string[];
+}
+
+export interface SmallGroupUpdateInput extends Partial<SmallGroupCreateInput> {
+  status?: SmallGroup['status'];
+  currentStudy?: string;
+  imageUrl?: string;
+}
+
+// ============================================================================
+// CHECK-IN SYSTEM TYPES
+// ============================================================================
+
+export interface Service {
+  id: string;
+  churchId: string;
+  name: string;
+  serviceType: 'sunday_worship' | 'wednesday_service' | 'special_event' | 'youth_service' | 'kids_church' | 'other';
+  scheduledDate: string;
+  startTime: string;
+  endTime?: string;
+  location?: string;
+  status: 'scheduled' | 'active' | 'completed' | 'cancelled';
+  totalCheckIns: number;
+  totalChildCheckIns: number;
+  isCheckInOpen: boolean;
+  checkInStartTime?: string;
+  checkInEndTime?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ServiceCheckIn {
+  id: string;
+  serviceId: string;
+  memberId?: string;
+  member?: Member;
+  guestName?: string;
+  guestEmail?: string;
+  guestPhone?: string;
+  isGuest: boolean;
+  isFirstTime: boolean;
+  checkInTime: string;
+  checkOutTime?: string;
+  kioskId?: string;
+  notes?: string;
+  children?: ChildCheckIn[];
+}
+
+export interface ChildCheckIn {
+  id: string;
+  serviceCheckInId: string;
+  serviceId: string;
+  childId?: string;
+  childName: string;
+  dateOfBirth?: string;
+  age?: number;
+  parentName: string;
+  parentPhone: string;
+  parentId?: string;
+  classroomAssignment?: string;
+  securityCode: string;
+  allergies?: string;
+  specialNotes?: string;
+  checkInTime: string;
+  checkOutTime?: string;
+  checkedOutBy?: string;
+  status: 'checked_in' | 'checked_out' | 'waiting_pickup';
+}
+
+export interface CheckInKiosk {
+  id: string;
+  churchId: string;
+  name: string;
+  location: string;
+  type: 'general' | 'children' | 'volunteer';
+  deviceId?: string;
+  lastActiveAt?: string;
+  isActive: boolean;
+  settings: {
+    allowGuestCheckIn: boolean;
+    allowChildCheckIn: boolean;
+    requirePhone: boolean;
+    printLabels: boolean;
+    defaultServiceId?: string;
+  };
+  createdAt: string;
+}
+
+export interface CheckInFilters {
+  serviceId?: string;
+  startDate?: string;
+  endDate?: string;
+  isGuest?: boolean;
+  isFirstTime?: boolean;
+  search?: string;
+  // Pagination params
+  page?: number;
+  pageSize?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface CheckInStats {
+  totalCheckIns: number;
+  totalGuests: number;
+  totalFirstTimers: number;
+  totalChildren: number;
+  averageCheckInTime: string;
+  peakCheckInTime: string;
+  byService: { service: Service; count: number }[];
+  trend: { date: string; checkIns: number; guests: number }[];
+}

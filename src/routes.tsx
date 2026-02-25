@@ -14,8 +14,12 @@ const EventsList = lazy(() => import("./pages/events/EventsList"));
 const Communications = lazy(() => import("./pages/communications/Communications"));
 const Volunteers = lazy(() => import("./pages/volunteers/Volunteers"));
 const Discipleship = lazy(() => import("./pages/discipleship/Discipleship"));
+const SmallGroups = lazy(() => import("./pages/groups/SmallGroups"));
+const SermonPrep = lazy(() => import("./pages/sermons/SermonPrep"));
+const PrayerRequests = lazy(() => import("./pages/prayer/PrayerRequests"));
 const Reports = lazy(() => import("./pages/reports/Reports"));
 const Settings = lazy(() => import("./pages/settings/Settings"));
+const CheckIn = lazy(() => import("./pages/checkin/CheckIn"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Landing = lazy(() => import("./pages/Landing"));
 const Features = lazy(() => import("./pages/Features"));
@@ -51,9 +55,13 @@ export const routes = {
     donor: "/donations/donor/:id",
   },
   events: "/events",
+  checkin: "/checkin",
   communications: "/communications",
   volunteers: "/volunteers",
   discipleship: "/discipleship",
+  groups: "/groups",
+  sermons: "/sermons",
+  prayer: "/prayer",
   reports: "/reports",
   settings: "/settings",
   login: "/login",
@@ -98,6 +106,9 @@ export function AppRoutes() {
         {/* Events */}
         <Route path="/events" component={EventsList} />
 
+        {/* Check-in */}
+        <Route path="/checkin" component={CheckIn} />
+
         {/* Communications */}
         <Route path="/communications" component={Communications} />
 
@@ -106,6 +117,15 @@ export function AppRoutes() {
 
         {/* Discipleship */}
         <Route path="/discipleship" component={Discipleship} />
+
+        {/* Small Groups */}
+        <Route path="/groups" component={SmallGroups} />
+
+        {/* Sermon Prep */}
+        <Route path="/sermons" component={SermonPrep} />
+
+        {/* Prayer Requests */}
+        <Route path="/prayer" component={PrayerRequests} />
 
         {/* Reports */}
         <Route path="/reports" component={Reports} />

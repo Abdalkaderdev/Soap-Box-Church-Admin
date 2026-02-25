@@ -17,6 +17,7 @@ import {
   ChevronUp,
   LogOut,
   ExternalLink,
+  UserCheck,
 } from 'lucide-react';
 import { Logo, LogoIcon } from './Logo';
 
@@ -61,6 +62,7 @@ const navigation: NavItem[] = [
       { name: 'Registrations', href: '/events/registrations' },
     ],
   },
+  { name: 'Check-in', href: '/checkin', icon: UserCheck },
   {
     name: 'Communications',
     href: '/communications',

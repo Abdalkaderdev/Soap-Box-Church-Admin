@@ -1,8 +1,5 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
-import { useAuth } from "@/hooks/useAuth";
 import {
   BarChart,
   Bar,
@@ -42,105 +39,44 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-
-// Types for API responses
-interface DashboardStats {
-  totalDonationsThisMonth: number;
-  totalDonationsLastMonth: number;
-  totalDonationsThisYear: number;
-  activeRecurringDonors: number;
-  newDonorsThisMonth: number;
-  averageDonation: number;
-  monthlyGrowthPercent: number;
-  yearToDateTarget: number;
-  yearToDateProgress: number;
-  totalDonors?: number;
-}
-
-interface MonthlyTrend {
-  month: string;
-  amount: number;
-  count: number;
-  recurring: number;
-  oneTime: number;
-}
-
-interface CategoryBreakdown {
-  name: string;
-  amount: number;
-  percent: number;
-  color: string;
-}
-
-interface RecentDonation {
-  id: number;
-  amount: number;
-  donorName: string;
-  fundName: string;
-  date: string;
-  isRecurring: boolean;
-  isAnonymous: boolean;
-  method?: string;
-}
-
-interface TopDonor {
-  id: number;
-  name: string;
-  totalAmount: number;
-  donationCount: number;
-  lastDonation: string;
-  trend?: "up" | "down" | "same";
-}
+import {
+  useDonationDashboard,
+  useDonationStats,
+  useDonations,
+  useRecurringDonations,
+} from "@/hooks/useDonations";
+import type { Fund } from "@/types";
 
 const CHART_COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
 
 export default function DonationsDashboard() {
-  const { churchId } = useAuth();
   const [timeRange, setTimeRange] = useState("6months");
   const [compareMode, setCompareMode] = useState(false);
 
-  // Fetch dashboard stats
-  const { data: stats, isLoading: loadingStats, refetch: refetchStats } = useQuery<DashboardStats>({
-    queryKey: ["/admin/financial-dashboard/stats", churchId],
-    queryFn: () => api.get<DashboardStats>(`/admin/financial-dashboard/stats`, { communityId: churchId }),
-    enabled: Boolean(churchId),
-  });
+  // Fetch dashboard data
+  const {
+    data: dashboard,
+    isLoading: loadingDashboard,
+    refetch: refetchDashboard,
+  } = useDonationDashboard();
 
-  // Fetch monthly trends
-  const { data: trends, isLoading: loadingTrends } = useQuery<MonthlyTrend[]>({
-    queryKey: ["/admin/financial-dashboard/trends", churchId, timeRange],
-    queryFn: () => api.get<MonthlyTrend[]>(`/admin/financial-dashboard/trends`, {
-      communityId: churchId,
-      range: timeRange
-    }),
-    enabled: Boolean(churchId),
-  });
-
-  // Fetch category breakdown
-  const { data: categories, isLoading: loadingCategories } = useQuery<CategoryBreakdown[]>({
-    queryKey: ["/admin/financial-dashboard/categories", churchId],
-    queryFn: () => api.get<CategoryBreakdown[]>(`/admin/financial-dashboard/categories`, { communityId: churchId }),
-    enabled: Boolean(churchId),
+  // Fetch donation stats for trends
+  const { data: stats, isLoading: loadingStats } = useDonationStats({
+    groupBy: timeRange === "3months" ? "week" : "month",
   });
 
   // Fetch recent donations
-  const { data: recentDonations, isLoading: loadingRecent } = useQuery<RecentDonation[]>({
-    queryKey: ["/admin/financial-dashboard/recent", churchId],
-    queryFn: () => api.get<RecentDonation[]>(`/admin/financial-dashboard/recent`, {
-      communityId: churchId,
-      limit: 5
-    }),
-    enabled: Boolean(churchId),
+  const { data: recentDonationsData, isLoading: loadingRecent } = useDonations({
+    page: 1,
+    pageSize: 5,
+    sortBy: "date",
+    sortOrder: "desc",
   });
 
-  // Fetch top donors
-  const { data: topDonors, isLoading: loadingTopDonors } = useQuery<TopDonor[]>({
-    queryKey: ["/admin/financial-dashboard/top-donors", churchId],
-    queryFn: () => api.get<TopDonor[]>(`/admin/financial-dashboard/top-donors`, {
-      communityId: churchId,
-      limit: 6
-    }),
-    enabled: Boolean(churchId),
+  // Fetch recurring donors count
+  const { data: recurringData, isLoading: loadingRecurring } = useRecurringDonations({
+    page: 1,
+    pageSize: 1,
   });
 
   const formatCurrency = (value: number) => {
@@ -152,18 +88,54 @@ export default function DonationsDashboard() {
     }).format(value);
   };
 
-  const totalThisYear = stats?.totalDonationsThisYear || 0;
-  const avgDonation = stats?.averageDonation || 0;
-  const totalDonors = stats?.totalDonors || stats?.activeRecurringDonors || 0;
-  const recurringDonors = stats?.activeRecurringDonors || 0;
+  // Compute stats from dashboard and stats data
+  const totalThisMonth = dashboard?.totalThisMonth || 0;
+  const totalThisYear = dashboard?.totalThisYear || 0;
+  const avgDonation = stats?.averageAmount || 0;
+  const recurringDonorsCount = recurringData?.pagination?.totalItems || 0;
 
-  // Transform trends for chart (if needed)
-  const chartData = trends?.map(t => ({
-    month: t.month,
+  // Calculate month-over-month growth
+  const lastMonthIndex = stats?.trend && stats.trend.length > 1 ? stats.trend.length - 2 : -1;
+  const lastMonthAmount = lastMonthIndex >= 0 ? stats?.trend[lastMonthIndex]?.amount || 0 : 0;
+  const monthlyGrowthPercent = lastMonthAmount > 0
+    ? ((totalThisMonth - lastMonthAmount) / lastMonthAmount) * 100
+    : 0;
+
+  // Transform trends for chart
+  const chartData = stats?.trend?.map((t) => ({
+    month: new Date(t.date).toLocaleDateString("en-US", { month: "short", year: "2-digit" }),
     amount: t.amount,
     lastYear: t.amount * 0.85, // Approximate last year for comparison
     donors: t.count,
   })) || [];
+
+  // Transform fund breakdown for pie chart
+  const categories = dashboard?.topFunds?.map((tf, index) => ({
+    name: (tf.fund as Fund).name || "Unknown Fund",
+    amount: tf.amount,
+    percent: Math.round(tf.percentage),
+    color: CHART_COLORS[index % CHART_COLORS.length],
+  })) || [];
+
+  // Recent donations
+  const recentDonations = recentDonationsData?.data || [];
+
+  // Top donors
+  const topDonors = dashboard?.topDonors?.map((td, index) => ({
+    id: td.memberId,
+    name: td.memberName,
+    totalAmount: td.totalAmount,
+    donationCount: 0, // Not provided by API
+    rank: index + 1,
+  })) || [];
+
+  // Calculate one-time vs recurring estimates from stats
+  const totalAmount = stats?.totalAmount || totalThisYear;
+  const recurringEstimate = totalAmount * 0.6;
+  const oneTimeEstimate = totalAmount * 0.4;
+
+  // Get new donors this month (estimate from stats)
+  const newDonorsThisMonth = stats?.trend?.[stats.trend.length - 1]?.count || 0;
 
   return (
     <div className="p-6 space-y-6">
@@ -186,7 +158,7 @@ export default function DonationsDashboard() {
               <SelectItem value="12months">12 Months</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="icon" onClick={() => refetchStats()}>
+          <Button variant="outline" size="icon" onClick={() => refetchDashboard()}>
             <RefreshCw className="h-4 w-4" />
           </Button>
           <Link href="/donations/new">
@@ -208,23 +180,23 @@ export default function DonationsDashboard() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {loadingStats ? (
+            {loadingDashboard ? (
               <Skeleton className="h-8 w-24" />
             ) : (
               <>
                 <div className="text-2xl font-bold">
-                  {formatCurrency(stats?.totalDonationsThisMonth || 0)}
+                  {formatCurrency(totalThisMonth)}
                 </div>
-                {stats?.monthlyGrowthPercent !== undefined && (
+                {monthlyGrowthPercent !== 0 && (
                   <div className={`flex items-center text-sm mt-1 ${
-                    stats.monthlyGrowthPercent >= 0 ? "text-green-600" : "text-red-600"
+                    monthlyGrowthPercent >= 0 ? "text-green-600" : "text-red-600"
                   }`}>
-                    {stats.monthlyGrowthPercent >= 0 ? (
+                    {monthlyGrowthPercent >= 0 ? (
                       <ArrowUpRight className="h-4 w-4 mr-1" />
                     ) : (
                       <ArrowDownRight className="h-4 w-4 mr-1" />
                     )}
-                    {Math.abs(stats.monthlyGrowthPercent).toFixed(1)}% from last month
+                    {Math.abs(monthlyGrowthPercent).toFixed(1)}% from last month
                   </div>
                 )}
               </>
@@ -240,17 +212,13 @@ export default function DonationsDashboard() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {loadingStats ? (
+            {loadingDashboard ? (
               <Skeleton className="h-8 w-24" />
             ) : (
               <>
                 <div className="text-2xl font-bold">{formatCurrency(totalThisYear)}</div>
                 <div className="text-sm text-muted-foreground mt-1">
-                  {stats?.yearToDateTarget ? (
-                    `${((totalThisYear / stats.yearToDateTarget) * 100).toFixed(0)}% of goal`
-                  ) : (
-                    "No target set"
-                  )}
+                  Total donations this year
                 </div>
               </>
             )}
@@ -286,11 +254,11 @@ export default function DonationsDashboard() {
             <Repeat className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {loadingStats ? (
+            {loadingRecurring ? (
               <Skeleton className="h-8 w-24" />
             ) : (
               <>
-                <div className="text-2xl font-bold">{recurringDonors}</div>
+                <div className="text-2xl font-bold">{recurringDonorsCount}</div>
                 <div className="text-sm text-muted-foreground mt-1">
                   Active subscriptions
                 </div>
@@ -320,7 +288,7 @@ export default function DonationsDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            {loadingTrends ? (
+            {loadingStats ? (
               <div className="flex items-center justify-center h-[300px]">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
@@ -383,7 +351,7 @@ export default function DonationsDashboard() {
             <CardDescription>Distribution by donation category</CardDescription>
           </CardHeader>
           <CardContent>
-            {loadingCategories ? (
+            {loadingDashboard ? (
               <div className="flex items-center justify-center h-[240px]">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
@@ -455,7 +423,7 @@ export default function DonationsDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            {loadingTopDonors ? (
+            {loadingDashboard ? (
               <div className="space-y-4">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="flex items-center gap-4">
@@ -487,28 +455,11 @@ export default function DonationsDashboard() {
                         </p>
                       </Link>
                       <p className="text-sm text-muted-foreground">
-                        {donor.donationCount} donations
+                        Top contributor
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold">{formatCurrency(donor.totalAmount)}</p>
-                      {donor.trend && (
-                        <div className="flex items-center justify-end gap-1">
-                          {donor.trend === "up" && (
-                            <ArrowUpRight className="h-3 w-3 text-green-500" />
-                          )}
-                          {donor.trend === "down" && (
-                            <ArrowDownRight className="h-3 w-3 text-red-500" />
-                          )}
-                          <span className={`text-xs ${
-                            donor.trend === "up" ? "text-green-500" :
-                            donor.trend === "down" ? "text-red-500" : "text-muted-foreground"
-                          }`}>
-                            {donor.trend === "up" ? "Increasing" :
-                             donor.trend === "down" ? "Decreasing" : "Stable"}
-                          </span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 ))}
@@ -569,14 +520,14 @@ export default function DonationsDashboard() {
                       </div>
                       <div>
                         <p className="font-medium">
-                          {donation.isAnonymous ? "Anonymous" : donation.donorName}
+                          {donation.isAnonymous ? "Anonymous" : (donation.member ? `${donation.member.firstName} ${donation.member.lastName}` : "Unknown Donor")}
                         </p>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span>{donation.fundName || "General Fund"}</span>
+                          <span>{donation.fund || "General Fund"}</span>
                           {donation.method && (
                             <>
                               <span>-</span>
-                              <span>{donation.method}</span>
+                              <span className="capitalize">{donation.method}</span>
                             </>
                           )}
                         </div>
@@ -610,7 +561,7 @@ export default function DonationsDashboard() {
                   {loadingStats ? (
                     <Skeleton className="h-8 w-20" />
                   ) : (
-                    formatCurrency((stats?.totalDonationsThisYear || 0) * 0.4)
+                    formatCurrency(oneTimeEstimate)
                   )}
                 </p>
               </div>
@@ -630,7 +581,7 @@ export default function DonationsDashboard() {
                   {loadingStats ? (
                     <Skeleton className="h-8 w-20" />
                   ) : (
-                    formatCurrency((stats?.totalDonationsThisYear || 0) * 0.6)
+                    formatCurrency(recurringEstimate)
                   )}
                 </p>
               </div>
@@ -645,12 +596,12 @@ export default function DonationsDashboard() {
                 <Building className="h-6 w-6 text-amber-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">New Donors</p>
+                <p className="text-sm text-muted-foreground">Donations This Month</p>
                 <p className="text-2xl font-bold">
                   {loadingStats ? (
                     <Skeleton className="h-8 w-20" />
                   ) : (
-                    stats?.newDonorsThisMonth || 0
+                    newDonorsThisMonth
                   )}
                 </p>
               </div>
@@ -665,12 +616,12 @@ export default function DonationsDashboard() {
                 <Heart className="h-6 w-6 text-rose-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Donors</p>
+                <p className="text-sm text-muted-foreground">Total Donations</p>
                 <p className="text-2xl font-bold">
                   {loadingStats ? (
                     <Skeleton className="h-8 w-20" />
                   ) : (
-                    totalDonors
+                    stats?.totalCount || 0
                   )}
                 </p>
               </div>

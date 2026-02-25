@@ -17,12 +17,14 @@ import {
   CreditCard,
   Mail,
   FileText,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -45,275 +47,101 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  useDonations,
+  useDeleteDonation,
+  useSendDonationReceipt,
+  useFunds,
+  type DonationFilters,
+} from "@/hooks/useDonations";
+import type { Donation, DonationMethod, DonationStatus } from "@/types";
 
-// Mock donations data
-const mockDonations = [
-  {
-    id: 1,
-    donorId: 1,
-    donorName: "Michael Johnson",
-    email: "michael.johnson@email.com",
-    amount: 500,
-    category: "Tithes",
-    paymentMethod: "Online",
-    date: "2024-01-15",
-    status: "completed",
-    receiptSent: true,
-    notes: "Monthly tithe",
-  },
-  {
-    id: 2,
-    donorId: 2,
-    donorName: "Sarah Williams",
-    email: "sarah.williams@email.com",
-    amount: 250,
-    category: "Missions",
-    paymentMethod: "Check",
-    date: "2024-01-15",
-    status: "completed",
-    receiptSent: true,
-    notes: "",
-  },
-  {
-    id: 3,
-    donorId: null,
-    donorName: "Anonymous",
-    email: "",
-    amount: 1000,
-    category: "Building Fund",
-    paymentMethod: "Cash",
-    date: "2024-01-14",
-    status: "completed",
-    receiptSent: false,
-    notes: "Anonymous donation - cash in offering plate",
-  },
-  {
-    id: 4,
-    donorId: 3,
-    donorName: "David Thompson",
-    email: "david.thompson@email.com",
-    amount: 350,
-    category: "General Offering",
-    paymentMethod: "Online",
-    date: "2024-01-14",
-    status: "completed",
-    receiptSent: true,
-    notes: "",
-  },
-  {
-    id: 5,
-    donorId: 4,
-    donorName: "Jennifer Davis",
-    email: "jennifer.davis@email.com",
-    amount: 200,
-    category: "Youth Ministry",
-    paymentMethod: "Online",
-    date: "2024-01-13",
-    status: "completed",
-    receiptSent: true,
-    notes: "For youth camp",
-  },
-  {
-    id: 6,
-    donorId: 5,
-    donorName: "Robert Brown",
-    email: "robert.brown@email.com",
-    amount: 750,
-    category: "Tithes",
-    paymentMethod: "Bank Transfer",
-    date: "2024-01-12",
-    status: "pending",
-    receiptSent: false,
-    notes: "Recurring monthly",
-  },
-  {
-    id: 7,
-    donorId: 6,
-    donorName: "Emily Martinez",
-    email: "emily.martinez@email.com",
-    amount: 150,
-    category: "General Offering",
-    paymentMethod: "Check",
-    date: "2024-01-12",
-    status: "completed",
-    receiptSent: true,
-    notes: "",
-  },
-  {
-    id: 8,
-    donorId: 7,
-    donorName: "James Wilson",
-    email: "james.wilson@email.com",
-    amount: 1200,
-    category: "Building Fund",
-    paymentMethod: "Online",
-    date: "2024-01-11",
-    status: "completed",
-    receiptSent: true,
-    notes: "Special gift for building project",
-  },
-  {
-    id: 9,
-    donorId: 8,
-    donorName: "Lisa Anderson",
-    email: "lisa.anderson@email.com",
-    amount: 300,
-    category: "Missions",
-    paymentMethod: "Online",
-    date: "2024-01-10",
-    status: "completed",
-    receiptSent: true,
-    notes: "Africa missions trip",
-  },
-  {
-    id: 10,
-    donorId: 9,
-    donorName: "Christopher Lee",
-    email: "chris.lee@email.com",
-    amount: 450,
-    category: "Tithes",
-    paymentMethod: "Cash",
-    date: "2024-01-10",
-    status: "completed",
-    receiptSent: false,
-    notes: "",
-  },
-  {
-    id: 11,
-    donorId: 10,
-    donorName: "Amanda Taylor",
-    email: "amanda.taylor@email.com",
-    amount: 100,
-    category: "Youth Ministry",
-    paymentMethod: "Online",
-    date: "2024-01-09",
-    status: "failed",
-    receiptSent: false,
-    notes: "Payment failed - card declined",
-  },
-  {
-    id: 12,
-    donorId: 1,
-    donorName: "Michael Johnson",
-    email: "michael.johnson@email.com",
-    amount: 2500,
-    category: "Building Fund",
-    paymentMethod: "Check",
-    date: "2024-01-08",
-    status: "completed",
-    receiptSent: true,
-    notes: "Special pledge payment",
-  },
+const paymentMethods: { value: string; label: string }[] = [
+  { value: "all", label: "All Methods" },
+  { value: "cash", label: "Cash" },
+  { value: "check", label: "Check" },
+  { value: "card", label: "Card" },
+  { value: "ach", label: "ACH" },
+  { value: "online", label: "Online" },
+  { value: "other", label: "Other" },
 ];
 
-const categories = [
-  "All Categories",
-  "Tithes",
-  "General Offering",
-  "Building Fund",
-  "Missions",
-  "Youth Ministry",
+const statuses: { value: string; label: string }[] = [
+  { value: "all", label: "All Statuses" },
+  { value: "completed", label: "Completed" },
+  { value: "pending", label: "Pending" },
+  { value: "failed", label: "Failed" },
+  { value: "refunded", label: "Refunded" },
 ];
 
-const paymentMethods = [
-  "All Methods",
-  "Online",
-  "Check",
-  "Cash",
-  "Bank Transfer",
-];
-
-const statuses = ["All Statuses", "completed", "pending", "failed"];
-
-type SortField = "date" | "amount" | "donorName" | "category";
+type SortField = "date" | "amount" | "donorName" | "fund";
 type SortDirection = "asc" | "desc";
 
 export default function DonationsList() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("All Categories");
-  const [methodFilter, setMethodFilter] = useState("All Methods");
-  const [statusFilter, setStatusFilter] = useState("All Statuses");
+  const [fundFilter, setFundFilter] = useState("all");
+  const [methodFilter, setMethodFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedDonation, setSelectedDonation] = useState<typeof mockDonations[0] | null>(null);
+  const [selectedDonation, setSelectedDonation] = useState<Donation | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [donationToDelete, setDonationToDelete] = useState<number | null>(null);
+  const [donationToDelete, setDonationToDelete] = useState<string | null>(null);
 
   const itemsPerPage = 10;
 
-  // Filter and sort donations
+  // Build filters for API
+  const filters: DonationFilters = useMemo(() => {
+    const f: DonationFilters = {
+      page: currentPage,
+      pageSize: itemsPerPage,
+      sortBy: sortField === "donorName" ? "member.lastName" : sortField,
+      sortOrder: sortDirection,
+    };
+
+    if (fundFilter !== "all") f.fundId = fundFilter;
+    if (methodFilter !== "all") f.method = methodFilter as DonationMethod;
+    if (statusFilter !== "all") f.status = statusFilter as DonationStatus;
+    if (dateFrom) f.dateFrom = dateFrom;
+    if (dateTo) f.dateTo = dateTo;
+
+    return f;
+  }, [currentPage, sortField, sortDirection, fundFilter, methodFilter, statusFilter, dateFrom, dateTo]);
+
+  // Fetch donations
+  const { data: donationsData, isLoading, refetch } = useDonations(filters);
+
+  // Fetch funds for filter dropdown
+  const { data: funds } = useFunds();
+
+  // Mutations
+  const deleteMutation = useDeleteDonation();
+  const sendReceiptMutation = useSendDonationReceipt();
+
+  // Get donations and pagination info
+  const donations = donationsData?.data || [];
+  const pagination = donationsData?.pagination;
+  const totalPages = pagination?.totalPages || 1;
+  const totalItems = pagination?.totalItems || 0;
+
+  // Filter by search query (client-side since API may not support full-text search)
   const filteredDonations = useMemo(() => {
-    let result = [...mockDonations];
+    if (!searchQuery) return donations;
 
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (d) =>
-          d.donorName.toLowerCase().includes(query) ||
-          d.email.toLowerCase().includes(query) ||
-          d.notes.toLowerCase().includes(query)
-      );
-    }
+    const query = searchQuery.toLowerCase();
+    return donations.filter(
+      (d) =>
+        (d.member?.firstName + " " + d.member?.lastName)?.toLowerCase().includes(query) ||
+        d.member?.email?.toLowerCase().includes(query) ||
+        d.notes?.toLowerCase().includes(query)
+    );
+  }, [donations, searchQuery]);
 
-    // Category filter
-    if (categoryFilter !== "All Categories") {
-      result = result.filter((d) => d.category === categoryFilter);
-    }
-
-    // Payment method filter
-    if (methodFilter !== "All Methods") {
-      result = result.filter((d) => d.paymentMethod === methodFilter);
-    }
-
-    // Status filter
-    if (statusFilter !== "All Statuses") {
-      result = result.filter((d) => d.status === statusFilter);
-    }
-
-    // Date range filter
-    if (dateFrom) {
-      result = result.filter((d) => d.date >= dateFrom);
-    }
-    if (dateTo) {
-      result = result.filter((d) => d.date <= dateTo);
-    }
-
-    // Sort
-    result.sort((a, b) => {
-      let comparison = 0;
-      switch (sortField) {
-        case "date":
-          comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
-          break;
-        case "amount":
-          comparison = a.amount - b.amount;
-          break;
-        case "donorName":
-          comparison = a.donorName.localeCompare(b.donorName);
-          break;
-        case "category":
-          comparison = a.category.localeCompare(b.category);
-          break;
-      }
-      return sortDirection === "asc" ? comparison : -comparison;
-    });
-
-    return result;
-  }, [searchQuery, categoryFilter, methodFilter, statusFilter, dateFrom, dateTo, sortField, sortDirection]);
-
-  // Pagination
-  const totalPages = Math.ceil(filteredDonations.length / itemsPerPage);
-  const paginatedDonations = filteredDonations.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // Calculate totals
+  // Calculate totals from filtered results
   const totalAmount = filteredDonations.reduce((sum, d) => sum + d.amount, 0);
 
   const handleSort = (field: SortField) => {
@@ -323,21 +151,29 @@ export default function DonationsList() {
       setSortField(field);
       setSortDirection("desc");
     }
+    setCurrentPage(1);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     setDonationToDelete(id);
     setShowDeleteDialog(true);
   };
 
-  const confirmDelete = () => {
-    // In a real app, this would call an API to delete the donation
-    console.log("Deleting donation:", donationToDelete);
-    setShowDeleteDialog(false);
-    setDonationToDelete(null);
+  const confirmDelete = async () => {
+    if (donationToDelete) {
+      await deleteMutation.mutateAsync(donationToDelete);
+      setShowDeleteDialog(false);
+      setDonationToDelete(null);
+      refetch();
+    }
   };
 
-  const getStatusBadge = (status: string) => {
+  const handleSendReceipt = async (donationId: string) => {
+    await sendReceiptMutation.mutateAsync({ donationId });
+    refetch();
+  };
+
+  const getStatusBadge = (status: DonationStatus) => {
     switch (status) {
       case "completed":
         return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Completed</Badge>;
@@ -345,6 +181,10 @@ export default function DonationsList() {
         return <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100">Pending</Badge>;
       case "failed":
         return <Badge variant="destructive">Failed</Badge>;
+      case "refunded":
+        return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Refunded</Badge>;
+      case "cancelled":
+        return <Badge variant="secondary">Cancelled</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -352,9 +192,9 @@ export default function DonationsList() {
 
   const clearFilters = () => {
     setSearchQuery("");
-    setCategoryFilter("All Categories");
-    setMethodFilter("All Methods");
-    setStatusFilter("All Statuses");
+    setFundFilter("all");
+    setMethodFilter("all");
+    setStatusFilter("all");
     setDateFrom("");
     setDateTo("");
     setCurrentPage(1);
@@ -362,11 +202,23 @@ export default function DonationsList() {
 
   const hasActiveFilters =
     searchQuery ||
-    categoryFilter !== "All Categories" ||
-    methodFilter !== "All Methods" ||
-    statusFilter !== "All Statuses" ||
+    fundFilter !== "all" ||
+    methodFilter !== "all" ||
+    statusFilter !== "all" ||
     dateFrom ||
     dateTo;
+
+  const getDonorName = (donation: Donation) => {
+    if (donation.isAnonymous) return "Anonymous";
+    if (donation.member) {
+      return `${donation.member.firstName} ${donation.member.lastName}`;
+    }
+    return "Unknown Donor";
+  };
+
+  const getDonorEmail = (donation: Donation) => {
+    return donation.member?.email || "";
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -399,7 +251,9 @@ export default function DonationsList() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Showing</p>
-                <p className="text-2xl font-bold">{filteredDonations.length}</p>
+                <p className="text-2xl font-bold">
+                  {isLoading ? <Skeleton className="h-8 w-16" /> : filteredDonations.length}
+                </p>
                 <p className="text-sm text-muted-foreground">donations</p>
               </div>
               <FileText className="h-8 w-8 text-muted-foreground" />
@@ -411,7 +265,9 @@ export default function DonationsList() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Amount</p>
-                <p className="text-2xl font-bold">${totalAmount.toLocaleString()}</p>
+                <p className="text-2xl font-bold">
+                  {isLoading ? <Skeleton className="h-8 w-24" /> : `$${totalAmount.toLocaleString()}`}
+                </p>
                 <p className="text-sm text-muted-foreground">filtered results</p>
               </div>
               <DollarSign className="h-8 w-8 text-muted-foreground" />
@@ -424,9 +280,11 @@ export default function DonationsList() {
               <div>
                 <p className="text-sm text-muted-foreground">Average</p>
                 <p className="text-2xl font-bold">
-                  ${filteredDonations.length > 0
-                    ? Math.round(totalAmount / filteredDonations.length).toLocaleString()
-                    : 0}
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-20" />
+                  ) : (
+                    `$${filteredDonations.length > 0 ? Math.round(totalAmount / filteredDonations.length).toLocaleString() : 0}`
+                  )}
                 </p>
                 <p className="text-sm text-muted-foreground">per donation</p>
               </div>
@@ -478,11 +336,11 @@ export default function DonationsList() {
             {showFilters && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-4 border-t">
                 <div className="space-y-2">
-                  <Label>Category</Label>
+                  <Label>Fund</Label>
                   <Select
-                    value={categoryFilter}
+                    value={fundFilter}
                     onValueChange={(value) => {
-                      setCategoryFilter(value);
+                      setFundFilter(value);
                       setCurrentPage(1);
                     }}
                   >
@@ -490,9 +348,10 @@ export default function DonationsList() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
+                      <SelectItem value="all">All Funds</SelectItem>
+                      {funds?.map((fund) => (
+                        <SelectItem key={fund.id} value={fund.id}>
+                          {fund.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -513,8 +372,8 @@ export default function DonationsList() {
                     </SelectTrigger>
                     <SelectContent>
                       {paymentMethods.map((method) => (
-                        <SelectItem key={method} value={method}>
-                          {method}
+                        <SelectItem key={method.value} value={method.value}>
+                          {method.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -535,8 +394,8 @@ export default function DonationsList() {
                     </SelectTrigger>
                     <SelectContent>
                       {statuses.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status === "All Statuses" ? status : status.charAt(0).toUpperCase() + status.slice(1)}
+                        <SelectItem key={status.value} value={status.value}>
+                          {status.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -575,153 +434,172 @@ export default function DonationsList() {
       {/* Donations Table */}
       <Card>
         <CardContent className="pt-6">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-medium">
-                    <button
-                      className="flex items-center gap-1 hover:text-primary"
-                      onClick={() => handleSort("date")}
-                    >
-                      Date
-                      <ArrowUpDown className="h-4 w-4" />
-                    </button>
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium">
-                    <button
-                      className="flex items-center gap-1 hover:text-primary"
-                      onClick={() => handleSort("donorName")}
-                    >
-                      Donor
-                      <ArrowUpDown className="h-4 w-4" />
-                    </button>
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium">
-                    <button
-                      className="flex items-center gap-1 hover:text-primary"
-                      onClick={() => handleSort("amount")}
-                    >
-                      Amount
-                      <ArrowUpDown className="h-4 w-4" />
-                    </button>
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium">
-                    <button
-                      className="flex items-center gap-1 hover:text-primary"
-                      onClick={() => handleSort("category")}
-                    >
-                      Category
-                      <ArrowUpDown className="h-4 w-4" />
-                    </button>
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium">Method</th>
-                  <th className="text-left py-3 px-4 font-medium">Status</th>
-                  <th className="text-left py-3 px-4 font-medium">Receipt</th>
-                  <th className="text-right py-3 px-4 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedDonations.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="text-center py-8 text-muted-foreground">
-                      No donations found matching your filters.
-                    </td>
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center gap-4 p-4">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-32 flex-1" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-8 w-8" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4 font-medium">
+                      <button
+                        className="flex items-center gap-1 hover:text-primary"
+                        onClick={() => handleSort("date")}
+                      >
+                        Date
+                        <ArrowUpDown className="h-4 w-4" />
+                      </button>
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium">
+                      <button
+                        className="flex items-center gap-1 hover:text-primary"
+                        onClick={() => handleSort("donorName")}
+                      >
+                        Donor
+                        <ArrowUpDown className="h-4 w-4" />
+                      </button>
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium">
+                      <button
+                        className="flex items-center gap-1 hover:text-primary"
+                        onClick={() => handleSort("amount")}
+                      >
+                        Amount
+                        <ArrowUpDown className="h-4 w-4" />
+                      </button>
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium">
+                      <button
+                        className="flex items-center gap-1 hover:text-primary"
+                        onClick={() => handleSort("fund")}
+                      >
+                        Fund
+                        <ArrowUpDown className="h-4 w-4" />
+                      </button>
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium">Method</th>
+                    <th className="text-left py-3 px-4 font-medium">Status</th>
+                    <th className="text-left py-3 px-4 font-medium">Receipt</th>
+                    <th className="text-right py-3 px-4 font-medium">Actions</th>
                   </tr>
-                ) : (
-                  paginatedDonations.map((donation) => (
-                    <tr key={donation.id} className="border-b hover:bg-muted/50">
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          {new Date(donation.date).toLocaleDateString()}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        {donation.donorId ? (
-                          <Link href={`/donations/donor/${donation.donorId}`}>
-                            <span className="font-medium hover:text-primary cursor-pointer">
-                              {donation.donorName}
-                            </span>
-                          </Link>
-                        ) : (
-                          <span className="font-medium text-muted-foreground">
-                            {donation.donorName}
-                          </span>
-                        )}
-                        {donation.email && (
-                          <p className="text-sm text-muted-foreground">{donation.email}</p>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="font-semibold">${donation.amount.toLocaleString()}</span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge variant="outline">{donation.category}</Badge>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          <CreditCard className="h-4 w-4 text-muted-foreground" />
-                          {donation.paymentMethod}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">{getStatusBadge(donation.status)}</td>
-                      <td className="py-3 px-4">
-                        {donation.receiptSent ? (
-                          <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-                            Sent
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">Not Sent</Badge>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setSelectedDonation(donation)}>
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Pencil className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            {!donation.receiptSent && donation.email && (
-                              <DropdownMenuItem>
-                                <Mail className="h-4 w-4 mr-2" />
-                                Send Receipt
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-red-600"
-                              onClick={() => handleDelete(donation.id)}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                </thead>
+                <tbody>
+                  {filteredDonations.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="text-center py-8 text-muted-foreground">
+                        No donations found matching your filters.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ) : (
+                    filteredDonations.map((donation) => (
+                      <tr key={donation.id} className="border-b hover:bg-muted/50">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            {new Date(donation.date).toLocaleDateString()}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          {donation.memberId && !donation.isAnonymous ? (
+                            <Link href={`/donations/donor/${donation.memberId}`}>
+                              <span className="font-medium hover:text-primary cursor-pointer">
+                                {getDonorName(donation)}
+                              </span>
+                            </Link>
+                          ) : (
+                            <span className="font-medium text-muted-foreground">
+                              {getDonorName(donation)}
+                            </span>
+                          )}
+                          {getDonorEmail(donation) && (
+                            <p className="text-sm text-muted-foreground">{getDonorEmail(donation)}</p>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="font-semibold">${donation.amount.toLocaleString()}</span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge variant="outline">{donation.fund}</Badge>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            <CreditCard className="h-4 w-4 text-muted-foreground" />
+                            <span className="capitalize">{donation.method}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">{getStatusBadge(donation.status)}</td>
+                        <td className="py-3 px-4">
+                          {donation.receiptSent ? (
+                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+                              Sent
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">Not Sent</Badge>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => setSelectedDonation(donation)}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              {!donation.receiptSent && getDonorEmail(donation) && (
+                                <DropdownMenuItem
+                                  onClick={() => handleSendReceipt(donation.id)}
+                                  disabled={sendReceiptMutation.isPending}
+                                >
+                                  <Mail className="h-4 w-4 mr-2" />
+                                  {sendReceiptMutation.isPending ? "Sending..." : "Send Receipt"}
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => handleDelete(donation.id)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4 pt-4 border-t">
               <p className="text-sm text-muted-foreground">
                 Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-                {Math.min(currentPage * itemsPerPage, filteredDonations.length)} of{" "}
-                {filteredDonations.length} donations
+                {Math.min(currentPage * itemsPerPage, totalItems)} of{" "}
+                {totalItems} donations
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -734,17 +612,20 @@ export default function DonationsList() {
                   Previous
                 </Button>
                 <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <Button
-                      key={page}
-                      variant={currentPage === page ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setCurrentPage(page)}
-                      className="w-8"
-                    >
-                      {page}
-                    </Button>
-                  ))}
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNum)}
+                        className="w-8"
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
                 </div>
                 <Button
                   variant="outline"
@@ -775,7 +656,7 @@ export default function DonationsList() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Donor</Label>
-                  <p className="font-medium">{selectedDonation.donorName}</p>
+                  <p className="font-medium">{getDonorName(selectedDonation)}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Amount</Label>
@@ -788,21 +669,27 @@ export default function DonationsList() {
                   </p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Category</Label>
-                  <p className="font-medium">{selectedDonation.category}</p>
+                  <Label className="text-muted-foreground">Fund</Label>
+                  <p className="font-medium">{selectedDonation.fund}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Payment Method</Label>
-                  <p className="font-medium">{selectedDonation.paymentMethod}</p>
+                  <p className="font-medium capitalize">{selectedDonation.method}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Status</Label>
                   <div className="mt-1">{getStatusBadge(selectedDonation.status)}</div>
                 </div>
-                {selectedDonation.email && (
+                {getDonorEmail(selectedDonation) && (
                   <div className="col-span-2">
                     <Label className="text-muted-foreground">Email</Label>
-                    <p className="font-medium">{selectedDonation.email}</p>
+                    <p className="font-medium">{getDonorEmail(selectedDonation)}</p>
+                  </div>
+                )}
+                {selectedDonation.transactionId && (
+                  <div className="col-span-2">
+                    <Label className="text-muted-foreground">Transaction ID</Label>
+                    <p className="font-medium font-mono text-sm">{selectedDonation.transactionId}</p>
                   </div>
                 )}
                 {selectedDonation.notes && (
@@ -835,8 +722,19 @@ export default function DonationsList() {
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              Delete
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

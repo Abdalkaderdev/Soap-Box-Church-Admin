@@ -606,6 +606,37 @@ import type {
   MembershipStats,
   DashboardStats,
   ReportParams,
+  // Sermon Prep types
+  SermonSeries,
+  Sermon,
+  SermonCreateInput,
+  SermonUpdateInput,
+  SermonResource,
+  SermonFeedback,
+  SermonCollaborator,
+  // Prayer Request types
+  PrayerRequest,
+  PrayerCreateInput,
+  PrayerUpdateInput,
+  PrayerCategory,
+  PrayerStatus,
+  PrayerFollowUp,
+  // Small Groups types
+  SmallGroup,
+  SmallGroupCreateInput,
+  SmallGroupUpdateInput,
+  SmallGroupCategory,
+  SmallGroupMember,
+  SmallGroupMeeting,
+  SmallGroupAttendance,
+  SmallGroupJoinRequest,
+  // Check-in types
+  Service,
+  ServiceCheckIn,
+  ChildCheckIn,
+  CheckInKiosk,
+  CheckInFilters,
+  CheckInStats,
 } from '../types';
 
 // ----------------------------------------------------------------------------
@@ -1528,7 +1559,7 @@ export interface DiscipleProgress {
   status: 'active' | 'completed' | 'paused' | 'dropped';
 }
 
-export interface SmallGroup {
+export interface DiscipleshipSmallGroup {
   id: string | number;
   name: string;
   description?: string;
@@ -1645,7 +1676,7 @@ export const discipleshipApi = {
 
   // Groups
   listGroups: (churchId: string, filters?: DiscipleshipFilters) =>
-    api.get<{ data: SmallGroup[]; meta: { total: number; page: number; limit: number; totalPages: number } }>(
+    api.get<{ data: DiscipleshipSmallGroup[]; meta: { total: number; page: number; limit: number; totalPages: number } }>(
       `/church/${churchId}/discipleship/groups`,
       filters
     ),
@@ -1663,7 +1694,7 @@ export const discipleshipApi = {
     maxMembers?: number;
     requiresApproval?: boolean;
   }) =>
-    api.post<SmallGroup>(`/church/${churchId}/discipleship/groups`, data),
+    api.post<DiscipleshipSmallGroup>(`/church/${churchId}/discipleship/groups`, data),
 
   updateGroup: (churchId: string, groupId: number, data: Partial<{
     name: string;
@@ -1676,10 +1707,10 @@ export const discipleshipApi = {
     virtualMeetingUrl: string;
     locationType: 'in_person' | 'online' | 'hybrid';
     maxMembers: number;
-    status: SmallGroup['status'];
+    status: DiscipleshipSmallGroup['status'];
     isAcceptingMembers: boolean;
   }>) =>
-    api.patch<SmallGroup>(`/church/${churchId}/discipleship/groups/${groupId}`, data),
+    api.patch<DiscipleshipSmallGroup>(`/church/${churchId}/discipleship/groups/${groupId}`, data),
 
   addGroupMember: (churchId: string, groupId: number, userId: string, role?: string) =>
     api.post<void>(`/church/${churchId}/discipleship/groups/${groupId}/members`, { userId, role }),
@@ -1696,6 +1727,527 @@ export const discipleshipApi = {
       smallGroups: number;
       weeklyEngagement: number;
     }>(`/church/${churchId}/discipleship/stats`),
+};
+
+// ----------------------------------------------------------------------------
+// SERMONS API
+// ----------------------------------------------------------------------------
+
+export interface SermonFilters extends PaginationParams {
+  seriesId?: string;
+  status?: Sermon['status'] | Sermon['status'][];
+  speakerId?: string;
+  tags?: string[];
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export const sermonsApi = {
+  // Series
+  listSeries: (churchId: string, params?: PaginationParams & { status?: string }) =>
+    api.get<PaginatedResponse<SermonSeries>>(`/church/${churchId}/sermons/series`, params),
+
+  getSeries: (churchId: string, seriesId: string) =>
+    api.get<SermonSeries & { sermons: Sermon[] }>(`/church/${churchId}/sermons/series/${seriesId}`),
+
+  createSeries: (churchId: string, data: {
+    title: string;
+    description?: string;
+    startDate?: string;
+    endDate?: string;
+    imageUrl?: string;
+    status?: SermonSeries['status'];
+  }) =>
+    api.post<SermonSeries>(`/church/${churchId}/sermons/series`, data),
+
+  updateSeries: (churchId: string, seriesId: string, data: Partial<{
+    title: string;
+    description: string;
+    startDate: string;
+    endDate: string;
+    imageUrl: string;
+    status: SermonSeries['status'];
+  }>) =>
+    api.patch<SermonSeries>(`/church/${churchId}/sermons/series/${seriesId}`, data),
+
+  deleteSeries: (churchId: string, seriesId: string) =>
+    api.delete<void>(`/church/${churchId}/sermons/series/${seriesId}`),
+
+  // Sermons
+  list: (churchId: string, filters?: SermonFilters) =>
+    api.get<PaginatedResponse<Sermon>>(`/church/${churchId}/sermons`, filters),
+
+  get: (churchId: string, sermonId: string) =>
+    api.get<Sermon & { resources: SermonResource[]; feedback: SermonFeedback[] }>(
+      `/church/${churchId}/sermons/${sermonId}`
+    ),
+
+  create: (churchId: string, data: SermonCreateInput) =>
+    api.post<Sermon>(`/church/${churchId}/sermons`, data),
+
+  update: (churchId: string, sermonId: string, data: SermonUpdateInput) =>
+    api.patch<Sermon>(`/church/${churchId}/sermons/${sermonId}`, data),
+
+  delete: (churchId: string, sermonId: string) =>
+    api.delete<void>(`/church/${churchId}/sermons/${sermonId}`),
+
+  duplicate: (churchId: string, sermonId: string) =>
+    api.post<Sermon>(`/church/${churchId}/sermons/${sermonId}/duplicate`),
+
+  // Collaborators
+  addCollaborator: (churchId: string, sermonId: string, data: {
+    userId: string;
+    role: SermonCollaborator['role'];
+    canEdit?: boolean;
+  }) =>
+    api.post<SermonCollaborator>(`/church/${churchId}/sermons/${sermonId}/collaborators`, data),
+
+  removeCollaborator: (churchId: string, sermonId: string, collaboratorId: string) =>
+    api.delete<void>(`/church/${churchId}/sermons/${sermonId}/collaborators/${collaboratorId}`),
+
+  // Resources
+  addResource: (churchId: string, sermonId: string, data: {
+    type: SermonResource['type'];
+    title: string;
+    url: string;
+    description?: string;
+  }) =>
+    api.post<SermonResource>(`/church/${churchId}/sermons/${sermonId}/resources`, data),
+
+  updateResource: (churchId: string, sermonId: string, resourceId: string, data: Partial<{
+    title: string;
+    url: string;
+    description: string;
+    orderIndex: number;
+  }>) =>
+    api.patch<SermonResource>(`/church/${churchId}/sermons/${sermonId}/resources/${resourceId}`, data),
+
+  deleteResource: (churchId: string, sermonId: string, resourceId: string) =>
+    api.delete<void>(`/church/${churchId}/sermons/${sermonId}/resources/${resourceId}`),
+
+  uploadResource: (churchId: string, sermonId: string, file: File, title?: string) =>
+    uploadFile<SermonResource>(
+      `/church/${churchId}/sermons/${sermonId}/resources/upload`,
+      file,
+      title ? { title } : undefined
+    ),
+
+  // Feedback
+  submitFeedback: (churchId: string, sermonId: string, data: {
+    rating?: number;
+    comment?: string;
+    isAnonymous?: boolean;
+  }) =>
+    api.post<SermonFeedback>(`/church/${churchId}/sermons/${sermonId}/feedback`, data),
+
+  getFeedback: (churchId: string, sermonId: string) =>
+    api.get<SermonFeedback[]>(`/church/${churchId}/sermons/${sermonId}/feedback`),
+
+  // Stats
+  getStats: (churchId: string, params?: { startDate?: string; endDate?: string }) =>
+    api.get<{
+      totalSermons: number;
+      totalSeries: number;
+      sermonsThisMonth: number;
+      averageRating: number;
+      topSpeakers: { speakerId: string; speakerName: string; sermonCount: number }[];
+      byStatus: Record<Sermon['status'], number>;
+    }>(`/church/${churchId}/sermons/stats`, params),
+
+  // Upcoming/Scheduled
+  getUpcoming: (churchId: string, limit?: number) =>
+    api.get<Sermon[]>(`/church/${churchId}/sermons/upcoming`, { limit }),
+
+  getArchive: (churchId: string, params?: PaginationParams) =>
+    api.get<PaginatedResponse<Sermon>>(`/church/${churchId}/sermons/archive`, params),
+};
+
+// ----------------------------------------------------------------------------
+// PRAYER REQUESTS API
+// ----------------------------------------------------------------------------
+
+export interface PrayerFilters extends PaginationParams {
+  category?: PrayerCategory | PrayerCategory[];
+  status?: PrayerStatus | PrayerStatus[];
+  isUrgent?: boolean;
+  isPrivate?: boolean;
+  memberId?: string;
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export const prayerApi = {
+  list: (churchId: string, filters?: PrayerFilters) =>
+    api.get<PaginatedResponse<PrayerRequest>>(`/church/${churchId}/prayer-requests`, filters),
+
+  get: (churchId: string, requestId: string) =>
+    api.get<PrayerRequest & { followUps: PrayerFollowUp[] }>(`/church/${churchId}/prayer-requests/${requestId}`),
+
+  create: (churchId: string, data: PrayerCreateInput) =>
+    api.post<PrayerRequest>(`/church/${churchId}/prayer-requests`, data),
+
+  update: (churchId: string, requestId: string, data: PrayerUpdateInput) =>
+    api.patch<PrayerRequest>(`/church/${churchId}/prayer-requests/${requestId}`, data),
+
+  delete: (churchId: string, requestId: string) =>
+    api.delete<void>(`/church/${churchId}/prayer-requests/${requestId}`),
+
+  // Mark as prayed
+  markPrayed: (churchId: string, requestId: string) =>
+    api.post<{ prayerCount: number }>(`/church/${churchId}/prayer-requests/${requestId}/prayed`),
+
+  // Mark as answered
+  markAnswered: (churchId: string, requestId: string, note?: string) =>
+    api.post<PrayerRequest>(`/church/${churchId}/prayer-requests/${requestId}/answered`, { note }),
+
+  // Add follow-up
+  addFollowUp: (churchId: string, requestId: string, data: {
+    content: string;
+    isUpdate?: boolean;
+  }) =>
+    api.post<PrayerFollowUp>(`/church/${churchId}/prayer-requests/${requestId}/follow-ups`, data),
+
+  // Get urgent requests
+  getUrgent: (churchId: string, limit?: number) =>
+    api.get<PrayerRequest[]>(`/church/${churchId}/prayer-requests/urgent`, { limit }),
+
+  // Get my prayer requests
+  getMine: (churchId: string, params?: PaginationParams) =>
+    api.get<PaginatedResponse<PrayerRequest>>(`/church/${churchId}/prayer-requests/mine`, params),
+
+  // Stats
+  getStats: (churchId: string, params?: { startDate?: string; endDate?: string }) =>
+    api.get<{
+      totalRequests: number;
+      activeRequests: number;
+      answeredRequests: number;
+      totalPrayers: number;
+      byCategory: Record<PrayerCategory, number>;
+      byStatus: Record<PrayerStatus, number>;
+      urgentCount: number;
+      trend: { date: string; requests: number; answered: number }[];
+    }>(`/church/${churchId}/prayer-requests/stats`, params),
+
+  // Categories
+  getCategories: (churchId: string) =>
+    api.get<{ category: PrayerCategory; label: string; count: number }[]>(
+      `/church/${churchId}/prayer-requests/categories`
+    ),
+};
+
+// ----------------------------------------------------------------------------
+// SMALL GROUPS API
+// ----------------------------------------------------------------------------
+
+export interface SmallGroupFilters extends PaginationParams {
+  category?: SmallGroupCategory | SmallGroupCategory[];
+  status?: SmallGroup['status'] | SmallGroup['status'][];
+  meetingDay?: string;
+  meetingType?: SmallGroup['meetingType'];
+  leaderId?: string;
+  isPublic?: boolean;
+  hasOpenings?: boolean;
+  search?: string;
+  tags?: string[];
+}
+
+export const smallGroupsApi = {
+  list: (churchId: string, filters?: SmallGroupFilters) =>
+    api.get<PaginatedResponse<SmallGroup>>(`/church/${churchId}/small-groups`, filters),
+
+  get: (churchId: string, groupId: string) =>
+    api.get<SmallGroup & { meetings: SmallGroupMeeting[] }>(`/church/${churchId}/small-groups/${groupId}`),
+
+  create: (churchId: string, data: SmallGroupCreateInput) =>
+    api.post<SmallGroup>(`/church/${churchId}/small-groups`, data),
+
+  update: (churchId: string, groupId: string, data: SmallGroupUpdateInput) =>
+    api.patch<SmallGroup>(`/church/${churchId}/small-groups/${groupId}`, data),
+
+  delete: (churchId: string, groupId: string) =>
+    api.delete<void>(`/church/${churchId}/small-groups/${groupId}`),
+
+  // Members
+  getMembers: (churchId: string, groupId: string) =>
+    api.get<SmallGroupMember[]>(`/church/${churchId}/small-groups/${groupId}/members`),
+
+  addMember: (churchId: string, groupId: string, data: {
+    memberId: string;
+    role?: SmallGroupMember['role'];
+  }) =>
+    api.post<SmallGroupMember>(`/church/${churchId}/small-groups/${groupId}/members`, data),
+
+  updateMember: (churchId: string, groupId: string, memberId: string, data: {
+    role?: SmallGroupMember['role'];
+    status?: SmallGroupMember['status'];
+  }) =>
+    api.patch<SmallGroupMember>(`/church/${churchId}/small-groups/${groupId}/members/${memberId}`, data),
+
+  removeMember: (churchId: string, groupId: string, memberId: string) =>
+    api.delete<void>(`/church/${churchId}/small-groups/${groupId}/members/${memberId}`),
+
+  // Join Requests
+  getJoinRequests: (churchId: string, groupId: string) =>
+    api.get<SmallGroupJoinRequest[]>(`/church/${churchId}/small-groups/${groupId}/join-requests`),
+
+  submitJoinRequest: (churchId: string, groupId: string, message?: string) =>
+    api.post<SmallGroupJoinRequest>(`/church/${churchId}/small-groups/${groupId}/join-requests`, { message }),
+
+  respondToJoinRequest: (churchId: string, groupId: string, requestId: string, data: {
+    status: 'approved' | 'denied';
+    message?: string;
+  }) =>
+    api.patch<SmallGroupJoinRequest>(
+      `/church/${churchId}/small-groups/${groupId}/join-requests/${requestId}`,
+      data
+    ),
+
+  // Meetings
+  getMeetings: (churchId: string, groupId: string, params?: { startDate?: string; endDate?: string }) =>
+    api.get<SmallGroupMeeting[]>(`/church/${churchId}/small-groups/${groupId}/meetings`, params),
+
+  createMeeting: (churchId: string, groupId: string, data: {
+    date: string;
+    startTime: string;
+    endTime?: string;
+    title?: string;
+    topic?: string;
+    location?: string;
+    notes?: string;
+  }) =>
+    api.post<SmallGroupMeeting>(`/church/${churchId}/small-groups/${groupId}/meetings`, data),
+
+  updateMeeting: (churchId: string, groupId: string, meetingId: string, data: Partial<{
+    date: string;
+    startTime: string;
+    endTime: string;
+    title: string;
+    topic: string;
+    location: string;
+    notes: string;
+  }>) =>
+    api.patch<SmallGroupMeeting>(`/church/${churchId}/small-groups/${groupId}/meetings/${meetingId}`, data),
+
+  deleteMeeting: (churchId: string, groupId: string, meetingId: string) =>
+    api.delete<void>(`/church/${churchId}/small-groups/${groupId}/meetings/${meetingId}`),
+
+  // Attendance
+  recordAttendance: (churchId: string, groupId: string, meetingId: string, data: {
+    attendees: { memberId: string; isPresent: boolean }[];
+  }) =>
+    api.post<SmallGroupAttendance[]>(
+      `/church/${churchId}/small-groups/${groupId}/meetings/${meetingId}/attendance`,
+      data
+    ),
+
+  getAttendance: (churchId: string, groupId: string, meetingId: string) =>
+    api.get<SmallGroupAttendance[]>(
+      `/church/${churchId}/small-groups/${groupId}/meetings/${meetingId}/attendance`
+    ),
+
+  // Stats
+  getStats: (churchId: string, params?: { startDate?: string; endDate?: string }) =>
+    api.get<{
+      totalGroups: number;
+      activeGroups: number;
+      totalMembers: number;
+      averageGroupSize: number;
+      totalMeetings: number;
+      averageAttendance: number;
+      byCategory: Record<SmallGroupCategory, number>;
+      byStatus: Record<SmallGroup['status'], number>;
+      trend: { date: string; meetings: number; attendance: number }[];
+    }>(`/church/${churchId}/small-groups/stats`, params),
+
+  // Find groups accepting members
+  findOpenGroups: (churchId: string, filters?: {
+    category?: SmallGroupCategory;
+    meetingDay?: string;
+    meetingType?: SmallGroup['meetingType'];
+  }) =>
+    api.get<SmallGroup[]>(`/church/${churchId}/small-groups/open`, filters),
+
+  // My groups
+  getMyGroups: (churchId: string) =>
+    api.get<SmallGroup[]>(`/church/${churchId}/small-groups/mine`),
+};
+
+// ----------------------------------------------------------------------------
+// CHECK-IN API
+// ----------------------------------------------------------------------------
+
+export interface ServiceFilters extends PaginationParams {
+  serviceType?: Service['serviceType'] | Service['serviceType'][];
+  status?: Service['status'] | Service['status'][];
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export const checkInApi = {
+  // Services
+  listServices: (churchId: string, filters?: ServiceFilters) =>
+    api.get<PaginatedResponse<Service>>(`/church/${churchId}/check-in/services`, filters),
+
+  getService: (churchId: string, serviceId: string) =>
+    api.get<Service & { checkIns: ServiceCheckIn[] }>(`/church/${churchId}/check-in/services/${serviceId}`),
+
+  createService: (churchId: string, data: {
+    name: string;
+    serviceType: Service['serviceType'];
+    scheduledDate: string;
+    startTime: string;
+    endTime?: string;
+    location?: string;
+    checkInStartTime?: string;
+    checkInEndTime?: string;
+    notes?: string;
+  }) =>
+    api.post<Service>(`/church/${churchId}/check-in/services`, data),
+
+  updateService: (churchId: string, serviceId: string, data: Partial<{
+    name: string;
+    serviceType: Service['serviceType'];
+    scheduledDate: string;
+    startTime: string;
+    endTime: string;
+    location: string;
+    status: Service['status'];
+    isCheckInOpen: boolean;
+    checkInStartTime: string;
+    checkInEndTime: string;
+    notes: string;
+  }>) =>
+    api.patch<Service>(`/church/${churchId}/check-in/services/${serviceId}`, data),
+
+  deleteService: (churchId: string, serviceId: string) =>
+    api.delete<void>(`/church/${churchId}/check-in/services/${serviceId}`),
+
+  // Open/close check-in
+  openCheckIn: (churchId: string, serviceId: string) =>
+    api.post<Service>(`/church/${churchId}/check-in/services/${serviceId}/open`),
+
+  closeCheckIn: (churchId: string, serviceId: string) =>
+    api.post<Service>(`/church/${churchId}/check-in/services/${serviceId}/close`),
+
+  // Check-ins
+  listCheckIns: (churchId: string, serviceId: string, filters?: CheckInFilters) =>
+    api.get<PaginatedResponse<ServiceCheckIn>>(`/church/${churchId}/check-in/services/${serviceId}/check-ins`, filters),
+
+  checkIn: (churchId: string, serviceId: string, data: {
+    memberId?: string;
+    guestName?: string;
+    guestEmail?: string;
+    guestPhone?: string;
+    isFirstTime?: boolean;
+    notes?: string;
+  }) =>
+    api.post<ServiceCheckIn>(`/church/${churchId}/check-in/services/${serviceId}/check-ins`, data),
+
+  checkOut: (churchId: string, serviceId: string, checkInId: string) =>
+    api.post<ServiceCheckIn>(`/church/${churchId}/check-in/services/${serviceId}/check-ins/${checkInId}/check-out`),
+
+  // Quick check-in by member search
+  quickCheckIn: (churchId: string, serviceId: string, query: string) =>
+    api.post<{ matches: Member[]; autoCheckedIn?: ServiceCheckIn }>(
+      `/church/${churchId}/check-in/services/${serviceId}/quick-check-in`,
+      { query }
+    ),
+
+  // Child check-in
+  checkInChild: (churchId: string, serviceId: string, parentCheckInId: string, data: {
+    childId?: string;
+    childName: string;
+    dateOfBirth?: string;
+    parentName: string;
+    parentPhone: string;
+    classroomAssignment?: string;
+    allergies?: string;
+    specialNotes?: string;
+  }) =>
+    api.post<ChildCheckIn>(
+      `/church/${churchId}/check-in/services/${serviceId}/check-ins/${parentCheckInId}/children`,
+      data
+    ),
+
+  checkOutChild: (churchId: string, serviceId: string, childCheckInId: string, data: {
+    securityCode: string;
+    checkedOutBy?: string;
+  }) =>
+    api.post<ChildCheckIn>(
+      `/church/${churchId}/check-in/services/${serviceId}/children/${childCheckInId}/check-out`,
+      data
+    ),
+
+  getChildCheckIns: (churchId: string, serviceId: string) =>
+    api.get<ChildCheckIn[]>(`/church/${churchId}/check-in/services/${serviceId}/children`),
+
+  // Kiosks
+  listKiosks: (churchId: string) =>
+    api.get<CheckInKiosk[]>(`/church/${churchId}/check-in/kiosks`),
+
+  createKiosk: (churchId: string, data: {
+    name: string;
+    location: string;
+    type: CheckInKiosk['type'];
+    settings?: CheckInKiosk['settings'];
+  }) =>
+    api.post<CheckInKiosk>(`/church/${churchId}/check-in/kiosks`, data),
+
+  updateKiosk: (churchId: string, kioskId: string, data: Partial<{
+    name: string;
+    location: string;
+    type: CheckInKiosk['type'];
+    isActive: boolean;
+    settings: CheckInKiosk['settings'];
+  }>) =>
+    api.patch<CheckInKiosk>(`/church/${churchId}/check-in/kiosks/${kioskId}`, data),
+
+  deleteKiosk: (churchId: string, kioskId: string) =>
+    api.delete<void>(`/church/${churchId}/check-in/kiosks/${kioskId}`),
+
+  // Today's services
+  getTodaysServices: (churchId: string) =>
+    api.get<Service[]>(`/church/${churchId}/check-in/today`),
+
+  // Current active service
+  getActiveService: (churchId: string) =>
+    api.get<Service | null>(`/church/${churchId}/check-in/active`),
+
+  // Stats
+  getStats: (churchId: string, params?: { startDate?: string; endDate?: string; serviceType?: string }) =>
+    api.get<CheckInStats>(`/church/${churchId}/check-in/stats`, params),
+
+  // Attendance report
+  getAttendanceReport: (churchId: string, params?: {
+    startDate?: string;
+    endDate?: string;
+    serviceType?: Service['serviceType'];
+    groupBy?: 'day' | 'week' | 'month';
+  }) =>
+    api.get<{
+      totalServices: number;
+      totalCheckIns: number;
+      averageAttendance: number;
+      trend: { date: string; attendance: number; guests: number; firstTimers: number }[];
+      byServiceType: Record<Service['serviceType'], { count: number; avgAttendance: number }>;
+    }>(`/church/${churchId}/check-in/attendance-report`, params),
+
+  // Export check-ins
+  exportCheckIns: (churchId: string, serviceId: string, format: 'csv' | 'xlsx') =>
+    downloadFile(
+      `/church/${churchId}/check-in/services/${serviceId}/export`,
+      `check-ins.${format}`,
+      { format }
+    ),
+
+  // Print labels (returns print-ready HTML)
+  printLabels: (churchId: string, serviceId: string, checkInIds: string[]) =>
+    api.post<{ html: string; count: number }>(
+      `/church/${churchId}/check-in/services/${serviceId}/print-labels`,
+      { checkInIds }
+    ),
 };
 
 // ----------------------------------------------------------------------------

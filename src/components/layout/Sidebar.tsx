@@ -6,16 +6,21 @@ import { useAuth } from "@/App";
 import {
   LayoutDashboard,
   Users,
+  UsersRound,
   DollarSign,
   Calendar,
   Mail,
   Heart,
   BookOpen,
+  BookMarked,
+  HandHeart,
   BarChart3,
   Settings,
   LogOut,
   ExternalLink,
-  ChevronRight,
+  Globe,
+  Home,
+  UserCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -42,6 +47,11 @@ const navigationItems = [
     icon: Calendar,
   },
   {
+    title: "Check-in",
+    href: routes.checkin,
+    icon: UserCheck,
+  },
+  {
     title: "Communications",
     href: routes.communications,
     icon: Mail,
@@ -55,6 +65,21 @@ const navigationItems = [
     title: "Discipleship",
     href: routes.discipleship,
     icon: BookOpen,
+  },
+  {
+    title: "Small Groups",
+    href: routes.groups,
+    icon: UsersRound,
+  },
+  {
+    title: "Sermon Prep",
+    href: routes.sermons,
+    icon: BookMarked,
+  },
+  {
+    title: "Prayer Requests",
+    href: routes.prayer,
+    icon: HandHeart,
   },
   {
     title: "Reports",
@@ -87,50 +112,51 @@ export function Sidebar() {
     navigate(routes.login);
   };
 
+  // Get Website Builder URL
+  const getWebsiteBuilderUrl = () => {
+    return window.location.origin.includes("localhost")
+      ? "http://localhost:3000"
+      : "https://builder.soapboxsuperapp.com";
+  };
+
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-slate-800/50">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r wood-gradient border-walnut-800/30">
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="flex h-16 items-center gap-2 border-b border-slate-800/50 px-5">
+        <div className="flex h-16 items-center border-b border-walnut-700/30 px-5">
           <Logo size="sm" className="text-white" />
-          <div className="ml-auto">
-            <span className="text-[10px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-1 rounded-md border border-amber-500/20">
-              CRM
-            </span>
-          </div>
         </div>
 
         {/* Main Navigation */}
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          <p className="px-3 mb-2 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-            Main Menu
+          <p className="px-3 mb-3 text-[10px] font-semibold text-walnut-400 uppercase tracking-widest">
+            Ministry
           </p>
-          {navigationItems.map((item) => (
+          {navigationItems.map((item, index) => (
             <Link key={item.href} href={item.href}>
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start gap-3 text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all duration-200 h-10",
+                  "w-full justify-start gap-3 text-ivory-300/80 hover:bg-walnut-700/40 hover:text-ivory-100 transition-all duration-200 h-11 rounded-lg",
+                  "animate-slide-in",
                   isActive(item.href) &&
-                    "bg-gradient-to-r from-blue-600/20 to-blue-600/5 text-white font-medium border-l-2 border-l-amber-500 rounded-l-none"
+                    "bg-burgundy-800/50 text-ivory-100 font-medium border-l-[3px] border-l-sidebar-primary rounded-l-none shadow-inner-warm"
                 )}
+                style={{ animationDelay: `${index * 30}ms` }}
               >
                 <item.icon className={cn(
-                  "h-4 w-4",
-                  isActive(item.href) ? "text-amber-400" : "text-slate-500"
+                  "h-[18px] w-[18px] transition-colors",
+                  isActive(item.href) ? "text-sidebar-primary" : "text-walnut-400"
                 )} />
-                <span className="flex-1 text-left">{item.title}</span>
-                {isActive(item.href) && (
-                  <ChevronRight className="h-4 w-4 text-slate-600" />
-                )}
+                <span className="flex-1 text-left font-medium">{item.title}</span>
               </Button>
             </Link>
           ))}
         </nav>
 
         {/* Bottom Navigation */}
-        <div className="border-t border-slate-800/50 px-3 py-4">
-          <p className="px-3 mb-2 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+        <div className="border-t border-walnut-700/30 px-3 py-4">
+          <p className="px-3 mb-3 text-[10px] font-semibold text-walnut-400 uppercase tracking-widest">
             System
           </p>
           {bottomNavigationItems.map((item) => (
@@ -138,39 +164,58 @@ export function Sidebar() {
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start gap-3 text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all duration-200 h-10",
+                  "w-full justify-start gap-3 text-ivory-300/80 hover:bg-walnut-700/40 hover:text-ivory-100 transition-all duration-200 h-11 rounded-lg",
                   isActive(item.href) &&
-                    "bg-gradient-to-r from-blue-600/20 to-blue-600/5 text-white font-medium border-l-2 border-l-amber-500 rounded-l-none"
+                    "bg-burgundy-800/50 text-ivory-100 font-medium border-l-[3px] border-l-sidebar-primary rounded-l-none"
                 )}
               >
                 <item.icon className={cn(
-                  "h-4 w-4",
-                  isActive(item.href) ? "text-amber-400" : "text-slate-500"
+                  "h-[18px] w-[18px]",
+                  isActive(item.href) ? "text-sidebar-primary" : "text-walnut-400"
                 )} />
                 {item.title}
               </Button>
             </Link>
           ))}
 
-          <Separator className="my-3 bg-slate-800/50" />
+          <Separator className="my-4 bg-walnut-700/30" />
+
+          {/* Quick Links */}
+          <p className="px-3 mb-2 text-[10px] font-semibold text-walnut-400 uppercase tracking-widest">
+            Quick Links
+          </p>
+
+          {/* Website Builder */}
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3 text-ivory-400/70 hover:bg-sage-800/30 hover:text-sage-300 transition-all duration-200 h-10 rounded-lg mb-1"
+            onClick={() => {
+              window.open(getWebsiteBuilderUrl(), "_blank");
+            }}
+          >
+            <Globe className="h-4 w-4 text-sage-500" />
+            <span className="flex-1 text-left text-sm">Website Builder</span>
+            <ExternalLink className="h-3 w-3 opacity-50" />
+          </Button>
 
           {/* Back to SoapBox */}
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-slate-500 hover:bg-slate-800/50 hover:text-white transition-all duration-200 h-10 mb-1"
+            className="w-full justify-start gap-3 text-ivory-400/70 hover:bg-walnut-700/40 hover:text-ivory-200 transition-all duration-200 h-10 rounded-lg mb-1"
             onClick={() => {
-              // In production, navigate to main SoapBox app
-              window.open("https://app.soapbox.com", "_blank");
+              window.location.href = "https://soapboxsuperapp.com/";
             }}
           >
-            <LogoIcon size="sm" className="h-4 w-4" />
-            <span className="flex-1 text-left text-sm">Back to SoapBox</span>
+            <Home className="h-4 w-4 text-walnut-400" />
+            <span className="flex-1 text-left text-sm">SoapBox Home</span>
             <ExternalLink className="h-3 w-3 opacity-50" />
           </Button>
 
+          <Separator className="my-3 bg-walnut-700/30" />
+
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-slate-500 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 h-10"
+            className="w-full justify-start gap-3 text-ivory-500/60 hover:bg-burgundy-900/30 hover:text-burgundy-300 transition-all duration-200 h-10 rounded-lg"
             onClick={handleSignOut}
           >
             <LogOut className="h-4 w-4" />
@@ -179,13 +224,16 @@ export function Sidebar() {
         </div>
 
         {/* Powered by footer */}
-        <div className="px-5 py-4 border-t border-slate-800/30 bg-slate-950/50">
-          <p className="text-[10px] text-slate-600 text-center">
-            Powered by{" "}
-            <span className="font-semibold text-amber-500">
-              SoapBox Super App
-            </span>
-          </p>
+        <div className="px-5 py-4 border-t border-walnut-800/40 bg-walnut-950/50">
+          <div className="flex items-center justify-center gap-2">
+            <LogoIcon size="sm" className="h-4 w-4 opacity-60" />
+            <p className="text-[10px] text-walnut-500">
+              Powered by{" "}
+              <span className="font-semibold text-sidebar-primary">
+                SoapBox
+              </span>
+            </p>
+          </div>
         </div>
       </div>
     </aside>

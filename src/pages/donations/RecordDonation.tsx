@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import {
   ArrowLeft,
@@ -11,12 +11,14 @@ import {
   Search,
   X,
   Check,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -32,42 +34,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useRecordDonation, useFunds } from "@/hooks/useDonations";
+import { useMemberSearch } from "@/hooks/useMembers";
+import type { Member, DonationMethod, DonationCreateInput } from "@/types";
 
-// Mock members for donor selection
-const mockMembers = [
-  { id: 1, name: "Michael Johnson", email: "michael.johnson@email.com", phone: "(555) 123-4567" },
-  { id: 2, name: "Sarah Williams", email: "sarah.williams@email.com", phone: "(555) 234-5678" },
-  { id: 3, name: "David Thompson", email: "david.thompson@email.com", phone: "(555) 345-6789" },
-  { id: 4, name: "Jennifer Davis", email: "jennifer.davis@email.com", phone: "(555) 456-7890" },
-  { id: 5, name: "Robert Brown", email: "robert.brown@email.com", phone: "(555) 567-8901" },
-  { id: 6, name: "Emily Martinez", email: "emily.martinez@email.com", phone: "(555) 678-9012" },
-  { id: 7, name: "James Wilson", email: "james.wilson@email.com", phone: "(555) 789-0123" },
-  { id: 8, name: "Lisa Anderson", email: "lisa.anderson@email.com", phone: "(555) 890-1234" },
-];
-
-const donationCategories = [
-  { value: "tithes", label: "Tithes" },
-  { value: "general-offering", label: "General Offering" },
-  { value: "building-fund", label: "Building Fund" },
-  { value: "missions", label: "Missions" },
-  { value: "youth-ministry", label: "Youth Ministry" },
-  { value: "benevolence", label: "Benevolence" },
-  { value: "special-projects", label: "Special Projects" },
-  { value: "other", label: "Other" },
-];
-
-const paymentMethods = [
+const paymentMethods: { value: DonationMethod; label: string }[] = [
   { value: "cash", label: "Cash" },
   { value: "check", label: "Check" },
-  { value: "online", label: "Online/Card" },
-  { value: "bank-transfer", label: "Bank Transfer" },
-  { value: "stock", label: "Stock/Securities" },
+  { value: "card", label: "Card" },
+  { value: "online", label: "Online" },
+  { value: "ach", label: "Bank Transfer (ACH)" },
   { value: "other", label: "Other" },
 ];
 
 interface DonationItem {
   id: string;
-  category: string;
+  fundId: string;
+  fundName: string;
   amount: string;
   notes: string;
 }
@@ -77,7 +60,7 @@ export default function RecordDonation() {
 
   // Donor selection
   const [donorType, setDonorType] = useState<"member" | "guest" | "anonymous">("member");
-  const [selectedDonor, setSelectedDonor] = useState<typeof mockMembers[0] | null>(null);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [donorSearch, setDonorSearch] = useState("");
   const [showDonorSearch, setShowDonorSearch] = useState(false);
 
@@ -89,13 +72,13 @@ export default function RecordDonation() {
 
   // Donation details
   const [donationDate, setDonationDate] = useState(new Date().toISOString().split("T")[0]);
-  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<DonationMethod | "">("");
   const [checkNumber, setCheckNumber] = useState("");
   const [transactionId, setTransactionId] = useState("");
 
   // Multiple donation items
   const [donationItems, setDonationItems] = useState<DonationItem[]>([
-    { id: "1", category: "", amount: "", notes: "" },
+    { id: "1", fundId: "", fundName: "", amount: "", notes: "" },
   ]);
 
   // Additional options
@@ -104,21 +87,34 @@ export default function RecordDonation() {
   const [recurringFrequency, setRecurringFrequency] = useState("");
   const [generalNotes, setGeneralNotes] = useState("");
 
-  // Form state
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Dialog state
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
-  // Filter members based on search
-  const filteredMembers = mockMembers.filter(
-    (member) =>
-      member.name.toLowerCase().includes(donorSearch.toLowerCase()) ||
-      member.email.toLowerCase().includes(donorSearch.toLowerCase())
-  );
+  // Fetch funds from API
+  const { data: funds, isLoading: loadingFunds } = useFunds();
+
+  // Search members
+  const { data: searchResults, isLoading: searchingMembers } = useMemberSearch(donorSearch);
+
+  // Record donation mutation
+  const recordDonationMutation = useRecordDonation();
+
+  // Close search dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (showDonorSearch) {
+        setShowDonorSearch(false);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [showDonorSearch]);
 
   const addDonationItem = () => {
     setDonationItems([
       ...donationItems,
-      { id: Date.now().toString(), category: "", amount: "", notes: "" },
+      { id: Date.now().toString(), fundId: "", fundName: "", amount: "", notes: "" },
     ]);
   };
 
@@ -130,9 +126,16 @@ export default function RecordDonation() {
 
   const updateDonationItem = (id: string, field: keyof DonationItem, value: string) => {
     setDonationItems(
-      donationItems.map((item) =>
-        item.id === id ? { ...item, [field]: value } : item
-      )
+      donationItems.map((item) => {
+        if (item.id === id) {
+          if (field === "fundId") {
+            const fund = funds?.find((f) => f.id === value);
+            return { ...item, fundId: value, fundName: fund?.name || "" };
+          }
+          return { ...item, [field]: value };
+        }
+        return item;
+      })
     );
   };
 
@@ -143,12 +146,27 @@ export default function RecordDonation() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Create donation for each item
+    for (const item of donationItems) {
+      if (!item.fundId || !item.amount) continue;
 
-    setIsSubmitting(false);
+      const donationData: DonationCreateInput = {
+        memberId: donorType === "member" ? selectedMember?.id : undefined,
+        amount: parseFloat(item.amount),
+        currency: "USD",
+        date: donationDate,
+        method: paymentMethod as DonationMethod,
+        fund: item.fundName,
+        fundId: item.fundId,
+        notes: [item.notes, generalNotes].filter(Boolean).join(" - ") || undefined,
+        isAnonymous: donorType === "anonymous",
+        isRecurring: isRecurring,
+      };
+
+      await recordDonationMutation.mutateAsync(donationData);
+    }
+
     setShowSuccessDialog(true);
   };
 
@@ -157,13 +175,29 @@ export default function RecordDonation() {
     navigate("/donations/list");
   };
 
+  const resetForm = () => {
+    setSelectedMember(null);
+    setGuestName("");
+    setGuestEmail("");
+    setGuestPhone("");
+    setGuestAddress("");
+    setDonationItems([{ id: "1", fundId: "", fundName: "", amount: "", notes: "" }]);
+    setPaymentMethod("");
+    setCheckNumber("");
+    setTransactionId("");
+    setGeneralNotes("");
+    setIsRecurring(false);
+    setRecurringFrequency("");
+  };
+
   const canSubmit = () => {
     // Check donor info
-    if (donorType === "member" && !selectedDonor) return false;
+    if (donorType === "member" && !selectedMember) return false;
     if (donorType === "guest" && !guestName) return false;
 
     // Check donation items
-    if (donationItems.every((item) => !item.category || !item.amount)) return false;
+    const hasValidItem = donationItems.some((item) => item.fundId && item.amount);
+    if (!hasValidItem) return false;
 
     // Check payment method
     if (!paymentMethod) return false;
@@ -211,7 +245,7 @@ export default function RecordDonation() {
                     variant={donorType === "member" ? "default" : "outline"}
                     onClick={() => {
                       setDonorType("member");
-                      setSelectedDonor(null);
+                      setSelectedMember(null);
                     }}
                     className="flex-1"
                   >
@@ -222,7 +256,7 @@ export default function RecordDonation() {
                     variant={donorType === "guest" ? "default" : "outline"}
                     onClick={() => {
                       setDonorType("guest");
-                      setSelectedDonor(null);
+                      setSelectedMember(null);
                     }}
                     className="flex-1"
                   >
@@ -233,7 +267,7 @@ export default function RecordDonation() {
                     variant={donorType === "anonymous" ? "default" : "outline"}
                     onClick={() => {
                       setDonorType("anonymous");
-                      setSelectedDonor(null);
+                      setSelectedMember(null);
                     }}
                     className="flex-1"
                   >
@@ -245,23 +279,23 @@ export default function RecordDonation() {
                 {donorType === "member" && (
                   <div className="space-y-3">
                     <Label>Select Member</Label>
-                    {selectedDonor ? (
+                    {selectedMember ? (
                       <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
                         <div>
-                          <p className="font-medium">{selectedDonor.name}</p>
-                          <p className="text-sm text-muted-foreground">{selectedDonor.email}</p>
+                          <p className="font-medium">{selectedMember.firstName} {selectedMember.lastName}</p>
+                          <p className="text-sm text-muted-foreground">{selectedMember.email}</p>
                         </div>
                         <Button
                           type="button"
                           variant="ghost"
                           size="icon"
-                          onClick={() => setSelectedDonor(null)}
+                          onClick={() => setSelectedMember(null)}
                         >
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
                     ) : (
-                      <div className="relative">
+                      <div className="relative" onClick={(e) => e.stopPropagation()}>
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                           placeholder="Search members by name or email..."
@@ -270,26 +304,31 @@ export default function RecordDonation() {
                           onFocus={() => setShowDonorSearch(true)}
                           className="pl-10"
                         />
-                        {showDonorSearch && donorSearch && (
+                        {showDonorSearch && donorSearch.length >= 2 && (
                           <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg max-h-60 overflow-auto">
-                            {filteredMembers.length === 0 ? (
+                            {searchingMembers ? (
+                              <div className="p-3 flex items-center justify-center">
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Searching...
+                              </div>
+                            ) : !searchResults?.length ? (
                               <div className="p-3 text-center text-muted-foreground">
                                 No members found
                               </div>
                             ) : (
-                              filteredMembers.map((member) => (
+                              searchResults.map((member) => (
                                 <button
                                   key={member.id}
                                   type="button"
                                   className="w-full p-3 text-left hover:bg-muted flex items-center justify-between"
                                   onClick={() => {
-                                    setSelectedDonor(member);
+                                    setSelectedMember(member);
                                     setDonorSearch("");
                                     setShowDonorSearch(false);
                                   }}
                                 >
                                   <div>
-                                    <p className="font-medium">{member.name}</p>
+                                    <p className="font-medium">{member.firstName} {member.lastName}</p>
                                     <p className="text-sm text-muted-foreground">{member.email}</p>
                                   </div>
                                 </button>
@@ -366,81 +405,97 @@ export default function RecordDonation() {
                   Donation Details
                 </CardTitle>
                 <CardDescription>
-                  Enter donation amounts by category
+                  Enter donation amounts by fund
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {donationItems.map((item, index) => (
-                  <div key={item.id} className="p-4 border rounded-lg space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Item {index + 1}</span>
-                      {donationItems.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeDonationItem(item.id)}
-                          className="h-8 w-8"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="space-y-2">
-                        <Label>Category *</Label>
-                        <Select
-                          value={item.category}
-                          onValueChange={(value) => updateDonationItem(item.id, "category", value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {donationCategories.map((cat) => (
-                              <SelectItem key={cat.value} value={cat.value}>
-                                {cat.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                {loadingFunds ? (
+                  <div className="space-y-4">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="p-4 border rounded-lg space-y-3">
+                        <Skeleton className="h-10 w-full" />
+                        <div className="grid grid-cols-2 gap-3">
+                          <Skeleton className="h-10 w-full" />
+                          <Skeleton className="h-10 w-full" />
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label>Amount *</Label>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    {donationItems.map((item, index) => (
+                      <div key={item.id} className="p-4 border rounded-lg space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Item {index + 1}</span>
+                          {donationItems.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeDonationItem(item.id)}
+                              className="h-8 w-8"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label>Fund *</Label>
+                            <Select
+                              value={item.fundId}
+                              onValueChange={(value) => updateDonationItem(item.id, "fundId", value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select fund" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {funds?.map((fund) => (
+                                  <SelectItem key={fund.id} value={fund.id}>
+                                    {fund.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Amount *</Label>
+                            <div className="relative">
+                              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={item.amount}
+                                onChange={(e) => updateDonationItem(item.id, "amount", e.target.value)}
+                                placeholder="0.00"
+                                className="pl-10"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Notes (optional)</Label>
                           <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={item.amount}
-                            onChange={(e) => updateDonationItem(item.id, "amount", e.target.value)}
-                            placeholder="0.00"
-                            className="pl-10"
+                            value={item.notes}
+                            onChange={(e) => updateDonationItem(item.id, "notes", e.target.value)}
+                            placeholder="Add notes for this donation item"
                           />
                         </div>
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Notes (optional)</Label>
-                      <Input
-                        value={item.notes}
-                        onChange={(e) => updateDonationItem(item.id, "notes", e.target.value)}
-                        placeholder="Add notes for this donation item"
-                      />
-                    </div>
-                  </div>
-                ))}
+                    ))}
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addDonationItem}
-                  className="w-full"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Another Category
-                </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={addDonationItem}
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Another Fund
+                    </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -469,7 +524,7 @@ export default function RecordDonation() {
                   </div>
                   <div className="space-y-2">
                     <Label>Payment Method *</Label>
-                    <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                    <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as DonationMethod)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select method" />
                       </SelectTrigger>
@@ -496,7 +551,7 @@ export default function RecordDonation() {
                   </div>
                 )}
 
-                {(paymentMethod === "online" || paymentMethod === "bank-transfer") && (
+                {(paymentMethod === "online" || paymentMethod === "ach" || paymentMethod === "card") && (
                   <div className="space-y-2">
                     <Label htmlFor="transactionId">Transaction ID</Label>
                     <Input
@@ -599,7 +654,9 @@ export default function RecordDonation() {
                   <Label className="text-muted-foreground">Donor</Label>
                   <p className="font-medium">
                     {donorType === "member"
-                      ? selectedDonor?.name || "Not selected"
+                      ? selectedMember
+                        ? `${selectedMember.firstName} ${selectedMember.lastName}`
+                        : "Not selected"
                       : donorType === "guest"
                       ? guestName || "Not entered"
                       : "Anonymous"}
@@ -632,8 +689,7 @@ export default function RecordDonation() {
                     {donationItems.map((item, index) => (
                       <div key={item.id} className="flex justify-between text-sm">
                         <span>
-                          {donationCategories.find((c) => c.value === item.category)?.label ||
-                            `Item ${index + 1}`}
+                          {item.fundName || `Item ${index + 1}`}
                         </span>
                         <span>${parseFloat(item.amount || "0").toFixed(2)}</span>
                       </div>
@@ -668,11 +724,11 @@ export default function RecordDonation() {
                   type="submit"
                   className="w-full mt-4"
                   size="lg"
-                  disabled={!canSubmit() || isSubmitting}
+                  disabled={!canSubmit() || recordDonationMutation.isPending}
                 >
-                  {isSubmitting ? (
+                  {recordDonationMutation.isPending ? (
                     <>
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       Recording...
                     </>
                   ) : (
@@ -710,17 +766,7 @@ export default function RecordDonation() {
             <Button
               onClick={() => {
                 setShowSuccessDialog(false);
-                // Reset form
-                setSelectedDonor(null);
-                setGuestName("");
-                setGuestEmail("");
-                setGuestPhone("");
-                setGuestAddress("");
-                setDonationItems([{ id: "1", category: "", amount: "", notes: "" }]);
-                setPaymentMethod("");
-                setCheckNumber("");
-                setTransactionId("");
-                setGeneralNotes("");
+                resetForm();
               }}
               className="flex-1"
             >

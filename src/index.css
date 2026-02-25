@@ -1,90 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Light mode - Refined Church Management Theme
-       Primary: Deep Navy/Indigo (Trust, Stability, Spirituality)
-       Accent: Warm Gold/Amber (Hope, Warmth, Community) */
-    --background: 210 20% 98%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    /* Deep Navy Primary - Professional & Trustworthy */
-    --primary: 224 71% 28%;
-    --primary-foreground: 0 0% 100%;
-    /* Warm Stone for secondary elements */
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    /* Warm Gold accent - Welcoming & Hopeful */
-    --accent: 43 96% 56%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;
+    /* Sacred Warmth Theme - Authentic Church Aesthetic
+       Inspired by traditional church interiors:
+       warm woods, stained glass, ivory paper, burgundy vestments */
+
+    /* Warm ivory/cream background */
+    --background: 40 33% 97%;
+    --foreground: 20 25% 15%;
+
+    /* Soft warm white cards */
+    --card: 40 40% 99%;
+    --card-foreground: 20 25% 15%;
+
+    --popover: 40 40% 99%;
+    --popover-foreground: 20 25% 15%;
+
+    /* Deep burgundy/wine primary - liturgical, dignified */
+    --primary: 345 45% 32%;
+    --primary-foreground: 40 40% 98%;
+
+    /* Warm stone secondary */
+    --secondary: 35 20% 93%;
+    --secondary-foreground: 20 25% 20%;
+
+    --muted: 35 15% 92%;
+    --muted-foreground: 20 10% 45%;
+
+    /* Sage green accent - growth, peace, hope */
+    --accent: 150 25% 40%;
+    --accent-foreground: 40 40% 98%;
+
+    --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 224 71% 28%;
-    --radius: 0.5rem;
-    /* Chart colors - Harmonious professional palette */
-    --chart-1: 224 71% 28%;
-    --chart-2: 158 64% 42%;
-    --chart-3: 43 96% 56%;
-    --chart-4: 262 52% 47%;
-    --chart-5: 346 77% 49%;
-    /* Sidebar - Deep navy theme */
-    --sidebar-background: 224 71% 20%;
-    --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 43 96% 56%;
-    --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: 224 65% 28%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 224 60% 25%;
-    --sidebar-ring: 43 96% 56%;
+
+    --border: 35 20% 88%;
+    --input: 35 20% 88%;
+    --ring: 345 45% 32%;
+    --radius: 0.625rem;
+
+    /* Chart colors - stained glass inspired */
+    --chart-1: 345 45% 35%;
+    --chart-2: 150 30% 42%;
+    --chart-3: 35 60% 50%;
+    --chart-4: 220 45% 45%;
+    --chart-5: 280 35% 45%;
+
+    /* Sidebar - rich walnut wood tone */
+    --sidebar-background: 20 35% 12%;
+    --sidebar-foreground: 35 30% 90%;
+    --sidebar-primary: 35 55% 55%;
+    --sidebar-primary-foreground: 20 35% 10%;
+    --sidebar-accent: 20 30% 18%;
+    --sidebar-accent-foreground: 35 30% 95%;
+    --sidebar-border: 20 25% 18%;
+    --sidebar-ring: 35 55% 55%;
   }
 
   .dark {
-    /* Dark mode - Sophisticated Church Management Theme */
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 9%;
-    --popover-foreground: 210 40% 98%;
-    /* Navy Blue - Lighter for dark mode contrast */
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 6%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    /* Warm Gold accent */
-    --accent: 43 96% 58%;
-    --accent-foreground: 222 47% 6%;
-    --destructive: 0 62% 50%;
+    /* Dark mode - Evening chapel ambiance */
+    --background: 20 25% 8%;
+    --foreground: 35 25% 92%;
+
+    --card: 20 25% 11%;
+    --card-foreground: 35 25% 92%;
+
+    --popover: 20 25% 11%;
+    --popover-foreground: 35 25% 92%;
+
+    /* Lighter burgundy for dark mode */
+    --primary: 345 50% 55%;
+    --primary-foreground: 20 25% 8%;
+
+    --secondary: 20 20% 16%;
+    --secondary-foreground: 35 25% 90%;
+
+    --muted: 20 20% 16%;
+    --muted-foreground: 35 15% 55%;
+
+    /* Brighter sage for dark mode */
+    --accent: 150 35% 50%;
+    --accent-foreground: 20 25% 8%;
+
+    --destructive: 0 60% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 217 91% 60%;
+
+    --border: 20 20% 18%;
+    --input: 20 20% 18%;
+    --ring: 345 50% 55%;
+
     /* Chart colors for dark mode */
-    --chart-1: 217 91% 60%;
-    --chart-2: 158 64% 52%;
-    --chart-3: 43 96% 58%;
-    --chart-4: 262 52% 60%;
-    --chart-5: 346 77% 60%;
+    --chart-1: 345 50% 55%;
+    --chart-2: 150 40% 52%;
+    --chart-3: 35 65% 58%;
+    --chart-4: 220 50% 58%;
+    --chart-5: 280 40% 58%;
+
     /* Sidebar dark mode */
-    --sidebar-background: 222 47% 8%;
-    --sidebar-foreground: 210 40% 90%;
-    --sidebar-primary: 43 96% 58%;
-    --sidebar-primary-foreground: 222 47% 6%;
-    --sidebar-accent: 217 33% 14%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 14%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-background: 20 30% 7%;
+    --sidebar-foreground: 35 25% 88%;
+    --sidebar-primary: 35 60% 58%;
+    --sidebar-primary-foreground: 20 30% 8%;
+    --sidebar-accent: 20 25% 12%;
+    --sidebar-accent-foreground: 35 25% 95%;
+    --sidebar-border: 20 25% 12%;
+    --sidebar-ring: 345 50% 55%;
   }
 }
 
@@ -92,28 +117,74 @@
   * {
     border-color: hsl(var(--border));
   }
+
+  html {
+    font-family: 'Source Sans 3', system-ui, sans-serif;
+  }
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  /* Headings use elegant serif font */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
 }
 
-/* Custom scrollbar styles */
+/* Elegant scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
   background-color: hsl(var(--muted));
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--muted-foreground) / 0.3);
-  border-radius: 9999px;
+  background-color: hsl(var(--muted-foreground) / 0.25);
+  border-radius: 5px;
+  border: 2px solid hsl(var(--muted));
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(var(--muted-foreground) / 0.5);
+  background-color: hsl(var(--muted-foreground) / 0.4);
+}
+
+/* Custom utility classes for church theme */
+@layer utilities {
+  .church-glow {
+    box-shadow:
+      0 4px 6px -1px hsl(345 45% 32% / 0.08),
+      0 2px 4px -2px hsl(345 45% 32% / 0.06);
+  }
+
+  .church-glow-lg {
+    box-shadow:
+      0 10px 15px -3px hsl(345 45% 32% / 0.1),
+      0 4px 6px -4px hsl(345 45% 32% / 0.08);
+  }
+
+  .warm-gradient {
+    background: linear-gradient(135deg, hsl(35 40% 96%) 0%, hsl(40 35% 94%) 100%);
+  }
+
+  .burgundy-gradient {
+    background: linear-gradient(135deg, hsl(345 45% 35%) 0%, hsl(345 50% 28%) 100%);
+  }
+
+  .wood-gradient {
+    background: linear-gradient(180deg, hsl(20 35% 14%) 0%, hsl(20 30% 10%) 100%);
+  }
+}
+
+/* Subtle paper texture for backgrounds */
+.paper-texture {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
 }

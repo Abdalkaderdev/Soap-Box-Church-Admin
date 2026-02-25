@@ -215,3 +215,6 @@ export {
 
 // Dashboard hooks
 export { useDashboard } from './useDashboard';
+
+// Toast hooks
+export { useToast, useToastState, type Toast, type ToastOptions } from './use-toast';

@@ -39,6 +39,12 @@ import {
   FileText,
   AlertCircle,
   Loader2,
+  Share2,
+  Heart,
+  MessageCircle,
+  Image,
+  Megaphone,
+  Calendar,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -48,7 +54,19 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useCommunications, useDeleteAnnouncement, type Announcement } from '@/hooks/useCommunications';
+import {
+  useMessages,
+  useMessageTemplates,
+  useAnnouncements,
+  useCommunicationStats,
+  useSendMessage,
+  useSaveDraft,
+  useDeleteAnnouncement,
+  type Announcement,
+  type MessageFilters,
+} from '@/hooks/useCommunications';
+import { useAuth } from '@/hooks/useAuth';
+import type { Message as ApiMessage, MessageTemplate, MessageType, RecipientFilter } from '@/types';
 
 // Using local interfaces that map from API types
 interface Message {
@@ -72,6 +90,56 @@ interface Template {
   category: string;
   lastUsed: string;
 }
+
+interface CommunityPost {
+  id: string;
+  content: string;
+  author: string;
+  authorRole: string;
+  createdAt: string;
+  likes: number;
+  comments: number;
+  hasImage: boolean;
+  pinned: boolean;
+}
+
+// TODO: Replace with real API when community posts endpoint is available
+// Currently there is no communityPostsApi in the backend
+const mockCommunityPosts: CommunityPost[] = [
+  {
+    id: '1',
+    content: 'Reminder: Our Easter service times will be at 8am, 10am, and 12pm. Invite your friends and family! ',
+    author: 'Pastor John',
+    authorRole: 'Senior Pastor',
+    createdAt: '2026-02-25T10:00:00Z',
+    likes: 45,
+    comments: 12,
+    hasImage: false,
+    pinned: true,
+  },
+  {
+    id: '2',
+    content: 'Thank you to everyone who volunteered at the food drive this weekend. Together we packed over 500 meals for families in need!',
+    author: 'Sarah Mitchell',
+    authorRole: 'Outreach Coordinator',
+    createdAt: '2026-02-24T15:30:00Z',
+    likes: 89,
+    comments: 23,
+    hasImage: true,
+    pinned: false,
+  },
+  {
+    id: '3',
+    content: 'Youth group meets every Wednesday at 7pm. This week we\'re discussing "Finding Your Purpose". All teens welcome!',
+    author: 'Mike Thompson',
+    authorRole: 'Youth Pastor',
+    createdAt: '2026-02-23T09:00:00Z',
+    likes: 32,
+    comments: 8,
+    hasImage: false,
+    pinned: false,
+  },
+];
 
 const typeIcons: Record<Message['type'], React.ReactNode> = {
   email: <Mail className="h-4 w-4" />,
@@ -150,17 +218,50 @@ function StatsCardSkeleton() {
 }
 
 export default function Communications() {
-  const { data, isLoading, error, sendMessage, isSending } = useCommunications();
+  // churchId is used internally by hooks via useAuth
+  useAuth();
+
+  // Fetch data using individual hooks for better control
+  const [messageFilters] = useState<MessageFilters>({
+    page: 1,
+    pageSize: 20,
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+  });
+
+  const {
+    data: messagesData,
+    isLoading: isLoadingMessages,
+    error: messagesError,
+  } = useMessages(messageFilters);
+
+  const {
+    data: templatesData,
+    isLoading: isLoadingTemplates,
+    error: templatesError,
+  } = useMessageTemplates();
+
+  const {
+    data: announcementsData,
+    isLoading: isLoadingAnnouncements,
+    error: announcementsError,
+  } = useAnnouncements();
+
+  const {
+    data: statsData,
+    isLoading: isLoadingStats,
+    error: statsError,
+  } = useCommunicationStats();
+
+  const sendMessageMutation = useSendMessage();
+  const saveDraftMutation = useSaveDraft();
   const deleteAnnouncementMutation = useDeleteAnnouncement();
 
-  // Map API announcements to UI format
-  const announcements: Announcement[] = data?.announcements ?? [];
-
   // Map API messages to UI format
-  const messages: Message[] = (data?.messages ?? []).map((msg) => ({
+  const messages: Message[] = (messagesData?.data ?? []).map((msg: ApiMessage) => ({
     id: msg.id,
     subject: msg.subject,
-    content: msg.body, // API uses 'body', UI uses 'content'
+    content: msg.body,
     type: msg.type as Message['type'],
     recipients: msg.recipientCount > 0 ? 'Members' : 'None',
     recipientCount: msg.recipientCount,
@@ -172,13 +273,16 @@ export default function Communications() {
   }));
 
   // Map API templates to UI format
-  const templates: Template[] = (data?.templates ?? []).map((tmpl) => ({
+  const templates: Template[] = (templatesData ?? []).map((tmpl: MessageTemplate) => ({
     id: tmpl.id,
     name: tmpl.name,
     type: tmpl.type as Template['type'],
-    category: 'General', // Default category since API doesn't have this
-    lastUsed: tmpl.updatedAt, // Use updatedAt as proxy for lastUsed
+    category: 'General',
+    lastUsed: tmpl.updatedAt,
   }));
+
+  // Use announcements from API
+  const announcements: Announcement[] = announcementsData ?? [];
 
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -197,17 +301,13 @@ export default function Communications() {
     return matchesSearch && matchesType;
   });
 
-  const totalSent = messages.filter((m) => m.status === 'sent').length;
-  const totalRecipients = messages
-    .filter((m) => m.status === 'sent')
-    .reduce((sum, m) => sum + m.recipientCount, 0);
-  const messagesWithOpenRate = messages.filter((m) => m.openRate);
-  const avgOpenRate = messagesWithOpenRate.length > 0
-    ? Math.round(
-        messagesWithOpenRate.reduce((sum, m) => sum + (m.openRate || 0), 0) /
-          messagesWithOpenRate.length
-      )
-    : 0;
+  // Use stats from API
+  const totalSent = statsData?.totalSent ?? 0;
+  const totalRecipients = statsData?.totalDelivered ?? 0;
+  const avgOpenRate = statsData?.averageOpenRate ? Math.round(statsData.averageOpenRate) : 0;
+  const scheduledCount = messages.filter((m) => m.status === 'scheduled').length;
+
+  const error = messagesError || templatesError || announcementsError || statsError;
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -219,17 +319,35 @@ export default function Communications() {
     });
   };
 
+  // Map recipient selection to proper filter
+  const getRecipientFilter = (recipientSelection: string): RecipientFilter | undefined => {
+    switch (recipientSelection) {
+      case 'all':
+        return {}; // No filter = all members
+      case 'active':
+        return { membershipStatus: ['active'] };
+      case 'volunteers':
+        return { tags: ['volunteer'] };
+      case 'youth':
+        return { tags: ['youth', 'parent'] };
+      case 'leaders':
+        return { tags: ['ministry-leader'] };
+      default:
+        return undefined;
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!messageType || !recipients || !subject || !content) {
       return;
     }
 
-    await sendMessage({
-      type: messageType as Message['type'],
-      recipients,
+    await sendMessageMutation.mutateAsync({
+      type: messageType as MessageType,
+      recipientFilter: getRecipientFilter(recipients),
       subject,
-      content,
-      scheduleForLater,
+      body: content,
+      scheduledFor: scheduleForLater ? new Date(Date.now() + 86400000).toISOString() : undefined,
     });
 
     // Reset form and close dialog
@@ -241,8 +359,24 @@ export default function Communications() {
     setIsComposeOpen(false);
   };
 
-  const handleSaveDraft = () => {
-    // Save as draft logic would go here
+  const handleSaveDraft = async () => {
+    if (!messageType || !subject || !content) {
+      return;
+    }
+
+    await saveDraftMutation.mutateAsync({
+      type: messageType as MessageType,
+      recipientFilter: recipients ? getRecipientFilter(recipients) : undefined,
+      subject,
+      body: content,
+    });
+
+    // Reset form and close dialog
+    setMessageType('');
+    setRecipients('');
+    setSubject('');
+    setContent('');
+    setScheduleForLater(false);
     setIsComposeOpen(false);
   };
 
@@ -341,11 +475,25 @@ export default function Communications() {
                 </label>
               </div>
               <div className="flex justify-end gap-2 mt-4">
-                <Button variant="outline" onClick={handleSaveDraft}>
-                  Save Draft
+                <Button
+                  variant="outline"
+                  onClick={handleSaveDraft}
+                  disabled={saveDraftMutation.isPending}
+                >
+                  {saveDraftMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Draft'
+                  )}
                 </Button>
-                <Button onClick={handleSendMessage} disabled={isSending}>
-                  {isSending ? (
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={sendMessageMutation.isPending}
+                >
+                  {sendMessageMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Sending...
@@ -365,7 +513,7 @@ export default function Communications() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {isLoading ? (
+        {isLoadingStats ? (
           <>
             <StatsCardSkeleton />
             <StatsCardSkeleton />
@@ -410,9 +558,7 @@ export default function Communications() {
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {messages.filter((m) => m.status === 'scheduled').length}
-                </div>
+                <div className="text-2xl font-bold">{scheduledCount}</div>
                 <p className="text-xs text-muted-foreground">Messages queued</p>
               </CardContent>
             </Card>
@@ -430,6 +576,10 @@ export default function Communications() {
           </TabsTrigger>
           <TabsTrigger value="announcements" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
             Announcements
+          </TabsTrigger>
+          <TabsTrigger value="community" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <Megaphone className="mr-2 h-4 w-4" />
+            Community Posts
           </TabsTrigger>
         </TabsList>
 
@@ -460,7 +610,7 @@ export default function Communications() {
 
           {/* Message List */}
           <div className="space-y-3">
-            {isLoading ? (
+            {isLoadingMessages ? (
               <>
                 <MessageCardSkeleton />
                 <MessageCardSkeleton />
@@ -564,7 +714,7 @@ export default function Communications() {
             </Button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {isLoading ? (
+            {isLoadingTemplates ? (
               <>
                 <TemplateCardSkeleton />
                 <TemplateCardSkeleton />
@@ -612,7 +762,7 @@ export default function Communications() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {isLoading ? (
+              {isLoadingAnnouncements ? (
                 <div className="space-y-4">
                   <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-24 w-full" />
@@ -666,6 +816,119 @@ export default function Communications() {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="community" className="space-y-4">
+          {/* New Post Card */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex gap-4">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <textarea
+                    className="w-full min-h-[80px] rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                    placeholder="Share an update with your community..."
+                  />
+                  <div className="flex items-center justify-between mt-3">
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" className="text-muted-foreground">
+                        <Image className="h-4 w-4 mr-1" />
+                        Photo
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-muted-foreground">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        Event
+                      </Button>
+                    </div>
+                    <Button size="sm" className="bg-primary hover:bg-primary/90">
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Post to Community
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Posts List - TODO: Replace with real API when available */}
+          <div className="space-y-4">
+            {mockCommunityPosts.map((post) => (
+              <Card key={post.id} className={post.pinned ? 'border-primary/30 bg-primary/5' : ''}>
+                <CardContent className="p-4">
+                  <div className="flex gap-4">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm font-semibold text-primary">
+                        {post.author.split(' ').map(n => n[0]).join('')}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{post.author}</span>
+                          <Badge variant="secondary" className="text-xs">{post.authorRole}</Badge>
+                          {post.pinned && (
+                            <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">
+                              Pinned
+                            </Badge>
+                          )}
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit Post
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              {post.pinned ? 'Unpin' : 'Pin'} Post
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-600">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {new Date(post.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                      <p className="mt-3 text-sm leading-relaxed">{post.content}</p>
+                      {post.hasImage && (
+                        <div className="mt-3 rounded-lg bg-muted h-48 flex items-center justify-center">
+                          <Image className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex items-center gap-6 mt-4 pt-3 border-t">
+                        <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+                          <Heart className="h-4 w-4" />
+                          <span>{post.likes}</span>
+                        </button>
+                        <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+                          <MessageCircle className="h-4 w-4" />
+                          <span>{post.comments} comments</span>
+                        </button>
+                        <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors ml-auto">
+                          <Share2 className="h-4 w-4" />
+                          <span>Share</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
       </Tabs>
     </div>
