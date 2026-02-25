@@ -51,8 +51,8 @@ export function Logo({ size = "md", className, showTagline = false }: LogoProps)
           SoapBox
         </span>
         {showTagline && (
-          <span className={cn("text-slate-400 -mt-0.5 font-medium", sizes.tagline)}>
-            Church Management System
+          <span className={cn("text-slate-400 -mt-0.5 font-medium tracking-wide", sizes.tagline)}>
+            Church Management
           </span>
         )}
       </div>
