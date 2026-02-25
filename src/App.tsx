@@ -47,41 +47,42 @@ function App() {
   const [location, navigate] = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
 
-  // Login page doesn't use the main layout
-  const isAuthPage = location === "/login";
+  // Public pages don't use the main layout
+  const isPublicPage = location === "/login" || location === "/" || location === "/features" || location === "/pricing";
 
   // Handle authentication redirects
   useEffect(() => {
     if (isLoading) return;
 
     // If on login page and authenticated, redirect to dashboard
-    if (isAuthPage && isAuthenticated) {
-      navigate("/");
+    if (location === "/login" && isAuthenticated) {
+      navigate("/dashboard");
       return;
     }
 
     // If on protected page and not authenticated, redirect to login
-    if (!isAuthPage && !isAuthenticated) {
+    if (!isPublicPage && !isAuthenticated) {
       // For demo, auto-authenticate after visiting login
       sessionStorage.setItem("soapbox_church_auth", "true");
       // In production, uncomment below to require login:
       // navigate("/login");
     }
-  }, [isAuthenticated, isAuthPage, isLoading, navigate]);
+  }, [isAuthenticated, isPublicPage, isLoading, navigate, location]);
 
   // Show loading state while checking auth
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-950">
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-purple-500 border-t-transparent" />
-          <p className="text-sm text-purple-200/70">Connecting to SoapBox...</p>
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
+          <p className="text-sm text-slate-400">Connecting to SoapBox...</p>
         </div>
       </div>
     );
   }
 
-  if (isAuthPage) {
+  // Public pages render without layout
+  if (isPublicPage) {
     return <AppRoutes />;
   }
 

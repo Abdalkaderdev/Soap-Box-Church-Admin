@@ -21,7 +21,7 @@ import { Separator } from "@/components/ui/separator";
 const navigationItems = [
   {
     title: "Dashboard",
-    href: routes.dashboard,
+    href: "/dashboard",
     icon: LayoutDashboard,
   },
   {
@@ -85,14 +85,14 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 border-white/10">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-slate-800">
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="flex h-16 items-center gap-2 border-b border-white/10 px-4">
+        <div className="flex h-16 items-center gap-2 border-b border-slate-800 px-4">
           <Logo size="sm" className="text-white" />
           <div className="ml-auto">
-            <span className="text-[10px] font-medium text-purple-300/80 bg-purple-500/20 px-2 py-0.5 rounded-full">
-              Church
+            <span className="text-[10px] font-medium text-sky-300/80 bg-sky-500/20 px-2 py-0.5 rounded-full border border-sky-500/30">
+              CRM
             </span>
           </div>
         </div>
@@ -104,14 +104,14 @@ export function Sidebar() {
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start gap-3 text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200",
+                  "w-full justify-start gap-3 text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-200",
                   isActive(item.href) &&
-                    "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-white font-medium border border-white/10"
+                    "bg-gradient-to-r from-sky-500/20 to-blue-500/20 text-white font-medium border border-sky-500/30"
                 )}
               >
                 <item.icon className={cn(
                   "h-4 w-4",
-                  isActive(item.href) && "text-purple-400"
+                  isActive(item.href) && "text-sky-400"
                 )} />
                 {item.title}
               </Button>
@@ -120,15 +120,15 @@ export function Sidebar() {
         </nav>
 
         {/* Bottom Navigation */}
-        <div className="border-t border-white/10 px-3 py-4">
+        <div className="border-t border-slate-800 px-3 py-4">
           {bottomNavigationItems.map((item) => (
             <Link key={item.href} href={item.href}>
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start gap-3 text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200",
+                  "w-full justify-start gap-3 text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-200",
                   isActive(item.href) &&
-                    "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-white font-medium border border-white/10"
+                    "bg-gradient-to-r from-sky-500/20 to-blue-500/20 text-white font-medium border border-sky-500/30"
                 )}
               >
                 <item.icon className="h-4 w-4" />
@@ -137,12 +137,12 @@ export function Sidebar() {
             </Link>
           ))}
 
-          <Separator className="my-2 bg-white/10" />
+          <Separator className="my-2 bg-slate-800" />
 
           {/* Back to SoapBox */}
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-slate-400 hover:bg-white/10 hover:text-white transition-all duration-200 mb-1"
+            className="w-full justify-start gap-3 text-slate-500 hover:bg-slate-800 hover:text-white transition-all duration-200 mb-1"
             onClick={() => {
               // In production, navigate to main SoapBox app
               window.open("https://app.soapbox.com", "_blank");
@@ -155,7 +155,7 @@ export function Sidebar() {
 
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-slate-400 hover:bg-red-500/20 hover:text-red-300 transition-all duration-200"
+            className="w-full justify-start gap-3 text-slate-500 hover:bg-red-500/20 hover:text-red-400 transition-all duration-200"
             onClick={handleSignOut}
           >
             <LogOut className="h-4 w-4" />
@@ -164,10 +164,10 @@ export function Sidebar() {
         </div>
 
         {/* Powered by footer */}
-        <div className="px-4 py-3 border-t border-white/5">
-          <p className="text-[10px] text-slate-500 text-center">
+        <div className="px-4 py-3 border-t border-slate-800/50">
+          <p className="text-[10px] text-slate-600 text-center">
             Powered by{" "}
-            <span className="font-medium bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            <span className="font-medium text-sky-400">
               SoapBox Super App
             </span>
           </p>

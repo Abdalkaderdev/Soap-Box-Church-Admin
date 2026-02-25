@@ -17,6 +17,9 @@ const Discipleship = lazy(() => import("./pages/discipleship/Discipleship"));
 const Reports = lazy(() => import("./pages/reports/Reports"));
 const Settings = lazy(() => import("./pages/settings/Settings"));
 const Login = lazy(() => import("./pages/auth/Login"));
+const Landing = lazy(() => import("./pages/Landing"));
+const Features = lazy(() => import("./pages/Features"));
+const Pricing = lazy(() => import("./pages/Pricing"));
 
 // Loading fallback component
 function PageLoader() {
@@ -32,7 +35,10 @@ function PageLoader() {
 
 // Route definitions for use in navigation and other components
 export const routes = {
-  dashboard: "/",
+  landing: "/",
+  features: "/features",
+  pricing: "/pricing",
+  dashboard: "/dashboard",
   members: {
     list: "/members",
     details: "/members/:id",
@@ -68,8 +74,15 @@ export function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
+        {/* Landing Page */}
+        <Route path="/" component={Landing} />
+
+        {/* Features & Pricing */}
+        <Route path="/features" component={Features} />
+        <Route path="/pricing" component={Pricing} />
+
         {/* Dashboard */}
-        <Route path="/" component={Dashboard} />
+        <Route path="/dashboard" component={Dashboard} />
 
         {/* Members - order matters: /new before /:id */}
         <Route path="/members/new" component={AddMember} />
