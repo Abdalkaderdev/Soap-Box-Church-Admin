@@ -1,6 +1,5 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Logo } from "@/components/Logo";
 import {
   Users,
@@ -14,236 +13,242 @@ import {
   PieChart,
   Layers,
   Lock,
-  Sparkles,
   Cloud,
   Workflow,
   Settings,
   MessageSquare,
   Shield,
+  Calendar,
+  Heart,
+  BookOpen,
+  CheckCircle,
 } from "lucide-react";
 
-const memberFeatures = [
-  {
-    icon: Users,
-    title: "Member Profiles",
-    description: "Comprehensive profiles with contact info, family connections, and custom fields.",
-  },
-  {
-    icon: Database,
-    title: "Family Management",
-    description: "Link family members, track households, and manage relationships.",
-  },
-  {
-    icon: BarChart3,
-    title: "Attendance Tracking",
-    description: "Track service attendance, event participation, and engagement trends.",
-  },
-  {
-    icon: FileText,
-    title: "Notes & History",
-    description: "Keep detailed notes on pastoral care, meetings, and interactions.",
-  },
-];
-
-const donationFeatures = [
-  {
-    icon: DollarSign,
-    title: "Donation Processing",
-    description: "Accept online donations, recurring giving, and multiple payment methods.",
-  },
-  {
-    icon: PieChart,
-    title: "Fund Management",
-    description: "Track donations by fund, campaign, or designated purpose.",
-  },
-  {
-    icon: FileText,
-    title: "Tax Receipts",
-    description: "Automatically generate year-end giving statements for donors.",
-  },
-  {
-    icon: BarChart3,
-    title: "Financial Reports",
-    description: "Detailed reports on giving trends, pledges, and budget tracking.",
-  },
-];
-
-const communicationFeatures = [
-  {
-    icon: Mail,
-    title: "Email Campaigns",
-    description: "Send beautiful emails with templates and personalization.",
-  },
-  {
-    icon: MessageSquare,
-    title: "SMS Messaging",
-    description: "Reach members instantly with text message broadcasts.",
-  },
-  {
-    icon: Bell,
-    title: "Push Notifications",
-    description: "Mobile app notifications for timely announcements.",
-  },
-  {
-    icon: Layers,
-    title: "Segmented Lists",
-    description: "Target specific groups with tailored communications.",
-  },
-];
-
-const adminFeatures = [
-  {
-    icon: Lock,
-    title: "Role-Based Access",
-    description: "Control who can view and edit different sections.",
-  },
-  {
-    icon: Shield,
-    title: "Data Security",
-    description: "Enterprise-grade encryption and secure backups.",
-  },
-  {
-    icon: Cloud,
-    title: "Cloud-Based",
-    description: "Access from anywhere, always up-to-date.",
-  },
-  {
-    icon: Workflow,
-    title: "Integrations",
-    description: "Connect with your favorite tools and services.",
-  },
-];
-
-const featureSections = [
+const featureCategories = [
   {
     title: "Member Management",
-    subtitle: "Track and engage your congregation",
-    features: memberFeatures,
-    iconColor: "text-blue-500",
-    iconBg: "bg-blue-500/10",
-    gradientFrom: "from-blue-600",
-    gradientTo: "to-indigo-600",
+    description: "Track and engage your congregation",
     icon: Users,
+    color: "bg-sage-100",
+    iconColor: "text-sage-700",
+    features: [
+      {
+        icon: Users,
+        title: "Member Profiles",
+        description: "Comprehensive profiles with contact info, family connections, and custom fields.",
+      },
+      {
+        icon: Database,
+        title: "Family Management",
+        description: "Link family members, track households, and manage relationships.",
+      },
+      {
+        icon: BarChart3,
+        title: "Attendance Tracking",
+        description: "Track service attendance, event participation, and engagement trends.",
+      },
+      {
+        icon: FileText,
+        title: "Notes & History",
+        description: "Keep detailed notes on pastoral care, meetings, and interactions.",
+      },
+    ],
   },
   {
     title: "Donation & Giving",
-    subtitle: "Manage finances with ease",
-    features: donationFeatures,
-    iconColor: "text-emerald-500",
-    iconBg: "bg-emerald-500/10",
-    gradientFrom: "from-emerald-600",
-    gradientTo: "to-teal-600",
+    description: "Manage finances with ease",
     icon: DollarSign,
+    color: "bg-amber-100",
+    iconColor: "text-amber-600",
+    features: [
+      {
+        icon: DollarSign,
+        title: "Donation Processing",
+        description: "Accept online donations, recurring giving, and multiple payment methods.",
+      },
+      {
+        icon: PieChart,
+        title: "Fund Management",
+        description: "Track donations by fund, campaign, or designated purpose.",
+      },
+      {
+        icon: FileText,
+        title: "Tax Receipts",
+        description: "Automatically generate year-end giving statements for donors.",
+      },
+      {
+        icon: BarChart3,
+        title: "Financial Reports",
+        description: "Detailed reports on giving trends, pledges, and budget tracking.",
+      },
+    ],
   },
   {
     title: "Communications",
-    subtitle: "Stay connected with your congregation",
-    features: communicationFeatures,
-    iconColor: "text-violet-500",
-    iconBg: "bg-violet-500/10",
-    gradientFrom: "from-violet-600",
-    gradientTo: "to-purple-600",
+    description: "Stay connected with your congregation",
     icon: Mail,
+    color: "bg-sky-100",
+    iconColor: "text-sky-600",
+    features: [
+      {
+        icon: Mail,
+        title: "Email Campaigns",
+        description: "Send beautiful emails with templates and personalization.",
+      },
+      {
+        icon: MessageSquare,
+        title: "SMS Messaging",
+        description: "Reach members instantly with text message broadcasts.",
+      },
+      {
+        icon: Bell,
+        title: "Push Notifications",
+        description: "Mobile app notifications for timely announcements.",
+      },
+      {
+        icon: Layers,
+        title: "Segmented Lists",
+        description: "Target specific groups with tailored communications.",
+      },
+    ],
+  },
+  {
+    title: "Events & Volunteers",
+    description: "Coordinate ministry activities",
+    icon: Calendar,
+    color: "bg-rose-100",
+    iconColor: "text-rose-600",
+    features: [
+      {
+        icon: Calendar,
+        title: "Event Scheduling",
+        description: "Plan services, Bible studies, and special events with ease.",
+      },
+      {
+        icon: Heart,
+        title: "Volunteer Management",
+        description: "Coordinate volunteers and track service hours.",
+      },
+      {
+        icon: CheckCircle,
+        title: "Check-in System",
+        description: "Secure child check-in and attendance tracking.",
+      },
+      {
+        icon: BookOpen,
+        title: "Small Groups",
+        description: "Manage small group meetings and participation.",
+      },
+    ],
   },
   {
     title: "Admin & Security",
-    subtitle: "Enterprise-grade management tools",
-    features: adminFeatures,
-    iconColor: "text-amber-500",
-    iconBg: "bg-amber-500/10",
-    gradientFrom: "from-amber-500",
-    gradientTo: "to-orange-500",
+    description: "Enterprise-grade management tools",
     icon: Settings,
+    color: "bg-purple-100",
+    iconColor: "text-purple-600",
+    features: [
+      {
+        icon: Lock,
+        title: "Role-Based Access",
+        description: "Control who can view and edit different sections.",
+      },
+      {
+        icon: Shield,
+        title: "Data Security",
+        description: "Enterprise-grade encryption and secure backups.",
+      },
+      {
+        icon: Cloud,
+        title: "Cloud-Based",
+        description: "Access from anywhere, always up-to-date.",
+      },
+      {
+        icon: Workflow,
+        title: "Integrations",
+        description: "Connect with your favorite tools and services.",
+      },
+    ],
   },
 ];
 
 export default function Features() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/">
-            <Logo size="sm" />
-          </Link>
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="/features" className="text-amber-400 font-medium text-sm">Features</Link>
-            <Link href="/pricing" className="text-slate-300 hover:text-white transition-colors text-sm font-medium">Pricing</Link>
-            <Link href="/#testimonials" className="text-slate-300 hover:text-white transition-colors text-sm font-medium">Testimonials</Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800">
-                Sign In
-              </Button>
+      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link href="/">
+              <Logo size="sm" />
             </Link>
-            <Link href="/login">
-              <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900 font-semibold shadow-lg shadow-amber-500/20">
-                Get Started
-              </Button>
-            </Link>
+
+            {/* Navigation Links */}
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="/features" className="text-sage-700 font-medium">Features</Link>
+              <Link href="/pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</Link>
+              <Link href="/#testimonials" className="text-gray-600 hover:text-gray-900 transition-colors">Testimonials</Link>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex items-center space-x-4">
+              <Link href="/login">
+                <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button className="bg-sage-700 hover:bg-sage-800 text-white">
+                  Get Started
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="pt-32 pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/8 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-amber-500/8 rounded-full blur-3xl" />
-        </div>
-
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-30" />
-
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-4 py-2 mb-8">
-              <Sparkles className="h-4 w-4 text-amber-400" />
-              <span className="text-sm text-amber-300 font-medium">Comprehensive Features</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
-              Everything You Need to
-              <br />
-              <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-orange-400 bg-clip-text text-transparent">
-                Manage Your Church
-              </span>
-            </h1>
-            <p className="text-xl text-slate-400 leading-relaxed">
-              Explore all the powerful features that make SoapBox the most complete church management solution.
-            </p>
-          </div>
+      <section className="py-20 px-4 bg-gradient-to-br from-sage-50 to-sage-100">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Powerful Features for
+            <span className="text-sage-700"> Modern Ministry</span>
+          </h1>
+          <p className="text-xl text-gray-600">
+            Explore all the tools that make SoapBox the most complete church management solution.
+          </p>
         </div>
       </section>
 
       {/* Feature Sections */}
-      {featureSections.map((section, sectionIndex) => (
+      {featureCategories.map((category, categoryIndex) => (
         <section
-          key={section.title}
-          className={`py-20 ${sectionIndex % 2 === 0 ? 'bg-slate-950/50' : ''}`}
+          key={category.title}
+          className={`py-20 px-4 ${categoryIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
         >
-          <div className="container mx-auto px-4">
-            <div className="flex items-center gap-4 mb-10">
-              <div className={`p-3.5 rounded-2xl bg-gradient-to-br ${section.gradientFrom} ${section.gradientTo} shadow-lg`}>
-                <section.icon className="h-6 w-6 text-white" />
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center gap-4 mb-12">
+              <div className={`w-14 h-14 ${category.color} rounded-xl flex items-center justify-center`}>
+                <category.icon className={`w-7 h-7 ${category.iconColor}`} />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">{section.title}</h2>
-                <p className="text-slate-400">{section.subtitle}</p>
+                <h2 className="text-2xl font-bold text-gray-900">{category.title}</h2>
+                <p className="text-gray-600">{category.description}</p>
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-              {section.features.map((feature) => (
-                <Card key={feature.title} className="bg-slate-900/60 border-slate-800/50 hover:border-slate-700/50 transition-all duration-300 group backdrop-blur-sm">
-                  <CardContent className="p-6">
-                    <div className={`inline-flex p-3 rounded-xl ${section.iconBg} mb-4`}>
-                      <feature.icon className={`h-6 w-6 ${section.iconColor}`} />
-                    </div>
-                    <h3 className="font-semibold text-white mb-2 group-hover:text-amber-400 transition-colors">{feature.title}</h3>
-                    <p className="text-sm text-slate-400 leading-relaxed">{feature.description}</p>
-                  </CardContent>
-                </Card>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {category.features.map((feature) => (
+                <div
+                  key={feature.title}
+                  className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100"
+                >
+                  <div className={`w-10 h-10 ${category.color} rounded-lg flex items-center justify-center mb-4`}>
+                    <feature.icon className={`w-5 h-5 ${category.iconColor}`} />
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">{feature.description}</p>
+                </div>
               ))}
             </div>
           </div>
@@ -251,42 +256,35 @@ export default function Features() {
       ))}
 
       {/* CTA */}
-      <section className="py-24">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 rounded-3xl border border-slate-800 p-12 relative overflow-hidden">
-            {/* Background decorations */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl" />
-
-            <div className="relative z-10">
-              <h2 className="text-3xl font-bold mb-4 text-white">Ready to Get Started?</h2>
-              <p className="text-lg text-slate-400 mb-8">
-                Try SoapBox free for 30 days. No credit card required.
-              </p>
-              <Link href="/login">
-                <Button size="lg" className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900 font-semibold shadow-xl shadow-amber-500/25">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            </div>
-          </div>
+      <section className="py-20 px-4 bg-sage-700">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-white mb-4">Ready to Get Started?</h2>
+          <p className="text-xl text-sage-100 mb-8">
+            Try SoapBox free for 30 days. No credit card required.
+          </p>
+          <Link href="/login">
+            <Button
+              size="lg"
+              className="bg-white text-sage-700 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
+            >
+              Start Free Trial
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-slate-800/50">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-slate-500">
-              &copy; {new Date().getFullYear()} SoapBox Super App. All rights reserved.
-            </p>
-            <Link href="/">
-              <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800">
-                Back to Home
-              </Button>
-            </Link>
-          </div>
+      <footer className="bg-gray-900 text-white py-8 px-4">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-gray-400">
+            &copy; {new Date().getFullYear()} SoapBox Super App. All rights reserved.
+          </p>
+          <Link href="/">
+            <Button variant="ghost" className="text-gray-400 hover:text-white">
+              Back to Home
+            </Button>
+          </Link>
         </div>
       </footer>
     </div>

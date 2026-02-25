@@ -1,11 +1,9 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Logo } from "@/components/Logo";
 import {
   CheckCircle2,
   ArrowRight,
-  Sparkles,
   Users,
   Building2,
   Crown,
@@ -18,10 +16,9 @@ const plans = [
     price: 0,
     period: "forever",
     icon: Users,
-    gradient: "from-slate-600 to-slate-700",
-    iconBg: "bg-slate-500/10",
-    iconColor: "text-slate-400",
-    borderColor: "border-slate-700",
+    color: "bg-gray-100",
+    iconColor: "text-gray-600",
+    popular: false,
     features: [
       "Up to 100 members",
       "Basic member management",
@@ -31,7 +28,6 @@ const plans = [
       "Community support",
     ],
     cta: "Get Started Free",
-    popular: false,
   },
   {
     name: "Growth",
@@ -39,10 +35,9 @@ const plans = [
     price: 49,
     period: "/month",
     icon: Building2,
-    gradient: "from-blue-600 to-indigo-600",
-    iconBg: "bg-blue-500/10",
-    iconColor: "text-blue-400",
-    borderColor: "border-amber-500/50",
+    color: "bg-sage-100",
+    iconColor: "text-sage-700",
+    popular: true,
     features: [
       "Up to 500 members",
       "Advanced member profiles",
@@ -54,7 +49,6 @@ const plans = [
       "Priority email support",
     ],
     cta: "Start Free Trial",
-    popular: true,
   },
   {
     name: "Enterprise",
@@ -62,10 +56,9 @@ const plans = [
     price: 149,
     period: "/month",
     icon: Crown,
-    gradient: "from-violet-600 to-purple-600",
-    iconBg: "bg-violet-500/10",
-    iconColor: "text-violet-400",
-    borderColor: "border-slate-700",
+    color: "bg-purple-100",
+    iconColor: "text-purple-600",
+    popular: false,
     features: [
       "Unlimited members",
       "Multi-campus support",
@@ -78,7 +71,6 @@ const plans = [
       "SLA guarantee",
     ],
     cta: "Contact Sales",
-    popular: false,
   },
 ];
 
@@ -111,194 +103,175 @@ const faqs = [
 
 export default function Pricing() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/">
-            <Logo size="sm" />
-          </Link>
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="/features" className="text-slate-300 hover:text-white transition-colors text-sm font-medium">Features</Link>
-            <Link href="/pricing" className="text-amber-400 font-medium text-sm">Pricing</Link>
-            <Link href="/#testimonials" className="text-slate-300 hover:text-white transition-colors text-sm font-medium">Testimonials</Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800">
-                Sign In
-              </Button>
+      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link href="/">
+              <Logo size="sm" />
             </Link>
-            <Link href="/login">
-              <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900 font-semibold shadow-lg shadow-amber-500/20">
-                Get Started
-              </Button>
-            </Link>
+
+            {/* Navigation Links */}
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="/features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</Link>
+              <Link href="/pricing" className="text-sage-700 font-medium">Pricing</Link>
+              <Link href="/#testimonials" className="text-gray-600 hover:text-gray-900 transition-colors">Testimonials</Link>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex items-center space-x-4">
+              <Link href="/login">
+                <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button className="bg-sage-700 hover:bg-sage-800 text-white">
+                  Get Started
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="pt-32 pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/8 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-amber-500/8 rounded-full blur-3xl" />
-        </div>
-
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-30" />
-
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-4 py-2 mb-8">
-              <Sparkles className="h-4 w-4 text-amber-400" />
-              <span className="text-sm text-amber-300 font-medium">Simple, Transparent Pricing</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
-              Plans for Churches
-              <br />
-              <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-orange-400 bg-clip-text text-transparent">
-                of All Sizes
-              </span>
-            </h1>
-            <p className="text-xl text-slate-400 leading-relaxed">
-              Start free, upgrade as you grow. No hidden fees, no surprises.
-            </p>
-          </div>
+      <section className="py-20 px-4 bg-gradient-to-br from-sage-50 to-sage-100">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Simple, Transparent
+            <span className="text-sage-700"> Pricing</span>
+          </h1>
+          <p className="text-xl text-gray-600">
+            Start free, upgrade as you grow. No hidden fees, no surprises.
+          </p>
         </div>
       </section>
 
       {/* Pricing Cards */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8">
             {plans.map((plan) => (
-              <Card
+              <div
                 key={plan.name}
-                className={`relative bg-slate-900/60 backdrop-blur-sm border ${plan.borderColor} ${
-                  plan.popular ? "shadow-xl shadow-amber-500/10 scale-[1.02]" : ""
-                }`}
+                className={`relative bg-white rounded-2xl border-2 ${
+                  plan.popular ? 'border-sage-500 shadow-xl' : 'border-gray-200'
+                } p-8`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-slate-900 text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">
+                    <span className="bg-sage-700 text-white text-sm font-semibold px-4 py-1 rounded-full">
                       Most Popular
                     </span>
                   </div>
                 )}
-                <CardHeader className="text-center pb-4 pt-8">
-                  <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${plan.gradient} mx-auto mb-4 shadow-lg`}>
-                    <plan.icon className="h-7 w-7 text-white" />
-                  </div>
-                  <CardTitle className="text-2xl text-white font-bold">{plan.name}</CardTitle>
-                  <CardDescription className="text-slate-400">
-                    {plan.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <div className="mb-8">
-                    <span className="text-5xl font-bold text-white">
-                      {plan.price === 0 ? "Free" : `$${plan.price}`}
-                    </span>
-                    {plan.price > 0 && (
-                      <span className="text-slate-400 ml-1">{plan.period}</span>
-                    )}
-                  </div>
 
-                  <ul className="space-y-3 mb-8 text-left">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-3">
-                        <CheckCircle2 className="h-5 w-5 text-emerald-400 flex-shrink-0" />
-                        <span className="text-slate-300 text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div className={`w-14 h-14 ${plan.color} rounded-xl flex items-center justify-center mb-6`}>
+                  <plan.icon className={`w-7 h-7 ${plan.iconColor}`} />
+                </div>
 
-                  <Link href="/login">
-                    <Button
-                      className={`w-full h-12 font-semibold ${
-                        plan.popular
-                          ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900 shadow-lg shadow-amber-500/20"
-                          : "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
-                      }`}
-                    >
-                      {plan.cta}
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                <p className="text-gray-600 mb-6">{plan.description}</p>
+
+                <div className="mb-8">
+                  <span className="text-5xl font-bold text-gray-900">
+                    {plan.price === 0 ? "Free" : `$${plan.price}`}
+                  </span>
+                  {plan.price > 0 && (
+                    <span className="text-gray-500 ml-1">{plan.period}</span>
+                  )}
+                </div>
+
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-sage-600 flex-shrink-0" />
+                      <span className="text-gray-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link href="/login">
+                  <Button
+                    className={`w-full py-3 font-semibold ${
+                      plan.popular
+                        ? 'bg-sage-700 hover:bg-sage-800 text-white'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                    }`}
+                  >
+                    {plan.cta}
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="py-20 bg-slate-950/50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-4 text-white">
+      {/* FAQ Section */}
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Frequently Asked Questions
             </h2>
-            <p className="text-center text-slate-400 mb-12">
+            <p className="text-gray-600">
               Everything you need to know about our pricing
             </p>
+          </div>
 
-            <div className="grid gap-4">
-              {faqs.map((faq) => (
-                <Card key={faq.question} className="bg-slate-900/60 border-slate-800/50 backdrop-blur-sm">
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold text-white mb-2">{faq.question}</h3>
-                    <p className="text-slate-400 text-sm leading-relaxed">{faq.answer}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          <div className="space-y-4">
+            {faqs.map((faq) => (
+              <div key={faq.question} className="bg-white rounded-xl p-6 border border-gray-200">
+                <h3 className="font-semibold text-gray-900 mb-2">{faq.question}</h3>
+                <p className="text-gray-600">{faq.answer}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-24">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 rounded-3xl border border-slate-800 p-12 relative overflow-hidden">
-            {/* Background decorations */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl" />
-
-            <div className="relative z-10">
-              <h2 className="text-3xl font-bold mb-4 text-white">Still Have Questions?</h2>
-              <p className="text-lg text-slate-400 mb-8">
-                Our team is here to help you find the right plan for your church.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/login">
-                  <Button size="lg" className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900 font-semibold h-12 px-8 shadow-xl shadow-amber-500/25">
-                    Start Free Trial
-                  </Button>
-                </Link>
-                <Button size="lg" variant="outline" className="border-slate-700 text-slate-200 hover:bg-slate-800 hover:border-slate-600 h-12 px-8">
-                  Contact Sales
-                </Button>
-              </div>
-            </div>
+      <section className="py-20 px-4 bg-sage-700">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-white mb-4">Still Have Questions?</h2>
+          <p className="text-xl text-sage-100 mb-8">
+            Our team is here to help you find the right plan for your church.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/login">
+              <Button
+                size="lg"
+                className="bg-white text-sage-700 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
+              >
+                Start Free Trial
+              </Button>
+            </Link>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-white text-white hover:bg-white hover:text-sage-700 px-8 py-4 text-lg"
+            >
+              Contact Sales
+            </Button>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-slate-800/50">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-slate-500">
-              &copy; {new Date().getFullYear()} SoapBox Super App. All rights reserved.
-            </p>
-            <Link href="/">
-              <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800">
-                Back to Home
-              </Button>
-            </Link>
-          </div>
+      <footer className="bg-gray-900 text-white py-8 px-4">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-gray-400">
+            &copy; {new Date().getFullYear()} SoapBox Super App. All rights reserved.
+          </p>
+          <Link href="/">
+            <Button variant="ghost" className="text-gray-400 hover:text-white">
+              Back to Home
+            </Button>
+          </Link>
         </div>
       </footer>
     </div>
