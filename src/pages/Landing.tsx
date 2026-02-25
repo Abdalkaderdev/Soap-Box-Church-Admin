@@ -96,12 +96,12 @@ export default function Landing() {
                   Sign In
                 </Button>
               </Link>
-              <Link href="/login">
+              <a href="https://soapboxsuperapp.com/quick-signup" target="_blank" rel="noopener noreferrer">
                 <Button className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] hover:from-[#6D28D9] hover:to-[#1D4ED8] text-white shadow-lg shadow-purple-500/25">
                   Get Started
                   <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -149,13 +149,13 @@ export default function Landing() {
 
               {/* CTA Buttons */}
               <div className="flex flex-wrap gap-4 mb-6">
-                <Link href="/login">
+                <a href="https://soapboxsuperapp.com/quick-signup" target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] hover:from-[#6D28D9] hover:to-[#1D4ED8] text-white shadow-lg shadow-purple-500/25 px-8">
                     <Sparkles className="w-5 h-5 mr-2" />
                     Get Started Free
                     <ChevronRight className="w-5 h-5 ml-1" />
                   </Button>
-                </Link>
+                </a>
                 <Button
                   size="lg"
                   variant="outline"
@@ -355,12 +355,12 @@ export default function Landing() {
 
           {/* CTA */}
           <div className="text-center">
-            <Link href="/login">
+            <a href="https://soapboxsuperapp.com/quick-signup" target="_blank" rel="noopener noreferrer">
               <Button size="lg" className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] hover:from-[#6D28D9] hover:to-[#1D4ED8] text-white shadow-lg shadow-purple-500/25 px-8">
                 Get Started Free
                 <ChevronRight className="w-5 h-5 ml-1" />
               </Button>
-            </Link>
+            </a>
             <p className="text-sm text-gray-500 mt-3">Takes less than 2 minutes</p>
           </div>
         </div>
@@ -787,12 +787,12 @@ export default function Landing() {
           </p>
 
           <div className="flex flex-wrap gap-4 justify-center mb-8">
-            <Link href="/login">
+            <a href="https://soapboxsuperapp.com/quick-signup" target="_blank" rel="noopener noreferrer">
               <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100 px-10 py-4 text-lg font-semibold shadow-xl">
                 <Sparkles className="w-5 h-5 mr-2" />
                 Start Free Today
               </Button>
-            </Link>
+            </a>
             <Button
               size="lg"
               variant="outline"

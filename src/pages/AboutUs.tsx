@@ -102,12 +102,12 @@ export default function AboutUs() {
                   Sign In
                 </Button>
               </Link>
-              <Link href="/login">
+              <a href="https://soapboxsuperapp.com/quick-signup" target="_blank" rel="noopener noreferrer">
                 <Button className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] hover:from-[#6D28D9] hover:to-[#1D4ED8] text-white shadow-lg shadow-purple-500/25">
                   Get Started
                   <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -459,7 +459,7 @@ export default function AboutUs() {
             Start using Church Admin today to shepherd your congregation with powerful tools.
           </p>
           <div className="flex flex-wrap gap-4 justify-center mb-8">
-            <Link href="/login">
+            <a href="https://soapboxsuperapp.com/quick-signup" target="_blank" rel="noopener noreferrer">
               <Button
                 size="lg"
                 className="bg-white text-purple-600 hover:bg-gray-100 px-10 py-4 text-lg font-semibold shadow-xl"
@@ -467,7 +467,7 @@ export default function AboutUs() {
                 <Sparkles className="w-5 h-5 mr-2" />
                 Get Started Free
               </Button>
-            </Link>
+            </a>
             <Button
               size="lg"
               className="bg-transparent text-white border-2 border-white/80 hover:bg-white/10 px-10 py-4 text-lg"

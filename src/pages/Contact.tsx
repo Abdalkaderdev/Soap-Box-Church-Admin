@@ -129,11 +129,11 @@ export default function Contact() {
                   Sign In
                 </Button>
               </Link>
-              <Link href="/login">
+              <a href="https://soapboxsuperapp.com/quick-signup" target="_blank" rel="noopener noreferrer">
                 <Button className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] hover:from-[#6D28D9] hover:to-[#1D4ED8] text-white shadow-lg shadow-purple-500/25">
                   Get Started
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -567,14 +567,14 @@ export default function Contact() {
                   <p className="text-purple-200 text-xs mt-2 font-medium">— Matthew 18:20</p>
                 </div>
 
-                <Link href="/login">
+                <a href="https://soapboxsuperapp.com/quick-signup" target="_blank" rel="noopener noreferrer">
                   <Button
                     className="bg-white text-purple-600 hover:bg-gray-100 hover:scale-105 w-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
                   >
                     <ChevronRight className="w-4 h-4 mr-2" />
                     Get Started Free
                   </Button>
-                </Link>
+                </a>
               </div>
             </div>
           </div>
@@ -597,14 +597,14 @@ export default function Contact() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/login">
+              <a href="https://soapboxsuperapp.com/quick-signup" target="_blank" rel="noopener noreferrer">
                 <Button
                   size="lg"
                   className="bg-white text-purple-600 hover:bg-gray-100 hover:scale-105 px-10 py-4 text-lg font-semibold w-full sm:w-auto min-w-[200px] shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
                 >
                   Start Free Today
                 </Button>
-              </Link>
+              </a>
               <Button
                 size="lg"
                 className="bg-transparent text-white border-2 border-white/80 hover:bg-white/10 hover:border-white hover:scale-105 px-10 py-4 text-lg font-semibold w-full sm:w-auto min-w-[200px] transition-all duration-300 rounded-xl"

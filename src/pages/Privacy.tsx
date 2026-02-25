@@ -35,11 +35,11 @@ export default function Privacy() {
                   Sign In
                 </Button>
               </Link>
-              <Link href="/login">
+              <a href="https://soapboxsuperapp.com/quick-signup" target="_blank" rel="noopener noreferrer">
                 <Button className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] hover:from-[#6D28D9] hover:to-[#1D4ED8] text-white shadow-lg shadow-purple-500/25">
                   Get Started
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         </div>
