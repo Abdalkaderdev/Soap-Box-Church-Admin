@@ -19,6 +19,7 @@ import {
   Workflow,
   Settings,
   MessageSquare,
+  Shield,
 } from "lucide-react";
 
 const memberFeatures = [
