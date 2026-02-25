@@ -182,3 +182,36 @@ export {
   type DiscipleshipStats,
   type DiscipleshipFilters,
 } from './useDiscipleship';
+
+// Settings hooks
+export {
+  useSettings,
+  useChurchInfo,
+  useUpdateChurchInfo,
+  useUserPreferences,
+  useUpdateUserPreferences,
+  useNotificationSettings,
+  useUpdateNotificationSettings,
+  useSecuritySettings,
+  useEnableTwoFactor,
+  useConfirmTwoFactor,
+  useDisableTwoFactor,
+  useChangePassword,
+  useRevokeSession,
+  useRevokeAllSessions,
+  useStaffMembers,
+  useInviteStaff,
+  useUpdateStaffMember,
+  useRemoveStaff,
+  useExportData,
+  useImportData,
+  type ChurchInfo,
+  type UserPreferences,
+  type NotificationSettings as SettingsNotificationSettings,
+  type SecuritySettings,
+  type SessionInfo,
+  type StaffMember,
+} from './useSettings';
+
+// Dashboard hooks
+export { useDashboard } from './useDashboard';

@@ -48,7 +48,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useCommunications } from '@/hooks/useCommunications';
+import { useCommunications, useCreateAnnouncement, useUpdateAnnouncement, useDeleteAnnouncement, type Announcement } from '@/hooks/useCommunications';
 
 // Using local interfaces that map from API types
 interface Message {
@@ -151,6 +151,11 @@ function StatsCardSkeleton() {
 
 export default function Communications() {
   const { data, isLoading, error, sendMessage, isSending } = useCommunications();
+  const createAnnouncementMutation = useCreateAnnouncement();
+  const deleteAnnouncementMutation = useDeleteAnnouncement();
+
+  // Map API announcements to UI format
+  const announcements: Announcement[] = data?.announcements ?? [];
 
   // Map API messages to UI format
   const messages: Message[] = (data?.messages ?? []).map((msg) => ({
@@ -614,59 +619,52 @@ export default function Communications() {
                   <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-24 w-full" />
                 </div>
+              ) : announcements.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">
+                  No announcements yet. Create your first announcement to get started.
+                </div>
               ) : (
                 <>
-                  {[
-                    {
-                      title: 'Easter Services',
-                      content: 'Join us for special Easter services on April 5th at 9 AM and 11 AM.',
-                      active: true,
-                      expires: '2026-04-06',
-                    },
-                    {
-                      title: 'Building Fund Update',
-                      content: 'We have reached 75% of our building fund goal!',
-                      active: true,
-                      expires: '2026-03-15',
-                    },
-                    {
-                      title: 'New Small Groups',
-                      content: 'Spring small groups are forming now. Sign up in the lobby!',
-                      active: true,
-                      expires: '2026-03-01',
-                    },
-                  ].map((announcement, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
+                  {announcements.map((announcement) => (
+                    <div key={announcement.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium">{announcement.title}</h4>
                           {announcement.active && (
                             <Badge className="bg-green-100 text-green-800">Active</Badge>
                           )}
+                          {announcement.priority === 'high' && (
+                            <Badge className="bg-red-100 text-red-800">High Priority</Badge>
+                          )}
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">
                           {announcement.content}
                         </p>
                         <p className="text-xs text-muted-foreground mt-2">
-                          Expires: {new Date(announcement.expires).toLocaleDateString()}
+                          Expires: {new Date(announcement.expiresAt).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="flex gap-2">
                         <Button variant="ghost" size="icon">
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => deleteAnnouncementMutation.mutate(announcement.id)}
+                          disabled={deleteAnnouncementMutation.isPending}
+                        >
                           <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
                       </div>
                     </div>
                   ))}
-                  <Button variant="outline" className="w-full">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Announcement
-                  </Button>
                 </>
               )}
+              <Button variant="outline" className="w-full">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Announcement
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>

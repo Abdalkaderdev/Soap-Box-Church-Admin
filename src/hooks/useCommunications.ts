@@ -542,8 +542,95 @@ export function useTemplateVariables() {
   });
 }
 
+// Announcement types
+export interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  active: boolean;
+  priority: 'low' | 'normal' | 'high';
+  expiresAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AnnouncementCreateInput {
+  title: string;
+  content: string;
+  active?: boolean;
+  priority?: 'low' | 'normal' | 'high';
+  expiresAt?: string;
+}
+
 /**
- * Combined hook for Communications page - provides messages, templates, and send functionality
+ * Hook for fetching church announcements
+ */
+export function useAnnouncements() {
+  const { churchId } = useAuth();
+
+  return useQuery<Announcement[]>({
+    queryKey: ['communications', churchId, 'announcements'],
+    queryFn: () => api.get<Announcement[]>(`/church/${churchId}/communications/announcements`),
+    enabled: Boolean(churchId),
+  });
+}
+
+/**
+ * Hook for creating an announcement
+ */
+export function useCreateAnnouncement() {
+  const { churchId } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<Announcement, Error, AnnouncementCreateInput>({
+    mutationFn: (data) =>
+      api.post<Announcement>(`/church/${churchId}/communications/announcements`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['communications', churchId, 'announcements'],
+      });
+    },
+  });
+}
+
+/**
+ * Hook for updating an announcement
+ */
+export function useUpdateAnnouncement() {
+  const { churchId } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<Announcement, Error, { announcementId: string; data: Partial<AnnouncementCreateInput> }>({
+    mutationFn: ({ announcementId, data }) =>
+      api.patch<Announcement>(`/church/${churchId}/communications/announcements/${announcementId}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['communications', churchId, 'announcements'],
+      });
+    },
+  });
+}
+
+/**
+ * Hook for deleting an announcement
+ */
+export function useDeleteAnnouncement() {
+  const { churchId } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, string>({
+    mutationFn: (announcementId) =>
+      api.delete<void>(`/church/${churchId}/communications/announcements/${announcementId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['communications', churchId, 'announcements'],
+      });
+    },
+  });
+}
+
+/**
+ * Combined hook for Communications page - provides messages, templates, announcements, and send functionality
  */
 export function useCommunications() {
   const { churchId } = useAuth();
@@ -560,6 +647,13 @@ export function useCommunications() {
   const templatesQuery = useQuery<MessageTemplate[]>({
     queryKey: communicationKeys.templates(churchId!),
     queryFn: () => api.get<MessageTemplate[]>(`/church/${churchId}/communications/templates`),
+    enabled: Boolean(churchId),
+  });
+
+  // Fetch announcements
+  const announcementsQuery = useQuery<Announcement[]>({
+    queryKey: ['communications', churchId, 'announcements'],
+    queryFn: () => api.get<Announcement[]>(`/church/${churchId}/communications/announcements`),
     enabled: Boolean(churchId),
   });
 
@@ -590,9 +684,10 @@ export function useCommunications() {
     data: {
       messages: messagesQuery.data ?? [],
       templates: templatesQuery.data ?? [],
+      announcements: announcementsQuery.data ?? [],
     },
-    isLoading: messagesQuery.isLoading || templatesQuery.isLoading,
-    error: messagesQuery.error || templatesQuery.error,
+    isLoading: messagesQuery.isLoading || templatesQuery.isLoading || announcementsQuery.isLoading,
+    error: messagesQuery.error || templatesQuery.error || announcementsQuery.error,
     sendMessage: sendMutation.mutateAsync,
     isSending: sendMutation.isPending,
   };

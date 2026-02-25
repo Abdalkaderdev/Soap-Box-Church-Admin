@@ -44,7 +44,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useVolunteers, useMinistryTeams } from '@/hooks/useVolunteers';
+import { useVolunteers, useMinistryTeams, useVolunteerSchedule } from '@/hooks/useVolunteers';
 
 interface Volunteer {
   id: string;
@@ -140,6 +140,18 @@ function StatsCardSkeleton() {
 export default function Volunteers() {
   const { data: volunteersResponse, isLoading: volunteersLoading, error: volunteersError } = useVolunteers();
   const { data: teamsData, isLoading: teamsLoading } = useMinistryTeams();
+
+  // Calculate schedule date range (current week)
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+
+  const { data: scheduleData, isLoading: scheduleLoading } = useVolunteerSchedule({
+    startDate: startOfWeek.toISOString().split('T')[0],
+    endDate: endOfWeek.toISOString().split('T')[0],
+  });
 
   // Map API volunteers to UI format
   const volunteers: Volunteer[] = (volunteersResponse?.data ?? []).map((v) => ({
@@ -545,54 +557,49 @@ export default function Volunteers() {
               <CardTitle>This Week's Schedule</CardTitle>
             </CardHeader>
             <CardContent>
-              {isLoading ? (
+              {isLoading || scheduleLoading ? (
                 <div className="space-y-4">
                   <Skeleton className="h-32 w-full" />
                   <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-20 w-full" />
                 </div>
+              ) : !scheduleData || scheduleData.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">
+                  No scheduled volunteer assignments for this week.
+                </div>
               ) : (
                 <div className="space-y-4">
-                  {[
-                    {
-                      day: 'Sunday, March 1',
-                      shifts: [
-                        { time: '8:00 AM', team: 'Greeting Ministry', volunteers: 4 },
-                        { time: '8:30 AM', team: 'Worship Team', volunteers: 8 },
-                        { time: '8:30 AM', team: 'Tech Team', volunteers: 3 },
-                        { time: '9:00 AM', team: "Children's Ministry", volunteers: 6 },
-                      ],
-                    },
-                    {
-                      day: 'Wednesday, March 4',
-                      shifts: [
-                        { time: '6:30 PM', team: 'Tech Team', volunteers: 2 },
-                        { time: '6:30 PM', team: 'Greeting Ministry', volunteers: 2 },
-                      ],
-                    },
-                    {
-                      day: 'Friday, March 6',
-                      shifts: [
-                        { time: '6:00 PM', team: 'Youth Ministry', volunteers: 5 },
-                      ],
-                    },
-                  ].map((schedule) => (
-                    <div key={schedule.day} className="border rounded-lg p-4">
-                      <h4 className="font-semibold mb-3">{schedule.day}</h4>
+                  {/* Group assignments by date */}
+                  {Object.entries(
+                    (scheduleData || []).reduce((acc, assignment) => {
+                      const dateKey = new Date(assignment.date).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        month: 'long',
+                        day: 'numeric',
+                      });
+                      if (!acc[dateKey]) {
+                        acc[dateKey] = [];
+                      }
+                      acc[dateKey].push(assignment);
+                      return acc;
+                    }, {} as Record<string, typeof scheduleData>)
+                  ).map(([day, assignments]) => (
+                    <div key={day} className="border rounded-lg p-4">
+                      <h4 className="font-semibold mb-3">{day}</h4>
                       <div className="space-y-2">
-                        {schedule.shifts.map((shift, idx) => (
+                        {assignments.map((assignment) => (
                           <div
-                            key={idx}
+                            key={assignment.id}
                             className="flex items-center justify-between text-sm py-2 border-b last:border-0"
                           >
                             <div className="flex items-center gap-4">
                               <span className="text-muted-foreground w-20">
-                                {shift.time}
+                                {assignment.startTime}
                               </span>
-                              <span className="font-medium">{shift.team}</span>
+                              <span className="font-medium">{assignment.role}</span>
                             </div>
                             <Badge variant="outline">
-                              {shift.volunteers} volunteers
+                              {assignment.status}
                             </Badge>
                           </div>
                         ))}
