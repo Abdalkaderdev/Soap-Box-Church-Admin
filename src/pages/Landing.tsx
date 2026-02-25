@@ -122,9 +122,9 @@ export default function Landing() {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
                 <span className="text-gray-900">The Complete</span>
                 <br />
-                <span className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] bg-clip-text text-transparent">Church Admin</span>
+                <span className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] bg-clip-text text-transparent">Church</span>
                 <br />
-                <span className="text-gray-900">Platform</span>
+                <span className="text-gray-900">MANAGEMENT SYSTEM</span>
               </h1>
 
               <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-xl">
