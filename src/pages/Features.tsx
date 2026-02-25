@@ -6,7 +6,7 @@ import {
   DollarSign,
   Mail,
   BarChart3,
-  ArrowRight,
+  ChevronRight,
   Database,
   Bell,
   FileText,
@@ -22,6 +22,8 @@ import {
   Heart,
   BookOpen,
   CheckCircle,
+  Check,
+  Sparkles,
 } from "lucide-react";
 
 // Custom Spiritual Icons
@@ -37,13 +39,12 @@ const ChurchIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   </svg>
 );
 
-// Hero background image
-const heroImage = "https://images.unsplash.com/photo-1560439514-4e9645039924?auto=format&fit=crop&w=1920&q=80";
-
 const featureCategories = [
   {
     title: "Member Management",
     description: "Track and engage your congregation",
+    badge: "Core Feature",
+    badgeColor: "green",
     icon: Users,
     features: [
       {
@@ -71,6 +72,8 @@ const featureCategories = [
   {
     title: "Donation & Giving",
     description: "Manage finances with ease",
+    badge: "No Platform Fees",
+    badgeColor: "blue",
     icon: DollarSign,
     features: [
       {
@@ -98,6 +101,8 @@ const featureCategories = [
   {
     title: "Communications",
     description: "Stay connected with your congregation",
+    badge: "Essential",
+    badgeColor: "purple",
     icon: Mail,
     features: [
       {
@@ -125,6 +130,8 @@ const featureCategories = [
   {
     title: "Events & Volunteers",
     description: "Coordinate ministry activities",
+    badge: "Popular",
+    badgeColor: "orange",
     icon: Calendar,
     features: [
       {
@@ -152,6 +159,8 @@ const featureCategories = [
   {
     title: "Admin & Security",
     description: "Enterprise-grade management tools",
+    badge: "Secure",
+    badgeColor: "gray",
     icon: Settings,
     features: [
       {
@@ -178,6 +187,14 @@ const featureCategories = [
   },
 ];
 
+const badgeColors: Record<string, string> = {
+  green: "bg-green-100 text-green-700",
+  blue: "bg-blue-100 text-blue-700",
+  purple: "bg-purple-100 text-purple-700",
+  orange: "bg-orange-100 text-orange-700",
+  gray: "bg-gray-100 text-gray-700",
+};
+
 export default function Features() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -186,19 +203,28 @@ export default function Features() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/">
-              <Logo size="sm" />
+              <div className="flex items-center gap-2 cursor-pointer">
+                <Logo size="sm" />
+              </div>
             </Link>
 
             {/* Navigation Links */}
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="/features" className="text-purple-600 font-semibold">Features</Link>
               <Link href="/about" className="text-gray-600 hover:text-purple-600 transition-colors font-medium">About</Link>
+              <Link href="/features" className="text-purple-600 font-semibold">Features</Link>
               <Link href="/contact" className="text-gray-600 hover:text-purple-600 transition-colors font-medium">Contact</Link>
-              <a href="https://soapboxsuperapp.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-purple-600 transition-colors font-medium">SoapBox</a>
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="outline"
+                className="hidden sm:flex border-purple-200 text-purple-600 hover:bg-purple-50"
+                onClick={() => window.open('https://calendly.com/soapboxsuperapp', '_blank')}
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                Book Demo
+              </Button>
               <Link href="/login">
                 <Button variant="ghost" className="text-gray-600 hover:text-purple-600">
                   Sign In
@@ -207,6 +233,7 @@ export default function Features() {
               <Link href="/login">
                 <Button className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] hover:from-[#6D28D9] hover:to-[#1D4ED8] text-white shadow-lg shadow-purple-500/25">
                   Get Started
+                  <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
             </div>
@@ -215,42 +242,35 @@ export default function Features() {
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img src={heroImage} alt="" className="w-full h-full object-cover" loading="eager" aria-hidden="true" />
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/80 via-gray-900/60 to-gray-900/80" />
-          <div className="absolute inset-0 bg-purple-900/20" />
-        </div>
-
+      <section className="relative py-20 sm:py-28 overflow-hidden bg-gradient-to-b from-purple-50 via-white to-white">
         <div className="max-w-4xl mx-auto relative z-10 text-center px-4">
-          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md text-white rounded-full px-5 py-2.5 mb-8 text-sm font-medium border border-white/20">
-            <ChurchIcon className="w-4 h-4" />
-            <span className="text-xs tracking-wide">COMPLETE PLATFORM</span>
+          <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 rounded-full px-4 py-2 mb-6 text-sm font-medium">
+            <Sparkles className="w-4 h-4" />
+            <span>Complete Platform</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">
-            <span className="text-white">Powerful Features for</span>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+            <span className="text-gray-900">Powerful Features for</span>
             <br />
-            <span className="text-purple-300 font-extrabold">Modern Ministry</span>
+            <span className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] bg-clip-text text-transparent">Modern Ministry</span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-200 font-medium max-w-2xl mx-auto mb-12">
-            Explore all the tools that make SoapBox Church Admin the most complete church management solution.
+          <p className="text-lg sm:text-xl text-gray-600 font-medium max-w-2xl mx-auto mb-10">
+            Explore all the tools that make Church Admin the most complete church management solution.
           </p>
 
           {/* Quick stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
-            <div className="bg-white/15 backdrop-blur-md rounded-2xl px-4 py-5 text-center border border-white/10">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white">50+</div>
-              <div className="text-gray-300 text-xs mt-1 font-medium">Features</div>
+          <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
+            <div className="bg-white rounded-2xl px-4 py-5 text-center border border-gray-100 shadow-sm">
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900">20+</div>
+              <div className="text-gray-500 text-xs mt-1 font-medium">Features</div>
             </div>
-            <div className="bg-white/15 backdrop-blur-md rounded-2xl px-4 py-5 text-center border border-white/10">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white">5</div>
-              <div className="text-gray-300 text-xs mt-1 font-medium">Categories</div>
+            <div className="bg-white rounded-2xl px-4 py-5 text-center border border-gray-100 shadow-sm">
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900">5</div>
+              <div className="text-gray-500 text-xs mt-1 font-medium">Categories</div>
             </div>
-            <div className="bg-white/15 backdrop-blur-md rounded-2xl px-4 py-5 text-center border border-white/10">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white">24/7</div>
-              <div className="text-gray-300 text-xs mt-1 font-medium">Support</div>
+            <div className="bg-white rounded-2xl px-4 py-5 text-center border border-gray-100 shadow-sm">
+              <div className="text-2xl sm:text-3xl font-bold text-gray-900">24/7</div>
+              <div className="text-gray-500 text-xs mt-1 font-medium">Support</div>
             </div>
           </div>
         </div>
@@ -260,19 +280,26 @@ export default function Features() {
       {featureCategories.map((category, categoryIndex) => (
         <section
           key={category.title}
-          className={`py-20 px-4 ${categoryIndex % 2 === 0 ? 'bg-white' : 'bg-gradient-to-br from-purple-50 to-purple-100'}`}
+          className={`py-20 px-4 ${categoryIndex % 2 === 0 ? 'bg-white' : 'bg-gradient-to-br from-purple-50 to-white'}`}
         >
           <div className="max-w-6xl mx-auto">
-            <div className="flex items-center gap-4 mb-12">
+            {/* Category Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-12">
               <div className="w-16 h-16 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/20">
                 <category.icon className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">{category.title}</h2>
+                <div className="flex items-center gap-3 mb-1">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">{category.title}</h2>
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColors[category.badgeColor]}`}>
+                    {category.badge}
+                  </span>
+                </div>
                 <p className="text-gray-600">{category.description}</p>
               </div>
             </div>
 
+            {/* Feature Cards */}
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {category.features.map((feature) => (
                 <div
@@ -308,12 +335,12 @@ export default function Features() {
             <a href="https://soapboxsuperapp.com/pricing" target="_blank" rel="noopener noreferrer">
               <Button className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] hover:from-[#6D28D9] hover:to-[#1D4ED8] text-white px-8 py-3 shadow-lg shadow-purple-500/25">
                 View SoapBox Plans
-                <ArrowRight className="ml-2 w-4 h-4" />
+                <ChevronRight className="ml-2 w-4 h-4" />
               </Button>
             </a>
             <Link href="/login">
               <Button variant="outline" className="border-purple-600 text-purple-600 hover:bg-purple-50 px-8 py-3">
-                Try Free for 30 Days
+                Try Free Today
               </Button>
             </Link>
           </div>
@@ -321,7 +348,7 @@ export default function Features() {
       </section>
 
       {/* CTA */}
-      <section className="relative py-20 px-4 overflow-hidden">
+      <section className="relative py-24 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#7C3AED] via-[#5B21B6] to-[#2563EB]" />
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1560439514-4e9645039924?auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center opacity-10" />
 
@@ -330,17 +357,17 @@ export default function Features() {
             <ChurchIcon className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Ready to Get Started?</h2>
-          <p className="text-xl text-purple-100 mb-8">
-            Try SoapBox free for 30 days. No credit card required.
+          <p className="text-xl text-purple-100 mb-10">
+            Try Church Admin free with your SoapBox subscription. No credit card required.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-wrap gap-4 justify-center mb-8">
             <Link href="/login">
               <Button
                 size="lg"
                 className="bg-white text-purple-600 hover:bg-gray-100 px-10 py-4 text-lg font-semibold shadow-xl"
               >
+                <Sparkles className="w-5 h-5 mr-2" />
                 Start Free Trial
-                <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
             <Button
@@ -351,41 +378,70 @@ export default function Features() {
               Schedule Demo
             </Button>
           </div>
+
+          {/* Benefit badges */}
+          <div className="flex flex-wrap gap-6 justify-center">
+            <div className="flex items-center gap-2 text-white/90">
+              <Check className="w-5 h-5 text-green-400" />
+              <span>Free with SoapBox</span>
+            </div>
+            <div className="flex items-center gap-2 text-white/90">
+              <Check className="w-5 h-5 text-green-400" />
+              <span>No credit card required</span>
+            </div>
+            <div className="flex items-center gap-2 text-white/90">
+              <Check className="w-5 h-5 text-green-400" />
+              <span>Setup in minutes</span>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 px-4">
+      <footer className="bg-gray-900 text-white py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="col-span-1 md:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            {/* Logo & Description */}
+            <div className="col-span-1 md:col-span-1">
               <Logo size="sm" />
-              <p className="text-gray-400 mt-4 mb-4">
+              <p className="text-gray-400 mt-4 text-sm leading-relaxed">
                 The complete church management platform powered by SoapBox Super App.
                 Helping churches shepherd their congregations with excellence.
               </p>
             </div>
 
+            {/* Features Column */}
             <div>
-              <h4 className="text-lg font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/features" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
+              <h4 className="text-lg font-semibold mb-4">Features</h4>
+              <ul className="space-y-3 text-gray-400 text-sm">
+                <li><Link href="/features" className="hover:text-white transition-colors">All Features</Link></li>
+                <li><Link href="/features" className="hover:text-white transition-colors">Member Management</Link></li>
+                <li><Link href="/features" className="hover:text-white transition-colors">Donation Tracking</Link></li>
+                <li><Link href="/features" className="hover:text-white transition-colors">Event Planning</Link></li>
+              </ul>
+            </div>
+
+            {/* Company Column */}
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Company</h4>
+              <ul className="space-y-3 text-gray-400 text-sm">
+                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
                 <li><a href="https://soapboxsuperapp.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">SoapBox App</a></li>
               </ul>
             </div>
 
+            {/* Legal Column */}
             <div>
-              <h4 className="text-lg font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
+              <h4 className="text-lg font-semibold mb-4">Legal</h4>
+              <ul className="space-y-3 text-gray-400 text-sm">
                 <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
             <p>&copy; {new Date().getFullYear()} SoapBox Super App. Built with faith and community in mind.</p>
           </div>
         </div>

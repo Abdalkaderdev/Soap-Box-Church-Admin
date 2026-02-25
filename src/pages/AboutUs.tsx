@@ -4,11 +4,15 @@ import { Logo } from "@/components/Logo";
 import {
   Heart,
   Users,
-  Shield,
-  BookOpen,
   ChevronRight,
   Star,
-  Lock,
+  Globe,
+  Sparkles,
+  Check,
+  Calendar,
+  Shield,
+  Target,
+  Lightbulb,
   Linkedin,
 } from "lucide-react";
 
@@ -16,6 +20,12 @@ import {
 const CrossIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
     <path d="M10 2V8H4V10H10V22H14V10H20V8H14V2H10Z"/>
+  </svg>
+);
+
+const ChurchIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18 12.22V21H6V12.22L4 13.5V15L6 13.78V21H4V23H20V21H18V13.78L20 15V13.5L18 12.22ZM8 21V15H10V21H8ZM14 21V15H16V21H14ZM11 7V4H9V7H7V9H9V11H7L12 16L17 11H15V9H17V7H15V4H13V7H11ZM12 2L10 4H14L12 2Z"/>
   </svg>
 );
 
@@ -27,16 +37,35 @@ const DoveIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   </svg>
 );
 
-const ChurchIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18 12.22V21H6V12.22L4 13.5V15L6 13.78V21H4V23H20V21H18V13.78L20 15V13.5L18 12.22ZM8 21V15H10V21H8ZM14 21V15H16V21H14ZM11 7V4H9V7H7V9H9V11H7L12 16L17 11H15V9H17V7H15V4H13V7H11ZM12 2L10 4H14L12 2Z"/>
-  </svg>
-);
+const values = [
+  {
+    icon: Heart,
+    title: "Faith-Centered",
+    description: "Every feature is designed with the mission of the church in mind, supporting your unique ministry needs.",
+  },
+  {
+    icon: Shield,
+    title: "Security First",
+    description: "Your congregation's data is treated with sacred care — secure, encrypted, and always under your control.",
+  },
+  {
+    icon: Target,
+    title: "Purpose-Built",
+    description: "Not adapted corporate software. Church Admin is built from the ground up for ministry.",
+  },
+  {
+    icon: Lightbulb,
+    title: "Innovation",
+    description: "Continually improving with new features based on feedback from real church leaders like you.",
+  },
+];
 
-// Hero background image
-const heroImage = "https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=1920&q=80";
-const volunteerImage = "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=800&q=80";
-const pastorImage = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80";
+const stats = [
+  { value: "10,000+", label: "Churches Served" },
+  { value: "2M+", label: "Members Managed" },
+  { value: "$50M+", label: "Donations Tracked" },
+  { value: "99.9%", label: "Uptime" },
+];
 
 export default function AboutUs() {
   return (
@@ -46,16 +75,28 @@ export default function AboutUs() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/">
-              <Logo size="sm" />
+              <div className="flex items-center gap-2 cursor-pointer">
+                <Logo size="sm" />
+              </div>
             </Link>
 
+            {/* Navigation Links */}
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="/features" className="text-gray-600 hover:text-purple-600 transition-colors font-medium">Features</Link>
               <Link href="/about" className="text-purple-600 font-semibold">About</Link>
+              <Link href="/features" className="text-gray-600 hover:text-purple-600 transition-colors font-medium">Features</Link>
               <Link href="/contact" className="text-gray-600 hover:text-purple-600 transition-colors font-medium">Contact</Link>
             </div>
 
-            <div className="flex items-center space-x-4">
+            {/* CTA Buttons */}
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="outline"
+                className="hidden sm:flex border-purple-200 text-purple-600 hover:bg-purple-50"
+                onClick={() => window.open('https://calendly.com/soapboxsuperapp', '_blank')}
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                Book Demo
+              </Button>
               <Link href="/login">
                 <Button variant="ghost" className="text-gray-600 hover:text-purple-600">
                   Sign In
@@ -64,6 +105,7 @@ export default function AboutUs() {
               <Link href="/login">
                 <Button className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] hover:from-[#6D28D9] hover:to-[#1D4ED8] text-white shadow-lg shadow-purple-500/25">
                   Get Started
+                  <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
             </div>
@@ -71,275 +113,243 @@ export default function AboutUs() {
         </div>
       </nav>
 
-      {/* Hero — Full-Bleed Image with Text Overlay */}
-      <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img src={heroImage} alt="" className="w-full h-full object-cover" loading="eager" aria-hidden="true" />
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/80 via-gray-900/60 to-gray-900/80" />
-          <div className="absolute inset-0 bg-purple-900/20" />
-        </div>
-
-        <div className="max-w-5xl mx-auto relative z-10 text-center px-4">
-          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md text-white rounded-full px-5 py-2.5 mb-8 text-sm font-medium border border-white/20">
-            <Heart className="w-4 h-4" />
-            <span className="text-xs tracking-wide">OUR STORY</span>
+      {/* Hero */}
+      <section className="relative py-20 sm:py-28 overflow-hidden bg-gradient-to-b from-purple-50 via-white to-white">
+        <div className="max-w-4xl mx-auto relative z-10 text-center px-4">
+          <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 rounded-full px-4 py-2 mb-6 text-sm font-medium">
+            <DoveIcon className="w-4 h-4" />
+            <span>Our Story</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6">
-            <span className="text-white">About SoapBox</span>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+            <span className="text-gray-900">Built for the</span>
             <br />
-            <span className="text-purple-300 font-extrabold">Church Admin</span>
+            <span className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] bg-clip-text text-transparent">Local Church</span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-200 font-medium max-w-2xl mx-auto mb-12">
-            Part of the SoapBox Super App — The Complete Faith-Based Digital Ministry Platform
+          <p className="text-lg sm:text-xl text-gray-600 font-medium max-w-2xl mx-auto mb-10">
+            Empowering pastors and ministry leaders with tools designed specifically for shepherding congregations in the digital age.
           </p>
 
-          {/* Stats row — glass white */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
-            <div className="bg-white/15 backdrop-blur-md rounded-2xl px-4 py-5 text-center border border-white/10 hover:bg-white/20 transition-all duration-300">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white">2023</div>
-              <div className="text-gray-300 text-xs mt-1 font-medium">Founded</div>
-            </div>
-            <div className="bg-white/15 backdrop-blur-md rounded-2xl px-4 py-5 text-center border border-white/10 hover:bg-white/20 transition-all duration-300">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white">100%</div>
-              <div className="text-gray-300 text-xs mt-1 font-medium">Faith-Focused</div>
-            </div>
-            <div className="bg-white/15 backdrop-blur-md rounded-2xl px-4 py-5 text-center border border-white/10 hover:bg-white/20 transition-all duration-300">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white">1000+</div>
-              <div className="text-gray-300 text-xs mt-1 font-medium">Churches</div>
-            </div>
+          {/* Stats Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {stats.map((stat) => (
+              <div key={stat.label} className="bg-white rounded-2xl px-4 py-5 text-center border border-gray-100 shadow-sm">
+                <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stat.value}</div>
+                <div className="text-gray-500 text-xs mt-1 font-medium">{stat.label}</div>
+              </div>
+            ))}
           </div>
+        </div>
+      </section>
 
-          {/* Scroll indicator */}
-          <div className="mt-14">
-            <div className="flex flex-col items-center gap-2 text-white/60">
-              <span className="text-xs font-medium tracking-wider uppercase">Discover Our Story</span>
-              <ChevronRight className="w-5 h-5 rotate-90 animate-bounce" />
+      {/* Mission Section */}
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left - Image */}
+            <div className="relative">
+              <img
+                src="https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=800&q=80"
+                alt="Church community"
+                className="w-full h-96 object-cover rounded-2xl shadow-2xl"
+              />
+              <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-2xl flex items-center justify-center shadow-xl">
+                <div className="text-center text-white">
+                  <CrossIcon className="w-12 h-12 mx-auto mb-2" />
+                  <p className="text-sm font-medium">Faith-First<br />Technology</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right - Content */}
+            <div>
+              <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 rounded-full px-4 py-2 mb-4 text-sm font-medium">
+                <Heart className="w-4 h-4" />
+                <span>Our Mission</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+                Helping Churches Thrive in the Digital Age
+              </h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Church Admin was born from a simple observation: churches deserve tools built specifically for their unique needs, not adapted corporate software that doesn't understand ministry.
+              </p>
+              <p className="text-lg text-gray-600 mb-8">
+                We believe technology should serve the mission of the church — to shepherd, connect, and grow congregations. Every feature we build is designed with pastors and ministry leaders in mind.
+              </p>
+
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-full">
+                  <Check className="w-5 h-5 text-purple-600" />
+                  <span className="font-medium text-gray-700">Ministry-Focused</span>
+                </div>
+                <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-full">
+                  <Check className="w-5 h-5 text-purple-600" />
+                  <span className="font-medium text-gray-700">Easy to Use</span>
+                </div>
+                <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-full">
+                  <Check className="w-5 h-5 text-purple-600" />
+                  <span className="font-medium text-gray-700">Always Improving</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-12 sm:py-16">
-
-        {/* Mission Section */}
-        <section className="mb-12 sm:mb-16">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div>
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
-                Our Mission
-              </h2>
-              <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
-                To build technology for the Church that strengthens relationships, enhances spiritual formation, and supports meaningful ministry in every season.
-              </p>
-
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <CrossIcon className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Faith-First Technology</h3>
-                    <p className="text-gray-600">Built exclusively for churches, not adapted from secular platforms.</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <Heart className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Community Connection</h3>
-                    <p className="text-gray-600">Strengthening relationships and building deeper spiritual bonds.</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <Shield className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Safe & Secure</h3>
-                    <p className="text-gray-600">Privacy-first design with no data reselling or ad tracking.</p>
-                  </div>
-                </div>
-              </div>
+      {/* Values Section */}
+      <section className="py-20 px-4 bg-gradient-to-br from-purple-50 to-white">
+        <div className="max-w-6xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 rounded-full px-4 py-2 mb-4 text-sm font-medium">
+              <Star className="w-4 h-4" />
+              <span>Our Values</span>
             </div>
-
-            <div className="mt-8 lg:mt-0 relative">
-              {/* Volunteer Image with overlaid card */}
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                <img
-                  src={volunteerImage}
-                  alt="Church volunteers serving together"
-                  className="w-full h-[400px] object-cover"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-purple-900/60 via-transparent to-transparent flex items-end">
-                  <div className="p-6 w-full bg-white/95 backdrop-blur-sm rounded-t-2xl">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Complete Church Management Platform
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Church Admin is part of the SoapBox Super App—the all-in-one platform designed to help churches grow, connect, and thrive in today's digital world.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* What We Do Section */}
-        <section className="mb-12 sm:mb-16">
-          <div className="text-center mb-6">
-            <p className="text-sm font-medium text-purple-600 mb-2">DIGITAL TOOLS FOR MODERN MINISTRY</p>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 px-4">
-              What We Do
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              What We Believe In
             </h2>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 sm:p-8 lg:p-12 mb-8">
-            <p className="text-base sm:text-lg text-gray-600 text-center max-w-4xl mx-auto mb-12">
-              SoapBox Church Admin is more than a church management system. It's a complete administrative platform that helps churches manage members, track giving, coordinate volunteers, and nurture spiritual growth.
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              These core values guide everything we do at Church Admin
             </p>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              <div className="group bg-white rounded-2xl p-6 lg:p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-gray-200 hover:border-purple-200">
-                <div className="w-14 h-14 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
-                  <Users className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="font-bold mb-3">Member Management</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">Track membership, families, and comprehensive profiles for your congregation.</p>
-              </div>
-
-              <div className="group bg-white rounded-2xl p-6 lg:p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-gray-200 hover:border-purple-200">
-                <div className="w-14 h-14 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
-                  <ChurchIcon className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="font-bold mb-3">Donation Tracking</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">Manage tithes, offerings, and donations with detailed financial reporting.</p>
-              </div>
-
-              <div className="group bg-white rounded-2xl p-6 lg:p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-gray-200 hover:border-purple-200">
-                <div className="w-14 h-14 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
-                  <BookOpen className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="font-bold mb-3">Discipleship Tracking</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">Monitor spiritual growth journeys, Bible studies, and mentorship programs.</p>
-              </div>
-            </div>
           </div>
-        </section>
 
-        {/* Who We Serve */}
-        <section className="mb-12 sm:mb-16">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 text-center mb-8 sm:mb-12 px-4">
-            Who We Serve
-          </h2>
-
+          {/* Values Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-full flex items-center justify-center mx-auto mb-6">
-                <ChurchIcon className="w-10 h-10 text-white" />
+            {values.map((value) => (
+              <div
+                key={value.title}
+                className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-purple-200 group"
+              >
+                <div className="w-14 h-14 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
+                  <value.icon className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{value.title}</h3>
+                <p className="text-gray-600">{value.description}</p>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Lead Pastors</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Senior leaders seeking comprehensive oversight of their ministry and congregation.
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Who We Serve Section */}
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 rounded-full px-4 py-2 mb-4 text-sm font-medium">
+              <Users className="w-4 h-4" />
+              <span>Who We Serve</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              Built for Every Church
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              From small community churches to large multi-campus ministries
+            </p>
+          </div>
+
+          {/* Church Types Grid */}
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center bg-gradient-to-br from-purple-50 to-white p-8 rounded-2xl border border-purple-100">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/20">
+                <ChurchIcon className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Small Churches</h3>
+              <p className="text-gray-600">
+                Perfect for churches under 100 members looking to organize and grow their ministry with professional tools.
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-full flex items-center justify-center mx-auto mb-6">
-                <Users className="w-10 h-10 text-white" />
+            <div className="text-center bg-gradient-to-br from-purple-50 to-white p-8 rounded-2xl border border-purple-100">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/20">
+                <Users className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Church Admins</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Administrative staff managing daily operations, events, and communications.
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Growing Churches</h3>
+              <p className="text-gray-600">
+                Scalable features that grow with your congregation, from hundreds to thousands of members.
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-full flex items-center justify-center mx-auto mb-6">
-                <BookOpen className="w-10 h-10 text-white" />
+            <div className="text-center bg-gradient-to-br from-purple-50 to-white p-8 rounded-2xl border border-purple-100">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/20">
+                <Globe className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Ministry Leaders</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Small group leaders, elders, and ministry coordinators overseeing teams.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-full flex items-center justify-center mx-auto mb-6">
-                <Heart className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">All Church Sizes</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Faith communities from small groups to megachurches of every size.
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Multi-Campus</h3>
+              <p className="text-gray-600">
+                Enterprise-grade tools for churches with multiple locations and complex organizational needs.
               </p>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Meet Our Team */}
-        <section className="mb-12 sm:mb-16">
-          <div className="text-center mb-8 sm:mb-12">
-            <p className="text-sm font-medium text-purple-600 mb-2">LEADERSHIP</p>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4 px-4">
+      {/* Leadership Section */}
+      <section className="py-20 px-4 bg-gradient-to-br from-gray-50 to-white">
+        <div className="max-w-6xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 rounded-full px-4 py-2 mb-4 text-sm font-medium">
+              <Users className="w-4 h-4" />
+              <span>Leadership</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Meet Our Team
             </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-              Passionate believers combining faith and technology to serve the Church.
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Passionate believers combining faith and technology to serve the Church
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Founder & CEO */}
-            <div className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow border border-gray-200">
-              <div className="w-24 h-24 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-full flex items-center justify-center mx-auto mb-4">
+          {/* Team Grid */}
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Founder */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center hover:shadow-xl transition-all duration-300">
+              <div className="w-24 h-24 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-3xl font-bold text-white">AS</span>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-1">Alan Safahi</h3>
-              <p className="text-purple-600 font-medium mb-3">Founder & CEO</p>
-              <p className="text-gray-600 text-sm">
-                Serial entrepreneur with 25+ years in fintech and software. Passionate about leveraging technology to strengthen faith communities.
+              <h3 className="text-xl font-bold text-gray-900 mb-1">Alan Safahi</h3>
+              <p className="text-purple-600 font-medium mb-4">Founder & CEO</p>
+              <p className="text-gray-600 text-sm mb-4">
+                Serial entrepreneur with 25+ years in fintech. Passionate about leveraging technology to strengthen faith communities.
               </p>
-              <div className="flex justify-center gap-3 mt-4">
-                <a href="https://www.linkedin.com/in/alansafahi" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-purple-100 transition-colors">
-                  <Linkedin className="w-4 h-4 text-gray-600" />
-                </a>
-              </div>
+              <a
+                href="https://linkedin.com/in/alansafahi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full hover:bg-purple-100 transition-colors"
+              >
+                <Linkedin className="w-5 h-5 text-gray-600" />
+              </a>
             </div>
 
-            {/* Tech Leadership */}
-            <div className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow border border-gray-200">
-              <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            {/* Engineering */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center hover:shadow-xl transition-all duration-300">
+              <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-3xl font-bold text-white">TL</span>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-1">Tech Leadership</h3>
-              <p className="text-purple-600 font-medium mb-3">Engineering Team</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-1">Tech Leadership</h3>
+              <p className="text-purple-600 font-medium mb-4">Engineering Team</p>
               <p className="text-gray-600 text-sm">
                 World-class engineering team with experience at leading tech companies. Building secure, scalable solutions for modern ministry.
               </p>
             </div>
 
             {/* Ministry Advisors */}
-            <div className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow border border-gray-200">
-              <div className="w-24 h-24 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-full flex items-center justify-center mx-auto mb-4">
-                <CrossIcon className="w-10 h-10 text-white" />
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center hover:shadow-xl transition-all duration-300">
+              <div className="w-24 h-24 bg-gradient-to-br from-[#7C3AED] to-[#2563EB] rounded-full flex items-center justify-center mx-auto mb-6">
+                <CrossIcon className="w-12 h-12 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-1">Ministry Advisors</h3>
-              <p className="text-purple-600 font-medium mb-3">Pastoral Guidance</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-1">Ministry Advisors</h3>
+              <p className="text-purple-600 font-medium mb-4">Pastoral Guidance</p>
               <p className="text-gray-600 text-sm">
                 Network of pastors and church administrators who guide our product development to ensure we truly serve the Church.
               </p>
             </div>
           </div>
 
-          <div className="mt-12 bg-purple-50 rounded-xl p-6 sm:p-8 text-center">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Join Our Mission</h3>
+          {/* Join CTA */}
+          <div className="mt-12 bg-purple-50 rounded-2xl p-8 text-center">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Join Our Mission</h3>
             <p className="text-gray-600 mb-4">
               We're always looking for talented believers who want to use their skills to serve the Church.
             </p>
@@ -348,163 +358,188 @@ export default function AboutUs() {
               <ChevronRight className="w-4 h-4 ml-1" />
             </a>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Our Story */}
-        <section className="mb-12 sm:mb-16">
-          <div className="bg-gradient-to-br from-gray-50 to-purple-50 rounded-2xl p-6 sm:p-8 lg:p-12 relative overflow-hidden">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 text-center mb-8 px-4">
-              Our Story
-            </h2>
+      {/* Part of SoapBox Section */}
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left - Content */}
+            <div>
+              <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 rounded-full px-4 py-2 mb-4 text-sm font-medium">
+                <Sparkles className="w-4 h-4" />
+                <span>Part of SoapBox</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+                Powered by SoapBox Super App
+              </h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Church Admin is part of the SoapBox Super App ecosystem — the complete digital ministry platform for faith communities.
+              </p>
+              <p className="text-lg text-gray-600 mb-8">
+                While Church Admin provides powerful tools for pastors and administrators, SoapBox gives your congregation a place to connect, pray, and grow together.
+              </p>
 
-            <div className="max-w-4xl mx-auto">
-              <div className="grid lg:grid-cols-5 gap-8 items-center mb-8">
-                <div className="lg:col-span-3">
-                  <p className="text-base sm:text-lg text-gray-700 mb-6">
-                    Church Admin began as part of the SoapBox Super App vision: What if the Church had a tech platform built exclusively for its mission—not adapted from secular tools?
-                  </p>
-                  <p className="text-base sm:text-lg text-gray-700">
-                    Founded by believers with backgrounds in software engineering, ministry, and nonprofit leadership, SoapBox was created to serve faith, not profit. Church Admin is included with every SoapBox subscription at no extra cost.
-                  </p>
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <Check className="w-5 h-5 text-green-600" />
+                  </div>
+                  <span className="text-gray-700 font-medium">Prayer walls for your congregation</span>
                 </div>
-                <div className="lg:col-span-2 rounded-2xl overflow-hidden shadow-xl h-64">
-                  <img src={pastorImage} alt="Pastor leading worship" className="w-full h-full object-cover" loading="lazy" />
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <Check className="w-5 h-5 text-green-600" />
+                  </div>
+                  <span className="text-gray-700 font-medium">Bible reading & S.O.A.P. journaling</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <Check className="w-5 h-5 text-green-600" />
+                  </div>
+                  <span className="text-gray-700 font-medium">Community engagement tools</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <Check className="w-5 h-5 text-green-600" />
+                  </div>
+                  <span className="text-gray-700 font-medium">10+ AI ministry tools</span>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl p-6 sm:p-8 shadow-lg border border-gray-200">
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-4 italic text-base sm:text-lg">
-                  "SoapBox Church Admin has brought our administrative team together in ways we never imagined. It's like having a digital command center for our ministry."
-                </p>
-                <div className="font-semibold text-gray-900">Pastor Michael J.</div>
-                <div className="text-gray-600">Texas</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Safe & Secure Features */}
-        <section className="mb-12 sm:mb-16">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4 px-4">
-              Faith-Based Technology That's Safe, Secure & Spirit-Led
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto px-4">
-              Church Admin is built for churches—prioritizing your privacy, values, and faith journey.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow duration-300">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Lock className="w-6 h-6 text-green-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Privacy-First</h3>
-              <p className="text-gray-600 text-sm">We protect your church's data with faith-first privacy—no ad tracking, no data resale, ever.</p>
+              <a href="https://soapboxsuperapp.com" target="_blank" rel="noopener noreferrer">
+                <Button className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] hover:from-[#6D28D9] hover:to-[#1D4ED8] text-white px-8 shadow-lg shadow-purple-500/25">
+                  Learn More About SoapBox
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </a>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow duration-300">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <CrossIcon className="w-6 h-6 text-purple-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Faith-Focused</h3>
-              <p className="text-gray-600 text-sm">Designed with spiritual discernment—technology supports your mission without replacing it.</p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow duration-300">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <ChurchIcon className="w-6 h-6 text-purple-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Church-Built</h3>
-              <p className="text-gray-600 text-sm">Purpose-built church technology—not a generic business platform in disguise.</p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 text-center hover:shadow-xl transition-shadow duration-300">
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Users className="w-6 h-6 text-orange-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Always Available</h3>
-              <p className="text-gray-600 text-sm">Access your church data anywhere with cloud-based technology and dedicated support.</p>
+            {/* Right - Image Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <img
+                src="https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&w=400&q=80"
+                alt="Bible study"
+                className="w-full h-48 object-cover rounded-xl shadow-lg"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=400&q=80"
+                alt="Church community"
+                className="w-full h-48 object-cover rounded-xl shadow-lg"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1560439514-4e9645039924?auto=format&fit=crop&w=400&q=80"
+                alt="Pastor"
+                className="w-full h-48 object-cover rounded-xl shadow-lg"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80"
+                alt="Small group"
+                className="w-full h-48 object-cover rounded-xl shadow-lg"
+              />
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Join the Movement */}
-        <section className="relative bg-gradient-to-br from-[#7C3AED] via-[#5B21B6] to-[#2563EB] rounded-2xl p-6 sm:p-8 lg:p-12 text-center text-white overflow-hidden">
-          {/* Background image overlay */}
-          <div className="absolute inset-0 z-0">
-            <img src={heroImage} alt="" className="w-full h-full object-cover opacity-10" loading="lazy" />
+      {/* CTA */}
+      <section className="relative py-24 px-4 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#7C3AED] via-[#5B21B6] to-[#2563EB]" />
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center opacity-10" />
+
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <ChurchIcon className="w-8 h-8 text-white" />
           </div>
-          <div className="relative z-10">
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <DoveIcon className="w-8 h-8 text-white" />
-          </div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6 px-4">
-            Transform Your Church Management
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            Ready to Transform Your Ministry?
           </h2>
-          <p className="text-base sm:text-lg text-purple-100 mb-8 max-w-2xl mx-auto px-4">
-            Ready to streamline your church administration? Experience where faith meets functionality.
+          <p className="text-xl text-purple-100 mb-10">
+            Join thousands of churches already using Church Admin to shepherd their congregations.
           </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-wrap gap-4 justify-center mb-8">
             <Link href="/login">
               <Button
                 size="lg"
-                className="bg-white text-purple-600 hover:bg-gray-100 px-12 py-4 text-lg font-semibold w-full sm:w-auto min-w-[200px] shadow-xl"
+                className="bg-white text-purple-600 hover:bg-gray-100 px-10 py-4 text-lg font-semibold shadow-xl"
               >
-                Start Free Today
+                <Sparkles className="w-5 h-5 mr-2" />
+                Get Started Free
               </Button>
             </Link>
             <Button
               size="lg"
-              className="bg-transparent text-white border-2 border-white/80 hover:bg-white/10 px-12 py-4 text-lg font-semibold w-full sm:w-auto min-w-[200px]"
-              onClick={() => window.open('https://www.calendly.com/soapboxsuperapp', '_blank')}
+              className="bg-transparent text-white border-2 border-white/80 hover:bg-white/10 px-10 py-4 text-lg"
+              onClick={() => window.open('https://calendly.com/soapboxsuperapp', '_blank')}
             >
               Schedule Demo
             </Button>
           </div>
-          </div>
-        </section>
 
-      </div>
+          {/* Benefit badges */}
+          <div className="flex flex-wrap gap-6 justify-center">
+            <div className="flex items-center gap-2 text-white/90">
+              <Check className="w-5 h-5 text-green-400" />
+              <span>Free with SoapBox</span>
+            </div>
+            <div className="flex items-center gap-2 text-white/90">
+              <Check className="w-5 h-5 text-green-400" />
+              <span>No credit card required</span>
+            </div>
+            <div className="flex items-center gap-2 text-white/90">
+              <Check className="w-5 h-5 text-green-400" />
+              <span>Setup in minutes</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 px-4">
+      <footer className="bg-gray-900 text-white py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="col-span-1 md:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            {/* Logo & Description */}
+            <div className="col-span-1 md:col-span-1">
               <Logo size="sm" />
-              <p className="text-gray-400 mt-4 mb-4">
+              <p className="text-gray-400 mt-4 text-sm leading-relaxed">
                 The complete church management platform powered by SoapBox Super App.
                 Helping churches shepherd their congregations with excellence.
               </p>
             </div>
 
+            {/* Features Column */}
             <div>
-              <h4 className="text-lg font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/features" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
+              <h4 className="text-lg font-semibold mb-4">Features</h4>
+              <ul className="space-y-3 text-gray-400 text-sm">
+                <li><Link href="/features" className="hover:text-white transition-colors">All Features</Link></li>
+                <li><Link href="/features" className="hover:text-white transition-colors">Member Management</Link></li>
+                <li><Link href="/features" className="hover:text-white transition-colors">Donation Tracking</Link></li>
+                <li><Link href="/features" className="hover:text-white transition-colors">Event Planning</Link></li>
+              </ul>
+            </div>
+
+            {/* Company Column */}
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Company</h4>
+              <ul className="space-y-3 text-gray-400 text-sm">
+                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
                 <li><a href="https://soapboxsuperapp.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">SoapBox App</a></li>
               </ul>
             </div>
 
+            {/* Legal Column */}
             <div>
-              <h4 className="text-lg font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
+              <h4 className="text-lg font-semibold mb-4">Legal</h4>
+              <ul className="space-y-3 text-gray-400 text-sm">
                 <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
             <p>&copy; {new Date().getFullYear()} SoapBox Super App. Built with faith and community in mind.</p>
           </div>
         </div>
