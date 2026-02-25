@@ -116,7 +116,7 @@ export default function Landing() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 rounded-full px-4 py-2 mb-6 text-sm font-medium">
                 <Sparkles className="w-4 h-4" />
-                <span>"The #1 Church Management Platform"</span>
+                <span>Complete Church Management Software</span>
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
@@ -783,7 +783,7 @@ export default function Landing() {
             Ready to Transform Your Church Management?
           </h2>
           <p className="text-xl text-purple-100 mb-10 max-w-2xl mx-auto">
-            Join thousands of churches worldwide using Church Admin to connect, grow, and serve.
+            Start using Church Admin today to connect, grow, and serve your congregation.
           </p>
 
           <div className="flex flex-wrap gap-4 justify-center mb-8">

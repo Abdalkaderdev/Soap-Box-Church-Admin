@@ -456,7 +456,7 @@ export default function AboutUs() {
             Ready to Transform Your Ministry?
           </h2>
           <p className="text-xl text-purple-100 mb-10">
-            Join thousands of churches already using Church Admin to shepherd their congregations.
+            Start using Church Admin today to shepherd your congregation with powerful tools.
           </p>
           <div className="flex flex-wrap gap-4 justify-center mb-8">
             <Link href="/login">
