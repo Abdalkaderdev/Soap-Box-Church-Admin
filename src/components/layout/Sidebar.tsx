@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { routes } from "@/routes";
 import { Logo, LogoIcon } from "@/components/Logo";
 import { useAuth } from "@/App";
+import { api } from "@/lib/api";
 import {
   LayoutDashboard,
   Users,
@@ -99,6 +101,7 @@ const bottomNavigationItems = [
 export function Sidebar() {
   const [location, navigate] = useLocation();
   const { logout } = useAuth();
+  const [isNavigatingToBuilder, setIsNavigatingToBuilder] = useState(false);
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -112,11 +115,39 @@ export function Sidebar() {
     navigate(routes.login);
   };
 
-  // Get Website Builder URL
-  const getWebsiteBuilderUrl = () => {
-    return window.location.origin.includes("localhost")
-      ? "http://localhost:3000"
-      : "https://builder.soapboxsuperapp.com";
+  // Navigate to Website Builder with SSO
+  const handleNavigateToBuilder = async () => {
+    if (isNavigatingToBuilder) return;
+    setIsNavigatingToBuilder(true);
+
+    try {
+      // Generate SSO token via API
+      const response = await api.post<{
+        success: boolean;
+        redirectUrl?: string;
+        message?: string;
+      }>("/sso/generate-token", { targetApp: "website-builder" });
+
+      if (response.success && response.redirectUrl) {
+        // Open the builder with the SSO token
+        window.open(response.redirectUrl, "_blank");
+      } else {
+        // Fallback: open builder without SSO (user will need to login)
+        const fallbackUrl = window.location.origin.includes("localhost")
+          ? "http://localhost:3000"
+          : "https://builder.soapboxsuperapp.com";
+        window.open(fallbackUrl, "_blank");
+      }
+    } catch (error) {
+      console.error("SSO token generation failed:", error);
+      // Fallback: open builder without SSO
+      const fallbackUrl = window.location.origin.includes("localhost")
+        ? "http://localhost:3000"
+        : "https://builder.soapboxsuperapp.com";
+      window.open(fallbackUrl, "_blank");
+    } finally {
+      setIsNavigatingToBuilder(false);
+    }
   };
 
   return (
@@ -189,12 +220,13 @@ export function Sidebar() {
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 text-ivory-400/70 hover:bg-sage-800/30 hover:text-sage-300 transition-all duration-200 h-10 rounded-lg mb-1"
-            onClick={() => {
-              window.open(getWebsiteBuilderUrl(), "_blank");
-            }}
+            onClick={handleNavigateToBuilder}
+            disabled={isNavigatingToBuilder}
           >
-            <Globe className="h-4 w-4 text-sage-500" />
-            <span className="flex-1 text-left text-sm">Website Builder</span>
+            <Globe className={`h-4 w-4 text-sage-500 ${isNavigatingToBuilder ? "animate-spin" : ""}`} />
+            <span className="flex-1 text-left text-sm">
+              {isNavigatingToBuilder ? "Opening..." : "Website Builder"}
+            </span>
             <ExternalLink className="h-3 w-3 opacity-50" />
           </Button>
 

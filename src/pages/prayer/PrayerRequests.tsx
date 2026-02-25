@@ -548,6 +548,8 @@ export default function PrayerRequests() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
+                id="prayer-search"
+                name="prayer-search"
                 placeholder="Search by title, description, or name..."
                 value={searchQuery}
                 onChange={(e) => {
@@ -565,8 +567,9 @@ export default function PrayerRequests() {
                 setCategoryFilter(value);
                 setPage(1);
               }}
+              name="category-filter"
             >
-              <SelectTrigger className="w-full sm:w-[180px] bg-white">
+              <SelectTrigger id="category-filter" className="w-full sm:w-[180px] bg-white">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
@@ -791,6 +794,8 @@ export default function PrayerRequests() {
                           </DialogHeader>
                           <div className="py-4">
                             <Textarea
+                              id="answered-note"
+                              name="answered-note"
                               placeholder="Share a testimony of how this prayer was answered..."
                               rows={3}
                               value={answeredNote}
