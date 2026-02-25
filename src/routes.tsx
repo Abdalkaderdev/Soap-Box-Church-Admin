@@ -23,6 +23,10 @@ const CheckIn = lazy(() => import("./pages/checkin/CheckIn"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Landing = lazy(() => import("./pages/Landing"));
 const Features = lazy(() => import("./pages/Features"));
+const AboutUs = lazy(() => import("./pages/AboutUs"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
 
 // Loading fallback component
 function PageLoader() {
@@ -40,6 +44,10 @@ function PageLoader() {
 export const routes = {
   landing: "/",
   features: "/features",
+  about: "/about",
+  contact: "/contact",
+  privacy: "/privacy",
+  terms: "/terms",
   dashboard: "/dashboard",
   members: {
     list: "/members",
@@ -85,6 +93,18 @@ export function AppRoutes() {
 
         {/* Features */}
         <Route path="/features" component={Features} />
+
+        {/* About */}
+        <Route path="/about" component={AboutUs} />
+
+        {/* Contact */}
+        <Route path="/contact" component={Contact} />
+
+        {/* Privacy */}
+        <Route path="/privacy" component={Privacy} />
+
+        {/* Terms */}
+        <Route path="/terms" component={Terms} />
 
         {/* Dashboard */}
         <Route path="/dashboard" component={Dashboard} />
