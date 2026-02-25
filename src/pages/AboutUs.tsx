@@ -61,10 +61,10 @@ const values = [
 ];
 
 const stats = [
-  { value: "10,000+", label: "Churches Served" },
-  { value: "2M+", label: "Members Managed" },
-  { value: "$50M+", label: "Donations Tracked" },
-  { value: "99.9%", label: "Uptime" },
+  { value: "20+", label: "Features" },
+  { value: "24/7", label: "Support" },
+  { value: "Free", label: "With SoapBox" },
+  { value: "100%", label: "Cloud-Based" },
 ];
 
 export default function AboutUs() {
