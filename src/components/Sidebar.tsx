@@ -13,10 +13,12 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Church,
   ChevronDown,
   ChevronUp,
+  LogOut,
+  ExternalLink,
 } from 'lucide-react';
+import { Logo, LogoIcon } from './Logo';
 
 interface NavItem {
   name: string;
@@ -122,24 +124,31 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     return isActive(item.href);
   };
 
+  const handleSignOut = () => {
+    sessionStorage.removeItem("soapbox_church_auth");
+    window.location.href = "/login";
+  };
+
   return (
     <aside
-      className={`fixed left-0 top-0 z-40 h-screen bg-slate-900 text-white transition-all duration-300 ${
+      className={`fixed left-0 top-0 z-40 h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 text-white transition-all duration-300 ${
         collapsed ? 'w-16' : 'w-64'
       }`}
     >
       {/* Logo Section */}
-      <div className="flex h-16 items-center justify-between border-b border-slate-700 px-4">
+      <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <Church className="h-8 w-8 text-blue-400" />
-            <span className="text-lg font-semibold">ChurchAdmin</span>
+            <Logo size="sm" />
+            <span className="text-[10px] font-medium text-purple-300/80 bg-purple-500/20 px-2 py-0.5 rounded-full ml-1">
+              Church
+            </span>
           </div>
         )}
-        {collapsed && <Church className="mx-auto h-8 w-8 text-blue-400" />}
+        {collapsed && <LogoIcon size="sm" className="mx-auto" />}
         <button
           onClick={onToggle}
-          className={`rounded-lg p-1.5 hover:bg-slate-800 ${collapsed ? 'mx-auto mt-2' : ''}`}
+          className={`rounded-lg p-1.5 hover:bg-white/10 transition-colors ${collapsed ? 'mx-auto mt-2' : ''}`}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? (
@@ -151,7 +160,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="h-[calc(100vh-4rem)] overflow-y-auto px-2 py-4">
+      <nav className="h-[calc(100vh-8rem)] overflow-y-auto px-2 py-4">
         <ul className="space-y-1">
           {navigation.map((item) => (
             <li key={item.name}>
@@ -161,12 +170,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     onClick={() => toggleExpand(item.name)}
                     className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                       isParentActive(item)
-                        ? 'bg-blue-600 text-white'
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                        ? 'bg-gradient-to-r from-indigo-500/30 to-purple-500/30 text-white border border-white/10'
+                        : 'text-slate-300 hover:bg-white/10 hover:text-white'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <item.icon className={`h-5 w-5 flex-shrink-0 ${isParentActive(item) ? 'text-purple-400' : ''}`} />
                       <span>{item.name}</span>
                     </div>
                     {expandedItems.includes(item.name) ? (
@@ -183,8 +192,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                             href={child.href}
                             className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
                               isActive(child.href)
-                                ? 'bg-slate-700 text-white'
-                                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                ? 'bg-white/10 text-white'
+                                : 'text-slate-400 hover:bg-white/5 hover:text-white'
                             }`}
                           >
                             {child.name}
@@ -199,12 +208,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   href={item.href}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                     isParentActive(item)
-                      ? 'bg-blue-600 text-white'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      ? 'bg-gradient-to-r from-indigo-500/30 to-purple-500/30 text-white border border-white/10'
+                      : 'text-slate-300 hover:bg-white/10 hover:text-white'
                   } ${collapsed ? 'justify-center' : ''}`}
                   title={collapsed ? item.name : undefined}
                 >
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
+                  <item.icon className={`h-5 w-5 flex-shrink-0 ${isParentActive(item) ? 'text-purple-400' : ''}`} />
                   {!collapsed && <span>{item.name}</span>}
                 </Link>
               )}
@@ -212,6 +221,43 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           ))}
         </ul>
       </nav>
+
+      {/* Bottom Section */}
+      <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 px-2 py-3">
+        {!collapsed && (
+          <>
+            {/* Back to SoapBox */}
+            <button
+              onClick={() => window.open("https://app.soapbox.com", "_blank")}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-white/10 hover:text-white transition-colors mb-1"
+            >
+              <LogoIcon size="sm" className="h-5 w-5" />
+              <span className="flex-1 text-left">Back to SoapBox</span>
+              <ExternalLink className="h-3 w-3 opacity-50" />
+            </button>
+          </>
+        )}
+
+        <button
+          onClick={handleSignOut}
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-red-500/20 hover:text-red-300 transition-colors ${
+            collapsed ? 'justify-center' : ''
+          }`}
+          title={collapsed ? 'Sign out' : undefined}
+        >
+          <LogOut className="h-5 w-5" />
+          {!collapsed && <span>Sign out</span>}
+        </button>
+
+        {!collapsed && (
+          <p className="text-[10px] text-slate-500 text-center mt-3">
+            Powered by{" "}
+            <span className="font-medium bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              SoapBox Super App
+            </span>
+          </p>
+        )}
+      </div>
     </aside>
   );
 }

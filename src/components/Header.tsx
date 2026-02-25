@@ -12,7 +12,9 @@ import {
   Menu,
   ChevronDown,
   X,
+  ExternalLink,
 } from 'lucide-react';
+import { LogoIcon } from './Logo';
 
 interface Notification {
   id: string;
@@ -110,7 +112,7 @@ export default function Header({ onMenuToggle, user }: HeaderProps) {
       case 'error':
         return 'bg-red-100 text-red-800';
       default:
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-indigo-100 text-indigo-800';
     }
   };
 
@@ -122,8 +124,13 @@ export default function Header({ onMenuToggle, user }: HeaderProps) {
 
   const currentUser = user || defaultUser;
 
+  const handleSignOut = () => {
+    sessionStorage.removeItem("soapbox_church_auth");
+    window.location.href = "/login";
+  };
+
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 shadow-sm">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 px-4 shadow-sm">
       {/* Left Section */}
       <div className="flex items-center gap-4">
         {/* Mobile Menu Toggle */}
@@ -145,7 +152,7 @@ export default function Header({ onMenuToggle, user }: HeaderProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setShowSearch(true)}
-              className="w-64 rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-sm placeholder-gray-500 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 lg:w-96"
+              className="w-64 rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-sm placeholder-gray-500 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 lg:w-96"
             />
             {searchQuery && (
               <button
@@ -196,7 +203,7 @@ export default function Header({ onMenuToggle, user }: HeaderProps) {
           >
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
-              <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+              <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-xs font-medium text-white">
                 {unreadCount}
               </span>
             )}
@@ -206,11 +213,14 @@ export default function Header({ onMenuToggle, user }: HeaderProps) {
           {showNotifications && (
             <div className="absolute right-0 top-full mt-2 w-80 rounded-lg border border-gray-200 bg-white shadow-lg">
               <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-                <h3 className="font-semibold text-gray-900">Notifications</h3>
+                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <Bell className="h-4 w-4 text-purple-500" />
+                  Notifications
+                </h3>
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllAsRead}
-                    className="text-sm text-blue-600 hover:text-blue-700"
+                    className="text-sm text-indigo-600 hover:text-indigo-700"
                   >
                     Mark all as read
                   </button>
@@ -227,7 +237,7 @@ export default function Header({ onMenuToggle, user }: HeaderProps) {
                       key={notification.id}
                       onClick={() => markAsRead(notification.id)}
                       className={`cursor-pointer border-b border-gray-100 px-4 py-3 hover:bg-gray-50 ${
-                        !notification.read ? 'bg-blue-50' : ''
+                        !notification.read ? 'bg-indigo-50' : ''
                       }`}
                     >
                       <div className="flex items-start gap-3">
@@ -250,7 +260,7 @@ export default function Header({ onMenuToggle, user }: HeaderProps) {
                           </p>
                         </div>
                         {!notification.read && (
-                          <span className="h-2 w-2 rounded-full bg-blue-500" />
+                          <span className="h-2 w-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
                         )}
                       </div>
                     </div>
@@ -259,7 +269,7 @@ export default function Header({ onMenuToggle, user }: HeaderProps) {
               </div>
               <Link
                 href="/notifications"
-                className="block border-t border-gray-200 px-4 py-3 text-center text-sm font-medium text-blue-600 hover:bg-gray-50"
+                className="block border-t border-gray-200 px-4 py-3 text-center text-sm font-medium text-purple-600 hover:bg-gray-50"
               >
                 View all notifications
               </Link>
@@ -273,7 +283,7 @@ export default function Header({ onMenuToggle, user }: HeaderProps) {
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center gap-2 rounded-lg p-2 hover:bg-gray-100"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-medium text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-sm font-medium text-white">
               {currentUser.name
                 .split(' ')
                 .map((n) => n[0])
@@ -290,9 +300,13 @@ export default function Header({ onMenuToggle, user }: HeaderProps) {
           {/* User Menu Dropdown */}
           {showUserMenu && (
             <div className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
-              <div className="border-b border-gray-200 px-4 py-3 lg:hidden">
-                <p className="text-sm font-medium text-gray-900">{currentUser.name}</p>
+              <div className="border-b border-gray-200 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium text-gray-900">{currentUser.name}</p>
+                  <LogoIcon size="sm" className="h-3 w-3" />
+                </div>
                 <p className="text-xs text-gray-500">{currentUser.email}</p>
+                <p className="text-xs text-purple-500 mt-1">SoapBox Connected</p>
               </div>
               <Link
                 href="/profile"
@@ -308,12 +322,17 @@ export default function Header({ onMenuToggle, user }: HeaderProps) {
                 <Settings className="h-4 w-4" />
                 Settings
               </Link>
+              <button
+                onClick={() => window.open("https://app.soapbox.com/profile", "_blank")}
+                className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <LogoIcon size="sm" className="h-4 w-4" />
+                <span className="flex-1 text-left">SoapBox Profile</span>
+                <ExternalLink className="h-3 w-3 opacity-50" />
+              </button>
               <hr className="my-1" />
               <button
-                onClick={() => {
-                  // Handle logout
-                  console.log('Logging out...');
-                }}
+                onClick={handleSignOut}
                 className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
               >
                 <LogOut className="h-4 w-4" />
@@ -335,7 +354,7 @@ export default function Header({ onMenuToggle, user }: HeaderProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoFocus
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-sm placeholder-gray-500 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-sm placeholder-gray-500 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
         </div>

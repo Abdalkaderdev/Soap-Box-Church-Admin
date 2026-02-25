@@ -9,195 +9,44 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import { routes } from "@/routes";
+import { useDashboard } from "@/hooks/useDashboard";
 
 // Placeholder data
 const churchName = "Grace Community Church";
 
 type ChangeType = "positive" | "negative" | "neutral";
 
-const stats: Array<{
+interface DashboardStat {
   title: string;
   value: string;
   change: string;
   changeType: ChangeType;
   description: string;
   icon: React.ReactNode;
-}> = [
-  {
-    title: "Total Members",
-    value: "1,247",
-    change: "+12%",
-    changeType: "positive" as const,
-    description: "from last month",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-4 w-4"
-      >
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-    ),
-  },
-  {
-    title: "This Month's Giving",
-    value: "$42,850",
-    change: "+8.2%",
-    changeType: "positive" as const,
-    description: "from last month",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-4 w-4"
-      >
-        <line x1="12" x2="12" y1="2" y2="22" />
-        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-      </svg>
-    ),
-  },
-  {
-    title: "Upcoming Events",
-    value: "8",
-    change: "3 this week",
-    changeType: "neutral" as const,
-    description: "scheduled",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-4 w-4"
-      >
-        <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-        <line x1="16" x2="16" y1="2" y2="6" />
-        <line x1="8" x2="8" y1="2" y2="6" />
-        <line x1="3" x2="21" y1="10" y2="10" />
-      </svg>
-    ),
-  },
-  {
-    title: "Active Volunteers",
-    value: "89",
-    change: "+5",
-    changeType: "positive" as const,
-    description: "from last month",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-4 w-4"
-      >
-        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-      </svg>
-    ),
-  },
-];
+}
 
-const recentDonations = [
-  {
-    id: 1,
-    donor: "John & Sarah Mitchell",
-    amount: "$500.00",
-    date: "Today",
-    type: "Tithe",
-    avatar: "JM",
-  },
-  {
-    id: 2,
-    donor: "Michael Thompson",
-    amount: "$250.00",
-    date: "Today",
-    type: "Building Fund",
-    avatar: "MT",
-  },
-  {
-    id: 3,
-    donor: "Anonymous",
-    amount: "$1,000.00",
-    date: "Yesterday",
-    type: "Missions",
-    avatar: "AN",
-  },
-  {
-    id: 4,
-    donor: "Grace Family",
-    amount: "$150.00",
-    date: "Yesterday",
-    type: "Tithe",
-    avatar: "GF",
-  },
-  {
-    id: 5,
-    donor: "Robert Chen",
-    amount: "$75.00",
-    date: "2 days ago",
-    type: "Youth Ministry",
-    avatar: "RC",
-  },
-];
+interface RecentDonation {
+  id: number;
+  donor: string;
+  amount: string;
+  date: string;
+  type: string;
+  avatar: string;
+}
 
-const upcomingEvents = [
-  {
-    id: 1,
-    title: "Sunday Worship Service",
-    date: "Feb 25, 2026",
-    time: "10:00 AM",
-    location: "Main Sanctuary",
-    attendees: 450,
-    status: "confirmed" as const,
-  },
-  {
-    id: 2,
-    title: "Youth Group Meeting",
-    date: "Feb 26, 2026",
-    time: "6:30 PM",
-    location: "Youth Center",
-    attendees: 45,
-    status: "confirmed" as const,
-  },
-  {
-    id: 3,
-    title: "Women's Bible Study",
-    date: "Feb 27, 2026",
-    time: "9:00 AM",
-    location: "Fellowship Hall",
-    attendees: 32,
-    status: "confirmed" as const,
-  },
-  {
-    id: 4,
-    title: "Community Outreach",
-    date: "Feb 28, 2026",
-    time: "2:00 PM",
-    location: "Community Center",
-    attendees: 25,
-    status: "pending" as const,
-  },
-];
+interface UpcomingEvent {
+  id: number;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  attendees: number;
+  status: "confirmed" | "pending";
+}
 
 const quickActions = [
   {
@@ -289,7 +138,150 @@ const quickActions = [
   },
 ];
 
+const statIcons = {
+  members: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+    >
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  ),
+  giving: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+    >
+      <line x1="12" x2="12" y1="2" y2="22" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  ),
+  events: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+    >
+      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+      <line x1="16" x2="16" y1="2" y2="6" />
+      <line x1="8" x2="8" y1="2" y2="6" />
+      <line x1="3" x2="21" y1="10" y2="10" />
+    </svg>
+  ),
+  volunteers: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+    >
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+    </svg>
+  ),
+};
+
+function StatCardSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-8 w-8 rounded-full" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-8 w-20 mb-1" />
+        <Skeleton className="h-4 w-32" />
+      </CardContent>
+    </Card>
+  );
+}
+
+function DonationItemSkeleton() {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-10 w-10 rounded-full" />
+        <div>
+          <Skeleton className="h-4 w-32 mb-1" />
+          <Skeleton className="h-3 w-24" />
+        </div>
+      </div>
+      <Skeleton className="h-4 w-16" />
+    </div>
+  );
+}
+
+function EventItemSkeleton() {
+  return (
+    <div className="flex items-start justify-between border-b border-border pb-4 last:border-0 last:pb-0">
+      <div className="flex gap-3">
+        <Skeleton className="h-14 w-14 rounded-lg" />
+        <div>
+          <Skeleton className="h-4 w-40 mb-1" />
+          <Skeleton className="h-3 w-32 mb-2" />
+          <div className="flex gap-2">
+            <Skeleton className="h-5 w-16 rounded-full" />
+            <Skeleton className="h-5 w-20" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
+  const { data, isLoading, error } = useDashboard();
+
+  const stats: DashboardStat[] = data?.stats ?? [];
+  const recentDonations: RecentDonation[] = data?.recentDonations ?? [];
+  const upcomingEvents: UpcomingEvent[] = data?.upcomingEvents ?? [];
+  const systemStatus = data?.systemStatus ?? {
+    operational: true,
+    lastSync: "2 minutes ago",
+    services: {
+      database: true,
+      email: true,
+      payments: true,
+    },
+  };
+
+  if (error) {
+    return (
+      <div className="space-y-6 p-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            Failed to load dashboard data. Please try again later.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
@@ -338,35 +330,53 @@ export default function Dashboard() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {stat.title}
-              </CardTitle>
-              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-                {stat.icon}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span
-                  className={
-                    stat.changeType === "positive"
-                      ? "text-green-600"
-                      : stat.changeType === "neutral"
-                      ? "text-muted-foreground"
-                      : "text-muted-foreground"
-                  }
-                >
-                  {stat.change}
-                </span>{" "}
-                {stat.description}
-              </p>
+        {isLoading ? (
+          <>
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </>
+        ) : stats.length === 0 ? (
+          <Card className="col-span-full">
+            <CardContent className="p-8 text-center text-muted-foreground">
+              No statistics available.
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          stats.map((stat, index) => (
+            <Card key={stat.title}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {stat.title}
+                </CardTitle>
+                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+                  {index === 0 && statIcons.members}
+                  {index === 1 && statIcons.giving}
+                  {index === 2 && statIcons.events}
+                  {index === 3 && statIcons.volunteers}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  <span
+                    className={
+                      stat.changeType === "positive"
+                        ? "text-green-600"
+                        : stat.changeType === "neutral"
+                        ? "text-muted-foreground"
+                        : "text-red-600"
+                    }
+                  >
+                    {stat.change}
+                  </span>{" "}
+                  {stat.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       {/* Main Content Grid */}
@@ -386,27 +396,41 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentDonations.map((donation) => (
-                <div
-                  key={donation.id}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
-                      {donation.avatar}
+              {isLoading ? (
+                <>
+                  <DonationItemSkeleton />
+                  <DonationItemSkeleton />
+                  <DonationItemSkeleton />
+                  <DonationItemSkeleton />
+                  <DonationItemSkeleton />
+                </>
+              ) : recentDonations.length === 0 ? (
+                <p className="text-center text-muted-foreground py-4">
+                  No recent donations.
+                </p>
+              ) : (
+                recentDonations.map((donation) => (
+                  <div
+                    key={donation.id}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
+                        {donation.avatar}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{donation.donor}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {donation.type} - {donation.date}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">{donation.donor}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {donation.type} - {donation.date}
-                      </p>
-                    </div>
+                    <span className="text-sm font-semibold text-green-600">
+                      {donation.amount}
+                    </span>
                   </div>
-                  <span className="text-sm font-semibold text-green-600">
-                    {donation.amount}
-                  </span>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -426,44 +450,57 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {upcomingEvents.map((event) => (
-                <div
-                  key={event.id}
-                  className="flex items-start justify-between border-b border-border pb-4 last:border-0 last:pb-0"
-                >
-                  <div className="flex gap-3">
-                    <div className="flex flex-col items-center justify-center rounded-lg bg-muted px-3 py-2 min-w-[60px]">
-                      <span className="text-xs font-medium text-muted-foreground">
-                        {event.date.split(" ")[0]}
-                      </span>
-                      <span className="text-lg font-bold">
-                        {event.date.split(" ")[1].replace(",", "")}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{event.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {event.time} - {event.location}
-                      </p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <Badge
-                          variant={
-                            event.status === "confirmed"
-                              ? "default"
-                              : "secondary"
-                          }
-                          className="text-xs"
-                        >
-                          {event.status}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {event.attendees} expected
+              {isLoading ? (
+                <>
+                  <EventItemSkeleton />
+                  <EventItemSkeleton />
+                  <EventItemSkeleton />
+                  <EventItemSkeleton />
+                </>
+              ) : upcomingEvents.length === 0 ? (
+                <p className="text-center text-muted-foreground py-4">
+                  No upcoming events.
+                </p>
+              ) : (
+                upcomingEvents.map((event) => (
+                  <div
+                    key={event.id}
+                    className="flex items-start justify-between border-b border-border pb-4 last:border-0 last:pb-0"
+                  >
+                    <div className="flex gap-3">
+                      <div className="flex flex-col items-center justify-center rounded-lg bg-muted px-3 py-2 min-w-[60px]">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {event.date.split(" ")[0]}
                         </span>
+                        <span className="text-lg font-bold">
+                          {event.date.split(" ")[1].replace(",", "")}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{event.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {event.time} - {event.location}
+                        </p>
+                        <div className="mt-1 flex items-center gap-2">
+                          <Badge
+                            variant={
+                              event.status === "confirmed"
+                                ? "default"
+                                : "secondary"
+                            }
+                            className="text-xs"
+                          >
+                            {event.status}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {event.attendees} expected
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -472,45 +509,68 @@ export default function Dashboard() {
       {/* Activity Summary Footer */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-6 w-6 text-green-600"
-                >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
+          {isLoading ? (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div>
+                  <Skeleton className="h-5 w-40 mb-1" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
               </div>
-              <div>
-                <p className="font-medium">All Systems Operational</p>
-                <p className="text-sm text-muted-foreground">
-                  Last sync: 2 minutes ago
-                </p>
+              <div className="flex flex-wrap gap-4">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-28" />
               </div>
             </div>
-            <div className="flex flex-wrap gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-green-500"></span>
-                <span className="text-muted-foreground">Database</span>
+          ) : (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className={`h-12 w-12 rounded-full ${systemStatus.operational ? 'bg-green-100' : 'bg-red-100'} flex items-center justify-center`}>
+                  {systemStatus.operational ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-6 w-6 text-green-600"
+                    >
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                      <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                  ) : (
+                    <AlertCircle className="h-6 w-6 text-red-600" />
+                  )}
+                </div>
+                <div>
+                  <p className="font-medium">
+                    {systemStatus.operational ? 'All Systems Operational' : 'System Issues Detected'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Last sync: {systemStatus.lastSync}
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-green-500"></span>
-                <span className="text-muted-foreground">Email Service</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-green-500"></span>
-                <span className="text-muted-foreground">Payment Gateway</span>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className={`h-2 w-2 rounded-full ${systemStatus.services.database ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                  <span className="text-muted-foreground">Database</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`h-2 w-2 rounded-full ${systemStatus.services.email ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                  <span className="text-muted-foreground">Email Service</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`h-2 w-2 rounded-full ${systemStatus.services.payments ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                  <span className="text-muted-foreground">Payment Gateway</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>

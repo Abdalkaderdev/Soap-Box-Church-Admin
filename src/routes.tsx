@@ -13,6 +13,7 @@ const DonorDetails = lazy(() => import("./pages/donations/DonorDetails"));
 const EventsList = lazy(() => import("./pages/events/EventsList"));
 const Communications = lazy(() => import("./pages/communications/Communications"));
 const Volunteers = lazy(() => import("./pages/volunteers/Volunteers"));
+const Discipleship = lazy(() => import("./pages/discipleship/Discipleship"));
 const Reports = lazy(() => import("./pages/reports/Reports"));
 const Settings = lazy(() => import("./pages/settings/Settings"));
 const Login = lazy(() => import("./pages/auth/Login"));
@@ -46,6 +47,7 @@ export const routes = {
   events: "/events",
   communications: "/communications",
   volunteers: "/volunteers",
+  discipleship: "/discipleship",
   reports: "/reports",
   settings: "/settings",
   login: "/login",
@@ -88,6 +90,9 @@ export function AppRoutes() {
 
         {/* Volunteers */}
         <Route path="/volunteers" component={Volunteers} />
+
+        {/* Discipleship */}
+        <Route path="/discipleship" component={Discipleship} />
 
         {/* Reports */}
         <Route path="/reports" component={Reports} />

@@ -6,7 +6,7 @@ metadata:
   labels:
     app: church-admin
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: church-admin
@@ -22,6 +22,9 @@ spec:
           image: registry.digitalocean.com/soapbox-registry/church-admin:latest
           ports:
             - containerPort: 80
+          env:
+            - name: VITE_API_URL
+              value: "https://app.soapboxsuperapp.com"
           resources:
             requests:
               memory: "64Mi"

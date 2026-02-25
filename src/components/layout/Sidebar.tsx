@@ -1,17 +1,19 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { routes } from "@/routes";
+import { Logo, LogoIcon } from "@/components/Logo";
 import {
-  Church,
   LayoutDashboard,
   Users,
   DollarSign,
   Calendar,
   Mail,
   Heart,
+  BookOpen,
   BarChart3,
   Settings,
   LogOut,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -48,6 +50,11 @@ const navigationItems = [
     icon: Heart,
   },
   {
+    title: "Discipleship",
+    href: routes.discipleship,
+    icon: BookOpen,
+  },
+  {
     title: "Reports",
     href: routes.reports,
     icon: BarChart3,
@@ -72,17 +79,21 @@ export function Sidebar() {
     return location.startsWith(href);
   };
 
+  const handleSignOut = () => {
+    // In production, this would clear auth tokens and redirect to SoapBox
+    window.location.href = routes.login;
+  };
+
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-sidebar-background">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 border-white/10">
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="flex h-16 items-center gap-2 border-b px-6">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <Church className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-semibold text-sidebar-foreground">Church Admin</span>
-            <span className="text-xs text-sidebar-foreground/60">Management System</span>
+        <div className="flex h-16 items-center gap-2 border-b border-white/10 px-4">
+          <Logo size="sm" className="text-white" />
+          <div className="ml-auto">
+            <span className="text-[10px] font-medium text-purple-300/80 bg-purple-500/20 px-2 py-0.5 rounded-full">
+              Church
+            </span>
           </div>
         </div>
 
@@ -93,12 +104,15 @@ export function Sidebar() {
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  "w-full justify-start gap-3 text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200",
                   isActive(item.href) &&
-                    "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                    "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-white font-medium border border-white/10"
                 )}
               >
-                <item.icon className="h-4 w-4" />
+                <item.icon className={cn(
+                  "h-4 w-4",
+                  isActive(item.href) && "text-purple-400"
+                )} />
                 {item.title}
               </Button>
             </Link>
@@ -106,15 +120,15 @@ export function Sidebar() {
         </nav>
 
         {/* Bottom Navigation */}
-        <div className="border-t px-3 py-4">
+        <div className="border-t border-white/10 px-3 py-4">
           {bottomNavigationItems.map((item) => (
             <Link key={item.href} href={item.href}>
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  "w-full justify-start gap-3 text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200",
                   isActive(item.href) &&
-                    "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                    "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-white font-medium border border-white/10"
                 )}
               >
                 <item.icon className="h-4 w-4" />
@@ -122,16 +136,41 @@ export function Sidebar() {
               </Button>
             </Link>
           ))}
-          <Separator className="my-2" />
-          <Link href={routes.login}>
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </Button>
-          </Link>
+
+          <Separator className="my-2 bg-white/10" />
+
+          {/* Back to SoapBox */}
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3 text-slate-400 hover:bg-white/10 hover:text-white transition-all duration-200 mb-1"
+            onClick={() => {
+              // In production, navigate to main SoapBox app
+              window.open("https://app.soapbox.com", "_blank");
+            }}
+          >
+            <LogoIcon size="sm" className="h-4 w-4" />
+            <span className="flex-1 text-left">Back to SoapBox</span>
+            <ExternalLink className="h-3 w-3 opacity-50" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3 text-slate-400 hover:bg-red-500/20 hover:text-red-300 transition-all duration-200"
+            onClick={handleSignOut}
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </Button>
+        </div>
+
+        {/* Powered by footer */}
+        <div className="px-4 py-3 border-t border-white/5">
+          <p className="text-[10px] text-slate-500 text-center">
+            Powered by{" "}
+            <span className="font-medium bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              SoapBox Super App
+            </span>
+          </p>
         </div>
       </div>
     </aside>
