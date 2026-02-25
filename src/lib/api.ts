@@ -287,10 +287,13 @@ async function handleTokenRefresh(): Promise<boolean> {
 // CORE REQUEST FUNCTION
 // ============================================================================
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type QueryParams = Record<string, any>;
+
 /**
  * Build URL with query parameters
  */
-function buildUrl(endpoint: string, params?: Record<string, unknown>): string {
+function buildUrl(endpoint: string, params?: QueryParams): string {
   const url = new URL(`${API_BASE_URL}${endpoint}`);
 
   if (params) {
@@ -314,7 +317,7 @@ function buildUrl(endpoint: string, params?: Record<string, unknown>): string {
 export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
-  params?: Record<string, unknown>
+  params?: QueryParams
 ): Promise<T> {
   const url = buildUrl(endpoint, params);
 
@@ -412,28 +415,28 @@ export async function apiRequest<T>(
  * Generic API methods for common HTTP verbs
  */
 export const api = {
-  get: <T>(endpoint: string, params?: Record<string, unknown>) =>
+  get: <T>(endpoint: string, params?: QueryParams) =>
     apiRequest<T>(endpoint, { method: 'GET' }, params),
 
-  post: <T>(endpoint: string, body?: unknown, params?: Record<string, unknown>) =>
+  post: <T>(endpoint: string, body?: unknown, params?: QueryParams) =>
     apiRequest<T>(endpoint, {
       method: 'POST',
       body: body ? JSON.stringify(body) : undefined,
     }, params),
 
-  put: <T>(endpoint: string, body?: unknown, params?: Record<string, unknown>) =>
+  put: <T>(endpoint: string, body?: unknown, params?: QueryParams) =>
     apiRequest<T>(endpoint, {
       method: 'PUT',
       body: body ? JSON.stringify(body) : undefined,
     }, params),
 
-  patch: <T>(endpoint: string, body?: unknown, params?: Record<string, unknown>) =>
+  patch: <T>(endpoint: string, body?: unknown, params?: QueryParams) =>
     apiRequest<T>(endpoint, {
       method: 'PATCH',
       body: body ? JSON.stringify(body) : undefined,
     }, params),
 
-  delete: <T>(endpoint: string, params?: Record<string, unknown>) =>
+  delete: <T>(endpoint: string, params?: QueryParams) =>
     apiRequest<T>(endpoint, { method: 'DELETE' }, params),
 };
 
@@ -529,7 +532,7 @@ export async function uploadFile<T>(
 export async function downloadFile(
   endpoint: string,
   filename: string,
-  params?: Record<string, unknown>
+  params?: QueryParams
 ): Promise<void> {
   const url = buildUrl(endpoint, params);
 
@@ -568,7 +571,6 @@ export async function downloadFile(
 import type {
   User,
   Church,
-  ChurchSettings,
   Member,
   MemberCreateInput,
   MemberUpdateInput,

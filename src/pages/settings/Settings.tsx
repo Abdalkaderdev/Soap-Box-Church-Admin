@@ -454,7 +454,7 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={notifications?.newMemberAlerts ?? true}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={(checked: boolean) =>
                       handleNotificationToggle("newMemberAlerts", checked)
                     }
                     disabled={updateNotificationsMutation.isPending}
@@ -470,7 +470,7 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={notifications?.donationReceipts ?? true}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={(checked: boolean) =>
                       handleNotificationToggle("donationReceipts", checked)
                     }
                     disabled={updateNotificationsMutation.isPending}
@@ -486,7 +486,7 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={notifications?.eventReminders ?? true}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={(checked: boolean) =>
                       handleNotificationToggle("eventReminders", checked)
                     }
                     disabled={updateNotificationsMutation.isPending}
@@ -502,7 +502,7 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={notifications?.volunteerReminders ?? true}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={(checked: boolean) =>
                       handleNotificationToggle("volunteerReminders", checked)
                     }
                     disabled={updateNotificationsMutation.isPending}
@@ -518,7 +518,7 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={notifications?.weeklyDigest ?? false}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={(checked: boolean) =>
                       handleNotificationToggle("weeklyDigest", checked)
                     }
                     disabled={updateNotificationsMutation.isPending}

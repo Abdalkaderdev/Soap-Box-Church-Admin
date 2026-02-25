@@ -48,7 +48,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useCommunications, useCreateAnnouncement, useUpdateAnnouncement, useDeleteAnnouncement, type Announcement } from '@/hooks/useCommunications';
+import { useCommunications, useDeleteAnnouncement, type Announcement } from '@/hooks/useCommunications';
 
 // Using local interfaces that map from API types
 interface Message {
@@ -151,7 +151,6 @@ function StatsCardSkeleton() {
 
 export default function Communications() {
   const { data, isLoading, error, sendMessage, isSending } = useCommunications();
-  const createAnnouncementMutation = useCreateAnnouncement();
   const deleteAnnouncementMutation = useDeleteAnnouncement();
 
   // Map API announcements to UI format

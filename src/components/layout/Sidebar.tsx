@@ -73,7 +73,7 @@ const bottomNavigationItems = [
 
 export function Sidebar() {
   const [location, navigate] = useLocation();
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
 
   const isActive = (href: string) => {
     if (href === "/") {
