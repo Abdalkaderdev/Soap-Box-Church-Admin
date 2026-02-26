@@ -485,4 +485,39 @@ export function useImportDonations() {
   });
 }
 
+/**
+ * Helper to export donations to CSV/Excel
+ * Opens a new tab with the export file download
+ */
+export function exportDonationsToCSV(params: {
+  churchId: string;
+  filters?: Partial<DonationFilters>;
+  format?: 'csv' | 'xlsx';
+}): void {
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://soapboxsuperapp.com/api';
+  const urlParams = new URLSearchParams();
+  urlParams.set('format', params.format || 'csv');
+
+  if (params.filters) {
+    if (params.filters.dateFrom) urlParams.set('dateFrom', params.filters.dateFrom);
+    if (params.filters.dateTo) urlParams.set('dateTo', params.filters.dateTo);
+    if (params.filters.status) {
+      const status = Array.isArray(params.filters.status)
+        ? params.filters.status.join(',')
+        : params.filters.status;
+      urlParams.set('status', status);
+    }
+    if (params.filters.fundId) urlParams.set('fundId', params.filters.fundId);
+    if (params.filters.isRecurring !== undefined) {
+      urlParams.set('isRecurring', String(params.filters.isRecurring));
+    }
+    if (params.filters.memberId) urlParams.set('memberId', params.filters.memberId);
+  }
+
+  window.open(
+    `${API_BASE_URL}/church/${params.churchId}/donations/export?${urlParams.toString()}`,
+    '_blank'
+  );
+}
+
 export default useDonations;

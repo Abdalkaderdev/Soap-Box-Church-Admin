@@ -33,6 +33,7 @@ import {
   HeartHandshake,
   CalendarClock,
   Megaphone,
+  LineChart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -113,15 +114,15 @@ const navigationItems = [
     href: routes.reports,
     icon: BarChart3,
   },
+  {
+    title: "Financial Dashboard",
+    href: routes.financialDashboard,
+    icon: LineChart,
+  },
 ];
 
 // Upcoming features (Coming Soon)
 const upcomingFeatures = [
-  {
-    title: "Financial Dashboard",
-    href: routes.upcoming.financialDashboard,
-    icon: Sparkles,
-  },
   {
     title: "Child Check-in",
     href: routes.upcoming.childCheckin,

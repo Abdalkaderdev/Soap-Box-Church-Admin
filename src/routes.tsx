@@ -8,6 +8,7 @@ const MemberDetails = lazy(() => import("./pages/members/MemberDetails"));
 const AddMember = lazy(() => import("./pages/members/AddMember"));
 const DonationsDashboard = lazy(() => import("./pages/donations/DonationsDashboard"));
 const DonationsList = lazy(() => import("./pages/donations/DonationsList"));
+const DonationsManagement = lazy(() => import("./pages/donations/DonationsManagement"));
 const RecordDonation = lazy(() => import("./pages/donations/RecordDonation"));
 const DonorDetails = lazy(() => import("./pages/donations/DonorDetails"));
 const EventsList = lazy(() => import("./pages/events/EventsList"));
@@ -24,8 +25,10 @@ const Attendance = lazy(() => import("./pages/attendance/Attendance"));
 const Visitors = lazy(() => import("./pages/visitors/Visitors"));
 const GivingStatements = lazy(() => import("./pages/statements/GivingStatements"));
 
-// Upcoming feature placeholders
+// Financial Dashboard (promoted from upcoming to main feature)
 const FinancialDashboard = lazy(() => import("./pages/upcoming/FinancialDashboard"));
+
+// Upcoming feature placeholders
 const ChildCheckin = lazy(() => import("./pages/upcoming/ChildCheckin"));
 const FacilityBooking = lazy(() => import("./pages/upcoming/FacilityBooking"));
 const VolunteerScheduling = lazy(() => import("./pages/upcoming/VolunteerScheduling"));
@@ -74,6 +77,7 @@ export const routes = {
   donations: {
     dashboard: "/donations",
     list: "/donations/list",
+    management: "/donations/management",
     new: "/donations/new",
     donor: "/donations/donor/:id",
   },
@@ -89,11 +93,11 @@ export const routes = {
   sermons: "/sermons",
   prayer: "/prayer",
   reports: "/reports",
+  financialDashboard: "/financial-dashboard",
   settings: "/settings",
   login: "/login",
   // Upcoming features
   upcoming: {
-    financialDashboard: "/upcoming/financial-dashboard",
     childCheckin: "/upcoming/child-checkin",
     facilityBooking: "/upcoming/facility-booking",
     volunteerScheduling: "/upcoming/volunteer-scheduling",
@@ -150,6 +154,7 @@ export function AppRoutes() {
 
         {/* Donations */}
         <Route path="/donations/donor/:id" component={DonorDetails} />
+        <Route path="/donations/management" component={DonationsManagement} />
         <Route path="/donations/list" component={DonationsList} />
         <Route path="/donations/new" component={RecordDonation} />
         <Route path="/donations" component={DonationsDashboard} />
@@ -190,6 +195,9 @@ export function AppRoutes() {
         {/* Reports */}
         <Route path="/reports" component={Reports} />
 
+        {/* Financial Dashboard */}
+        <Route path="/financial-dashboard" component={FinancialDashboard} />
+
         {/* Settings */}
         <Route path="/settings" component={Settings} />
 
@@ -197,7 +205,6 @@ export function AppRoutes() {
         <Route path="/login" component={Login} />
 
         {/* Upcoming Features (Coming Soon placeholders) */}
-        <Route path="/upcoming/financial-dashboard" component={FinancialDashboard} />
         <Route path="/upcoming/child-checkin" component={ChildCheckin} />
         <Route path="/upcoming/facility-booking" component={FacilityBooking} />
         <Route path="/upcoming/volunteer-scheduling" component={VolunteerScheduling} />

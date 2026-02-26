@@ -49,8 +49,35 @@ export {
   useSendDonationReceipt,
   useGenerateGivingStatements,
   useImportDonations,
+  exportDonationsToCSV,
   type DonationFilters,
 } from './useDonations';
+
+// Financial Dashboard hooks
+export {
+  useChurchDonationStats,
+  useDonationTrends,
+  useDonationCategories,
+  useRecentDonationsWidget,
+  useTopDonors,
+  useFinancialDashboard,
+  formatCurrency,
+  formatPercent,
+  formatCompactNumber,
+  type DashboardStats,
+  type MonthlyTrend,
+  type CategoryBreakdown,
+  type RecentDonation,
+  type TopDonor,
+} from './useChurchFinancialDashboard';
+
+// Live Donations hooks
+export {
+  useLiveDonations,
+  type LiveDonation,
+  type UseLiveDonationsOptions,
+  type UseLiveDonationsResult,
+} from './useLiveDonations';
 
 // Events hooks
 export {
