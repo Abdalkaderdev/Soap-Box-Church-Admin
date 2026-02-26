@@ -20,6 +20,9 @@ const PrayerRequests = lazy(() => import("./pages/prayer/PrayerRequests"));
 const Reports = lazy(() => import("./pages/reports/Reports"));
 const Settings = lazy(() => import("./pages/settings/Settings"));
 const CheckIn = lazy(() => import("./pages/checkin/CheckIn"));
+const Attendance = lazy(() => import("./pages/attendance/Attendance"));
+const Visitors = lazy(() => import("./pages/visitors/Visitors"));
+const GivingStatements = lazy(() => import("./pages/statements/GivingStatements"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Landing = lazy(() => import("./pages/Landing"));
 const Features = lazy(() => import("./pages/Features"));
@@ -62,6 +65,9 @@ export const routes = {
   },
   events: "/events",
   checkin: "/checkin",
+  attendance: "/attendance",
+  visitors: "/visitors",
+  statements: "/statements",
   communications: "/communications",
   volunteers: "/volunteers",
   discipleship: "/discipleship",
@@ -125,6 +131,15 @@ export function AppRoutes() {
 
         {/* Check-in */}
         <Route path="/checkin" component={CheckIn} />
+
+        {/* Attendance Tracking */}
+        <Route path="/attendance" component={Attendance} />
+
+        {/* First-Time Visitors */}
+        <Route path="/visitors" component={Visitors} />
+
+        {/* Giving Statements */}
+        <Route path="/statements" component={GivingStatements} />
 
         {/* Communications */}
         <Route path="/communications" component={Communications} />

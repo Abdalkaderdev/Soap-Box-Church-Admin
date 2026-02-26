@@ -23,6 +23,9 @@ import {
   Globe,
   Home,
   UserCheck,
+  ClipboardCheck,
+  UserPlus,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -52,6 +55,21 @@ const navigationItems = [
     title: "Check-in",
     href: routes.checkin,
     icon: UserCheck,
+  },
+  {
+    title: "Attendance",
+    href: routes.attendance,
+    icon: ClipboardCheck,
+  },
+  {
+    title: "Visitors",
+    href: routes.visitors,
+    icon: UserPlus,
+  },
+  {
+    title: "Statements",
+    href: routes.statements,
+    icon: FileText,
   },
   {
     title: "Communications",
