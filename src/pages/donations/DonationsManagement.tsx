@@ -4,7 +4,7 @@
  */
 
 import { useState, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+// useQueryClient for future cache invalidation
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -14,7 +14,7 @@ import {
   useSendDonationReceipt,
   type DonationFilters,
 } from '@/hooks/useDonations';
-import { api } from '@/lib/api';
+// api imported for future export functionality
 import type { Donation, DonationStatus } from '@/types';
 import {
   Card,
@@ -77,7 +77,6 @@ import {
   MoreVertical,
   Eye,
   Mail,
-  Receipt,
   RotateCcw,
   Loader2,
   Heart,
@@ -125,9 +124,8 @@ interface ManagementFilters {
 }
 
 export default function DonationsManagement() {
-  const { user, isAuthenticated, churchId, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, churchId, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);

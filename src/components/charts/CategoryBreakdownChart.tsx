@@ -225,8 +225,7 @@ const CategoryBreakdownChartComponent = ({
               paddingAngle={2}
               dataKey="amount"
               nameKey="name"
-              activeIndex={activeIndex}
-              activeShape={renderActiveShape}
+              activeShape={activeIndex !== null ? renderActiveShape : undefined}
               onMouseEnter={onPieEnter}
               onMouseLeave={onPieLeave}
             >

@@ -120,7 +120,7 @@ const getScoreLabel = (score: number): string => {
 };
 
 // Generate AI-style recommendations based on scores
-const generateRecommendations = (data: FinancialHealthData, score: number): Array<{
+const generateRecommendations = (data: FinancialHealthData, _score: number): Array<{
   type: 'success' | 'warning' | 'tip';
   title: string;
   description: string;
@@ -415,7 +415,7 @@ const FinancialHealthScoreComponent = ({
 }: FinancialHealthScoreProps) => {
   const healthScore = useMemo(() => calculateHealthScore(data), [data]);
   const recommendations = useMemo(() => generateRecommendations(data, healthScore), [data, healthScore]);
-  const scoreColors = useMemo(() => getScoreColor(healthScore), [healthScore]);
+  const _scoreColors = useMemo(() => getScoreColor(healthScore), [healthScore]);
 
   if (isLoading) {
     return (

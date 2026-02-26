@@ -309,7 +309,6 @@ const BudgetOverviewComponent = ({
                 const categoryProgress = category.allocatedAmount > 0
                   ? (category.actualAmount / category.allocatedAmount) * 100
                   : 0;
-                const colorClass = getVarianceColor(category.status);
                 const badgeVariant = getVarianceBadgeVariant(category.status);
 
                 return (

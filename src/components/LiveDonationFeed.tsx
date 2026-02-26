@@ -158,7 +158,7 @@ const LiveDonationFeedComponent = ({
   maxVisible = 10,
   showToasts = true,
   toastPosition = 'top-right',
-  toastDuration = 5000,
+  toastDuration: _toastDuration = 5000,
   showConnectionStatus = true,
   className,
   initialDonations = [],

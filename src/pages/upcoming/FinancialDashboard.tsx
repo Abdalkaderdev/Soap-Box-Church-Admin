@@ -24,7 +24,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -83,7 +82,7 @@ import {
 const CHART_COLORS = ["#7c3aed", "#a855f7", "#c084fc", "#d8b4fe", "#e9d5ff", "#f3e8ff"];
 
 export default function FinancialDashboard() {
-  const { user, isAuthenticated, isLoading: authLoading, churchId } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, churchId } = useAuth();
   const { toast } = useToast();
   const [dateRange, setDateRange] = useState("6months");
   const [chartMode, setChartMode] = useState<"area" | "bar">("area");
@@ -115,7 +114,7 @@ export default function FinancialDashboard() {
   });
 
   // Fetch funds for category breakdown
-  const { data: funds } = useFunds();
+  const { data: _funds } = useFunds();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -574,7 +573,7 @@ export default function FinancialDashboard() {
                     <XAxis dataKey="month" className="text-xs" stroke="#9ca3af" fontSize={12} />
                     <YAxis className="text-xs" stroke="#9ca3af" fontSize={12} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
                     <Tooltip
-                      formatter={(value: number) => [formatCurrency(value), ""]}
+                      formatter={(value) => [formatCurrency(Number(value) || 0), ""]}
                       contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }}
                     />
                     <Legend />
@@ -603,7 +602,7 @@ export default function FinancialDashboard() {
                     <XAxis dataKey="month" className="text-xs" stroke="#9ca3af" fontSize={12} />
                     <YAxis className="text-xs" stroke="#9ca3af" fontSize={12} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
                     <Tooltip
-                      formatter={(value: number) => [formatCurrency(value), ""]}
+                      formatter={(value) => [formatCurrency(Number(value) || 0), ""]}
                       contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }}
                     />
                     <Legend />
@@ -650,7 +649,7 @@ export default function FinancialDashboard() {
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value: number) => formatCurrency(value)}
+                      formatter={(value) => formatCurrency(Number(value) || 0)}
                       contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }}
                     />
                   </PieChart>
