@@ -31,6 +31,11 @@ const FacilityBooking = lazy(() => import("./pages/upcoming/FacilityBooking"));
 const VolunteerScheduling = lazy(() => import("./pages/upcoming/VolunteerScheduling"));
 const OnlineClasses = lazy(() => import("./pages/upcoming/OnlineClasses"));
 const PastoralCare = lazy(() => import("./pages/upcoming/PastoralCare"));
+const BackgroundChecks = lazy(() => import("./pages/upcoming/BackgroundChecks"));
+const MultiCampus = lazy(() => import("./pages/upcoming/MultiCampus"));
+const MemberDirectory = lazy(() => import("./pages/upcoming/MemberDirectory"));
+const PledgeTracking = lazy(() => import("./pages/upcoming/PledgeTracking"));
+const Announcements = lazy(() => import("./pages/upcoming/Announcements"));
 
 const Login = lazy(() => import("./pages/auth/Login"));
 const Landing = lazy(() => import("./pages/Landing"));
@@ -94,6 +99,11 @@ export const routes = {
     volunteerScheduling: "/upcoming/volunteer-scheduling",
     onlineClasses: "/upcoming/online-classes",
     pastoralCare: "/upcoming/pastoral-care",
+    backgroundChecks: "/upcoming/background-checks",
+    multiCampus: "/upcoming/multi-campus",
+    memberDirectory: "/upcoming/member-directory",
+    pledgeTracking: "/upcoming/pledge-tracking",
+    announcements: "/upcoming/announcements",
   },
 } as const;
 
@@ -193,6 +203,11 @@ export function AppRoutes() {
         <Route path="/upcoming/volunteer-scheduling" component={VolunteerScheduling} />
         <Route path="/upcoming/online-classes" component={OnlineClasses} />
         <Route path="/upcoming/pastoral-care" component={PastoralCare} />
+        <Route path="/upcoming/background-checks" component={BackgroundChecks} />
+        <Route path="/upcoming/multi-campus" component={MultiCampus} />
+        <Route path="/upcoming/member-directory" component={MemberDirectory} />
+        <Route path="/upcoming/pledge-tracking" component={PledgeTracking} />
+        <Route path="/upcoming/announcements" component={Announcements} />
 
         {/* 404 fallback */}
         <Route>

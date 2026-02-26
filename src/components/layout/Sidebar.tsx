@@ -32,6 +32,7 @@ import {
   GraduationCap,
   HeartHandshake,
   CalendarClock,
+  Megaphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -145,6 +146,11 @@ const upcomingFeatures = [
     title: "Pastoral Care",
     href: routes.upcoming.pastoralCare,
     icon: HeartHandshake,
+  },
+  {
+    title: "Announcements",
+    href: routes.upcoming.announcements,
+    icon: Megaphone,
   },
 ];
 

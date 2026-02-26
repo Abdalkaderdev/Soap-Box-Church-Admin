@@ -1,47 +1,47 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  BarChart3,
   TrendingUp,
-  PieChart,
-  DollarSign,
   Target,
-  Bell,
-  Download,
+  Receipt,
   FileText,
+  Wallet,
+  LineChart,
+  Shield,
+  DollarSign,
 } from "lucide-react";
 
 export default function FinancialDashboard() {
   const plannedFeatures = [
     {
-      icon: BarChart3,
-      title: "Donation Trends",
-      description: "Interactive line charts showing monthly donation patterns and year-over-year comparisons",
-    },
-    {
-      icon: PieChart,
-      title: "Category Breakdown",
-      description: "Visual breakdown of donations by fund type: General, Building, Missions, Youth Ministry",
-    },
-    {
-      icon: TrendingUp,
-      title: "Financial Health Score",
-      description: "Overall church financial health metric with giving trends, retention rates, and recommendations",
-    },
-    {
       icon: Target,
-      title: "Budget Overview",
-      description: "Track budget vs actual spending with category breakdowns and variance alerts",
+      title: "Budget Tracking",
+      description: "Set and monitor budgets across departments with real-time progress tracking.",
     },
     {
-      icon: Bell,
-      title: "Real-time Notifications",
-      description: "Live donation alerts and dashboard updates as gifts come in",
+      icon: Receipt,
+      title: "Expense Management",
+      description: "Track and categorize expenses. Approve reimbursements and manage vendor payments.",
     },
     {
-      icon: Download,
-      title: "Export Reports",
-      description: "Generate CSV/Excel reports for accounting, year-end giving statements, and audits",
+      icon: FileText,
+      title: "Financial Reports",
+      description: "Generate income statements, balance sheets, and customized financial reports.",
+    },
+    {
+      icon: Wallet,
+      title: "Fund Accounting",
+      description: "Track restricted and unrestricted funds with proper fund accounting principles.",
+    },
+    {
+      icon: LineChart,
+      title: "Forecasting",
+      description: "Project future income and expenses based on historical trends and patterns.",
+    },
+    {
+      icon: Shield,
+      title: "Audit Trail",
+      description: "Complete history of all financial transactions with user attribution.",
     },
   ];
 
@@ -65,11 +65,11 @@ export default function FinancialDashboard() {
       <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            What's Coming
+            <TrendingUp className="h-5 w-5" />
+            Planned Features
           </CardTitle>
           <CardDescription>
-            A powerful financial dashboard to help you track, analyze, and grow your church's giving
+            Complete financial management and reporting for your church
           </CardDescription>
         </CardHeader>
         <CardContent>
