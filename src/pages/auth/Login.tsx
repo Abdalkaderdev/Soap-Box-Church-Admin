@@ -11,7 +11,7 @@ import { ExternalLink, Shield, Church, Users, Heart, Calendar, Sparkles, Mail, L
 const getSoapBoxApiUrl = () => {
   return window.location.origin.includes("localhost")
     ? "http://localhost:5000"
-    : "https://api.soapboxsuperapp.com";
+    : "https://soapboxsuperapp.com";
 };
 
 export default function Login() {
@@ -49,6 +49,14 @@ export default function Login() {
           const data = await response.json();
 
           if (data.success && data.user) {
+            // Store JWT tokens for authentication
+            if (data.token) {
+              localStorage.setItem("soapbox_auth_token", data.token);
+            }
+            if (data.refreshToken) {
+              localStorage.setItem("soapbox_refresh_token", data.refreshToken);
+            }
+
             // Store user info in localStorage
             localStorage.setItem("soapbox_user", JSON.stringify(data.user));
             localStorage.setItem("soapbox_authenticated", "true");
@@ -82,7 +90,7 @@ export default function Login() {
     // Redirect to the main SoapBox app for authentication
     const soapboxAuthUrl = window.location.origin.includes("localhost")
       ? "http://localhost:5000/api/sso/redirect/church-admin"
-      : "https://api.soapboxsuperapp.com/api/sso/redirect/church-admin";
+      : "https://soapboxsuperapp.com/api/sso/redirect/church-admin";
 
     // Redirect to SoapBox for SSO
     window.location.href = soapboxAuthUrl;
@@ -100,19 +108,24 @@ export default function Login() {
     setError(null);
 
     try {
-      // Authenticate with SoapBox API
-      const response = await fetch(`${getSoapBoxApiUrl()}/api/login`, {
+      // Authenticate with SoapBox API using mobile auth endpoint (returns JWT tokens)
+      const response = await fetch(`${getSoapBoxApiUrl()}/api/mobile/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ emailOrUsername: email, password }),
       });
 
       const data = await response.json();
 
-      if (response.ok && data.user) {
+      if (data.success && data.token && data.user) {
+        // Store JWT tokens for authentication
+        localStorage.setItem("soapbox_auth_token", data.token);
+        if (data.refreshToken) {
+          localStorage.setItem("soapbox_refresh_token", data.refreshToken);
+        }
+
         // Store user info in localStorage
         localStorage.setItem("soapbox_user", JSON.stringify(data.user));
         localStorage.setItem("soapbox_authenticated", "true");

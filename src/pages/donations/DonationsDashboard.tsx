@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import {
   BarChart,
@@ -14,6 +14,8 @@ import {
   Legend,
   AreaChart,
   Area,
+  RadialBarChart,
+  RadialBar,
 } from "recharts";
 import {
   DollarSign,
@@ -28,6 +30,10 @@ import {
   Repeat,
   Loader2,
   RefreshCw,
+  Activity,
+  Target,
+  AlertTriangle,
+  CheckCircle2,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -136,6 +142,38 @@ export default function DonationsDashboard() {
 
   // Get new donors this month (estimate from stats)
   const newDonorsThisMonth = stats?.trend?.[stats.trend.length - 1]?.count || 0;
+
+  // Calculate Financial Health Score (0-100)
+  const financialHealthScore = useMemo(() => {
+    let score = 50; // Base score
+
+    // Giving trend indicator (+/- 15 points)
+    if (monthlyGrowthPercent > 10) score += 15;
+    else if (monthlyGrowthPercent > 5) score += 10;
+    else if (monthlyGrowthPercent > 0) score += 5;
+    else if (monthlyGrowthPercent < -10) score -= 15;
+    else if (monthlyGrowthPercent < -5) score -= 10;
+    else if (monthlyGrowthPercent < 0) score -= 5;
+
+    // Recurring giving percentage (+/- 20 points)
+    const recurringPercent = totalAmount > 0 ? (recurringEstimate / totalAmount) * 100 : 0;
+    if (recurringPercent >= 60) score += 20;
+    else if (recurringPercent >= 40) score += 10;
+    else if (recurringPercent < 20) score -= 10;
+
+    // Donor diversity (+ 15 points if multiple donors)
+    if (topDonors.length >= 5) score += 15;
+    else if (topDonors.length >= 3) score += 10;
+
+    return Math.max(0, Math.min(100, score));
+  }, [monthlyGrowthPercent, totalAmount, recurringEstimate, topDonors.length]);
+
+  const healthScoreColor = financialHealthScore >= 70 ? "#22c55e" : financialHealthScore >= 50 ? "#f59e0b" : "#ef4444";
+  const healthScoreLabel = financialHealthScore >= 70 ? "Healthy" : financialHealthScore >= 50 ? "Moderate" : "At Risk";
+
+  const healthScoreData = [
+    { name: "Score", value: financialHealthScore, fill: healthScoreColor },
+  ];
 
   return (
     <div className="p-6 space-y-6">
@@ -267,6 +305,77 @@ export default function DonationsDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Financial Health Score Card */}
+      <Card className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5" />
+            Financial Health Score
+          </CardTitle>
+          <CardDescription>Overall giving health assessment</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-6">
+            <div className="w-32 h-32">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadialBarChart
+                  cx="50%"
+                  cy="50%"
+                  innerRadius="60%"
+                  outerRadius="100%"
+                  barSize={10}
+                  data={healthScoreData}
+                  startAngle={180}
+                  endAngle={0}
+                >
+                  <RadialBar
+                    background
+                    dataKey="value"
+                    cornerRadius={5}
+                  />
+                </RadialBarChart>
+              </ResponsiveContainer>
+              <div className="text-center -mt-10">
+                <span className="text-3xl font-bold" style={{ color: healthScoreColor }}>
+                  {financialHealthScore}
+                </span>
+                <span className="text-sm text-muted-foreground">/100</span>
+              </div>
+            </div>
+            <div className="flex-1 space-y-3">
+              <div className="flex items-center gap-2">
+                {financialHealthScore >= 70 ? (
+                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                ) : financialHealthScore >= 50 ? (
+                  <AlertTriangle className="h-5 w-5 text-amber-500" />
+                ) : (
+                  <AlertTriangle className="h-5 w-5 text-red-500" />
+                )}
+                <span className="font-semibold" style={{ color: healthScoreColor }}>
+                  {healthScoreLabel}
+                </span>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Giving Trend</span>
+                  <span className={monthlyGrowthPercent >= 0 ? "text-green-600" : "text-red-600"}>
+                    {monthlyGrowthPercent >= 0 ? "↑" : "↓"} {Math.abs(monthlyGrowthPercent).toFixed(1)}%
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Recurring %</span>
+                  <span>{totalAmount > 0 ? Math.round((recurringEstimate / totalAmount) * 100) : 0}%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Active Donors</span>
+                  <span>{recurringDonorsCount}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
