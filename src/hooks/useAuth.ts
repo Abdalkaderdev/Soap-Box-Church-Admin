@@ -24,6 +24,32 @@ interface CurrentSessionResponse {
 const SSO_LOGIN_URL = import.meta.env.VITE_SSO_LOGIN_URL || 'https://soapboxsuperapp.com/login';
 const SSO_LOGOUT_URL = import.meta.env.VITE_SSO_LOGOUT_URL || 'https://soapboxsuperapp.com/logout';
 
+// Local storage keys for SSO user data
+const USER_STORAGE_KEY = 'soapbox_user';
+const AUTH_FLAG_KEY = 'soapbox_authenticated';
+
+/**
+ * Get user from localStorage (set by Login page after SSO)
+ */
+function getStoredUser(): User | null {
+  try {
+    const userJson = localStorage.getItem(USER_STORAGE_KEY);
+    if (userJson) {
+      return JSON.parse(userJson) as User;
+    }
+  } catch (e) {
+    console.error('Failed to parse stored user:', e);
+  }
+  return null;
+}
+
+/**
+ * Check if user is authenticated via localStorage flag
+ */
+function isStoredAuthenticated(): boolean {
+  return localStorage.getItem(AUTH_FLAG_KEY) === 'true';
+}
+
 /**
  * Hook for managing authentication state
  */
@@ -34,7 +60,11 @@ export function useAuth() {
   // Check if we have a token
   const hasToken = Boolean(getAuthToken());
 
-  // Fetch current session/user
+  // Get stored user from localStorage (set by Login page)
+  const storedUser = getStoredUser();
+  const isStoredAuth = isStoredAuthenticated();
+
+  // Fetch current session/user from API
   const {
     data: session,
     isLoading,
@@ -43,17 +73,26 @@ export function useAuth() {
   } = useQuery<CurrentSessionResponse>({
     queryKey: ['auth', 'session'],
     queryFn: () => api.get<CurrentSessionResponse>('/auth/me'),
-    enabled: hasToken,
+    enabled: hasToken && !storedUser, // Only fetch if we don't have stored user
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Mark as initialized once we've attempted to fetch session
+  // Resolve user: prefer API response, fallback to localStorage
+  const resolvedUser = session?.user || storedUser;
+
+  // Resolve church: prefer API response, create from stored user's churchId
+  const resolvedChurch = session?.church || (storedUser?.churchId ? {
+    id: storedUser.churchId,
+    name: 'Church', // Default name when we only have churchId
+  } as Church : null);
+
+  // Mark as initialized once we've determined auth state
   useEffect(() => {
-    if (!hasToken || !isLoading) {
+    if (!hasToken || !isLoading || storedUser) {
       setIsInitialized(true);
     }
-  }, [hasToken, isLoading]);
+  }, [hasToken, isLoading, storedUser]);
 
   /**
    * Redirect to SSO login page
@@ -102,10 +141,10 @@ export function useAuth() {
    * Check if user has specific permission
    */
   const hasPermission = useCallback((permission: string): boolean => {
-    if (!session?.user) return false;
+    if (!resolvedUser) return false;
 
     // Admin has all permissions
-    if (session.user.role === 'admin') return true;
+    if (resolvedUser.role === 'admin') return true;
 
     // Define role-based permissions
     const rolePermissions: Record<string, string[]> = {
@@ -135,32 +174,33 @@ export function useAuth() {
       ],
     };
 
-    const userPermissions = rolePermissions[session.user.role] || [];
+    const userPermissions = rolePermissions[resolvedUser.role] || [];
     return userPermissions.includes(permission);
-  }, [session?.user]);
+  }, [resolvedUser]);
 
   /**
    * Check if user has specific role
    */
   const hasRole = useCallback((role: string | string[]): boolean => {
-    if (!session?.user) return false;
+    if (!resolvedUser) return false;
 
     const roles = Array.isArray(role) ? role : [role];
-    return roles.includes(session.user.role);
-  }, [session?.user]);
+    return roles.includes(resolvedUser.role);
+  }, [resolvedUser]);
 
   /**
    * Get church ID for API calls
+   * Uses churchId from user object or church object
    */
-  const churchId = session?.church?.id || null;
+  const churchId = resolvedChurch?.id || resolvedUser?.churchId || null;
 
   return {
     // State
-    user: session?.user || null,
-    church: session?.church || null,
+    user: resolvedUser || null,
+    church: resolvedChurch || null,
     churchId,
-    isAuthenticated: hasToken && Boolean(session?.user),
-    isLoading: !isInitialized || isLoading,
+    isAuthenticated: (hasToken || isStoredAuth) && Boolean(resolvedUser),
+    isLoading: !isInitialized || (isLoading && !storedUser),
     error: error as Error | null,
 
     // Actions
