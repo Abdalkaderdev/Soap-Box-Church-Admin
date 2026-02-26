@@ -26,6 +26,12 @@ import {
   ClipboardCheck,
   UserPlus,
   FileText,
+  Sparkles,
+  Baby,
+  Building,
+  GraduationCap,
+  HeartHandshake,
+  CalendarClock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -105,6 +111,40 @@ const navigationItems = [
     title: "Reports",
     href: routes.reports,
     icon: BarChart3,
+  },
+];
+
+// Upcoming features (Coming Soon)
+const upcomingFeatures = [
+  {
+    title: "Financial Dashboard",
+    href: routes.upcoming.financialDashboard,
+    icon: Sparkles,
+  },
+  {
+    title: "Child Check-in",
+    href: routes.upcoming.childCheckin,
+    icon: Baby,
+  },
+  {
+    title: "Facility Booking",
+    href: routes.upcoming.facilityBooking,
+    icon: Building,
+  },
+  {
+    title: "Volunteer Scheduling",
+    href: routes.upcoming.volunteerScheduling,
+    icon: CalendarClock,
+  },
+  {
+    title: "Online Classes",
+    href: routes.upcoming.onlineClasses,
+    icon: GraduationCap,
+  },
+  {
+    title: "Pastoral Care",
+    href: routes.upcoming.pastoralCare,
+    icon: HeartHandshake,
   },
 ];
 
@@ -198,6 +238,31 @@ export function Sidebar() {
                   isActive(item.href) ? "text-sidebar-primary" : "text-walnut-400"
                 )} />
                 <span className="flex-1 text-left font-medium">{item.title}</span>
+              </Button>
+            </Link>
+          ))}
+
+          {/* Coming Soon Section */}
+          <Separator className="my-4 bg-walnut-700/30" />
+          <p className="px-3 mb-3 text-[10px] font-semibold text-amber-500/80 uppercase tracking-widest flex items-center gap-2">
+            <Sparkles className="h-3 w-3" />
+            Coming Soon
+          </p>
+          {upcomingFeatures.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-3 text-ivory-400/60 hover:bg-amber-900/20 hover:text-amber-200 transition-all duration-200 h-10 rounded-lg",
+                  isActive(item.href) &&
+                    "bg-amber-900/30 text-amber-200 font-medium border-l-[3px] border-l-amber-500 rounded-l-none"
+                )}
+              >
+                <item.icon className={cn(
+                  "h-[16px] w-[16px] transition-colors",
+                  isActive(item.href) ? "text-amber-400" : "text-amber-500/50"
+                )} />
+                <span className="flex-1 text-left text-sm">{item.title}</span>
               </Button>
             </Link>
           ))}

@@ -23,6 +23,15 @@ const CheckIn = lazy(() => import("./pages/checkin/CheckIn"));
 const Attendance = lazy(() => import("./pages/attendance/Attendance"));
 const Visitors = lazy(() => import("./pages/visitors/Visitors"));
 const GivingStatements = lazy(() => import("./pages/statements/GivingStatements"));
+
+// Upcoming feature placeholders
+const FinancialDashboard = lazy(() => import("./pages/upcoming/FinancialDashboard"));
+const ChildCheckin = lazy(() => import("./pages/upcoming/ChildCheckin"));
+const FacilityBooking = lazy(() => import("./pages/upcoming/FacilityBooking"));
+const VolunteerScheduling = lazy(() => import("./pages/upcoming/VolunteerScheduling"));
+const OnlineClasses = lazy(() => import("./pages/upcoming/OnlineClasses"));
+const PastoralCare = lazy(() => import("./pages/upcoming/PastoralCare"));
+
 const Login = lazy(() => import("./pages/auth/Login"));
 const Landing = lazy(() => import("./pages/Landing"));
 const Features = lazy(() => import("./pages/Features"));
@@ -77,6 +86,15 @@ export const routes = {
   reports: "/reports",
   settings: "/settings",
   login: "/login",
+  // Upcoming features
+  upcoming: {
+    financialDashboard: "/upcoming/financial-dashboard",
+    childCheckin: "/upcoming/child-checkin",
+    facilityBooking: "/upcoming/facility-booking",
+    volunteerScheduling: "/upcoming/volunteer-scheduling",
+    onlineClasses: "/upcoming/online-classes",
+    pastoralCare: "/upcoming/pastoral-care",
+  },
 } as const;
 
 // Helper function to generate member details URL
@@ -167,6 +185,14 @@ export function AppRoutes() {
 
         {/* Auth */}
         <Route path="/login" component={Login} />
+
+        {/* Upcoming Features (Coming Soon placeholders) */}
+        <Route path="/upcoming/financial-dashboard" component={FinancialDashboard} />
+        <Route path="/upcoming/child-checkin" component={ChildCheckin} />
+        <Route path="/upcoming/facility-booking" component={FacilityBooking} />
+        <Route path="/upcoming/volunteer-scheduling" component={VolunteerScheduling} />
+        <Route path="/upcoming/online-classes" component={OnlineClasses} />
+        <Route path="/upcoming/pastoral-care" component={PastoralCare} />
 
         {/* 404 fallback */}
         <Route>
