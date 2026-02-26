@@ -415,7 +415,6 @@ const FinancialHealthScoreComponent = ({
 }: FinancialHealthScoreProps) => {
   const healthScore = useMemo(() => calculateHealthScore(data), [data]);
   const recommendations = useMemo(() => generateRecommendations(data, healthScore), [data, healthScore]);
-  const _scoreColors = useMemo(() => getScoreColor(healthScore), [healthScore]);
 
   if (isLoading) {
     return (

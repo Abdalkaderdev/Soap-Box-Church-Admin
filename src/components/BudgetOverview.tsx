@@ -93,22 +93,6 @@ function getVarianceStatus(
 }
 
 /**
- * Get color classes for variance indicators
- */
-function getVarianceColor(status: ReturnType<typeof getVarianceStatus>): string {
-  switch (status) {
-    case "critical":
-      return "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950";
-    case "warning":
-      return "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950";
-    case "under":
-      return "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950";
-    case "on-track":
-      return "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950";
-  }
-}
-
-/**
  * Get badge variant for variance status
  */
 function getVarianceBadgeVariant(status: ReturnType<typeof getVarianceStatus>): "default" | "secondary" | "destructive" | "outline" {
