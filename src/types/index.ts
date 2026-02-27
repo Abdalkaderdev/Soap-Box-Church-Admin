@@ -423,17 +423,21 @@ export interface MessageTemplate {
   type: MessageType;
   subject: string;
   body: string;
+  category?: TemplateCategory;
   variables: string[];
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
+export type TemplateCategory = 'welcome' | 'event' | 'newsletter' | 'reminder' | 'follow-up' | 'announcement' | 'thank-you' | 'general';
+
 export interface MessageTemplateCreateInput {
   name: string;
   type: MessageType;
   subject: string;
   body: string;
+  category?: TemplateCategory;
 }
 
 // Reports types

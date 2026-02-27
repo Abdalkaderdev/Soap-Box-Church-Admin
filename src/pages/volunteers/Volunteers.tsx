@@ -55,7 +55,9 @@ import {
   FileText,
   TrendingUp,
   Sparkles,
+  Download,
 } from 'lucide-react';
+import { exportToCSV, generateExportFilename, type ExportColumn } from '@/lib/exportUtils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -142,6 +144,25 @@ const availableTrainings = [
   'Worship Team Guidelines',
   'Conflict Resolution',
   'Privacy & Data Handling',
+];
+
+// Volunteer export columns
+const volunteerExportColumns: ExportColumn[] = [
+  { key: 'name', header: 'Name' },
+  { key: 'email', header: 'Email' },
+  { key: 'phone', header: 'Phone' },
+  { key: 'teams', header: 'Ministry Teams', formatter: (value) => Array.isArray(value) ? value.join('; ') : String(value || '') },
+  { key: 'status', header: 'Status' },
+  { key: 'hoursThisMonth', header: 'Hours This Month' },
+  { key: 'totalHours', header: 'Total Hours' },
+  { key: 'joinedDate', header: 'Joined Date', formatter: (value) => {
+    if (!value) return '';
+    const date = new Date(value as string);
+    return isNaN(date.getTime()) ? '' : date.toLocaleDateString('en-US');
+  }},
+  { key: 'skills', header: 'Skills', formatter: (value) => Array.isArray(value) ? value.join('; ') : String(value || '') },
+  { key: 'backgroundCheckStatus', header: 'Background Check Status' },
+  { key: 'trainingCompleted', header: 'Training Completed', formatter: (value) => Array.isArray(value) ? value.join('; ') : String(value || '') },
 ];
 
 // ============================================================================
@@ -842,9 +863,20 @@ function HoursReport({ volunteers, isLoading }: { volunteers: VolunteerUI[]; isL
           </div>
         </div>
 
-        <Button variant="outline" className="w-full font-serif">
-          <FileText className="mr-2 h-4 w-4" />
-          Download Full Report
+        <Button
+          variant="outline"
+          className="w-full font-serif"
+          onClick={() => {
+            exportToCSV(
+              volunteers as unknown as Record<string, unknown>[],
+              generateExportFilename('volunteers'),
+              volunteerExportColumns
+            );
+          }}
+          disabled={volunteers.length === 0}
+        >
+          <Download className="mr-2 h-4 w-4" />
+          Export CSV Report
         </Button>
       </CardContent>
     </Card>

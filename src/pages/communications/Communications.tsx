@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import {
@@ -45,15 +46,27 @@ import {
   Image,
   Megaphone,
   Calendar,
+  LayoutTemplate,
 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   useMessages,
   useMessageTemplates,
@@ -62,11 +75,15 @@ import {
   useSendMessage,
   useSaveDraft,
   useDeleteAnnouncement,
+  useCreateTemplate,
+  useUpdateTemplate,
+  useDeleteTemplate,
+  useDuplicateTemplate,
   type Announcement,
   type MessageFilters,
 } from '@/hooks/useCommunications';
 import { useAuth } from '@/hooks/useAuth';
-import type { Message as ApiMessage, MessageTemplate, MessageType, RecipientFilter } from '@/types';
+import type { Message as ApiMessage, MessageTemplate, MessageType, RecipientFilter, TemplateCategory } from '@/types';
 
 // Using local interfaces that map from API types
 interface Message {
@@ -87,9 +104,23 @@ interface Template {
   id: string;
   name: string;
   type: 'email' | 'sms' | 'push';
+  subject: string;
+  content: string;
   category: string;
   lastUsed: string;
 }
+
+// Template categories (matches TemplateCategory type from @/types)
+const TEMPLATE_CATEGORIES: TemplateCategory[] = [
+  'welcome',
+  'event',
+  'newsletter',
+  'reminder',
+  'follow-up',
+  'announcement',
+  'thank-you',
+  'general',
+];
 
 interface CommunityPost {
   id: string;
@@ -256,6 +287,10 @@ export default function Communications() {
   const sendMessageMutation = useSendMessage();
   const saveDraftMutation = useSaveDraft();
   const deleteAnnouncementMutation = useDeleteAnnouncement();
+  const createTemplateMutation = useCreateTemplate();
+  const updateTemplateMutation = useUpdateTemplate();
+  const deleteTemplateMutation = useDeleteTemplate();
+  const duplicateTemplateMutation = useDuplicateTemplate();
 
   // Map API messages to UI format
   const messages: Message[] = (messagesData?.data ?? []).map((msg: ApiMessage) => ({
@@ -277,7 +312,9 @@ export default function Communications() {
     id: tmpl.id,
     name: tmpl.name,
     type: tmpl.type as Template['type'],
-    category: 'General',
+    subject: tmpl.subject || '',
+    content: tmpl.body || '',
+    category: tmpl.category || 'general',
     lastUsed: tmpl.updatedAt,
   }));
 
@@ -287,6 +324,25 @@ export default function Communications() {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [isComposeOpen, setIsComposeOpen] = useState(false);
+
+  // Template management state
+  const [isCreateTemplateOpen, setIsCreateTemplateOpen] = useState(false);
+  const [isEditTemplateOpen, setIsEditTemplateOpen] = useState(false);
+  const [isDuplicateTemplateOpen, setIsDuplicateTemplateOpen] = useState(false);
+  const [templateToEdit, setTemplateToEdit] = useState<Template | null>(null);
+  const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
+  const [templateToDuplicate, setTemplateToDuplicate] = useState<Template | null>(null);
+  const [duplicateTemplateName, setDuplicateTemplateName] = useState('');
+  const [templateSearchQuery, setTemplateSearchQuery] = useState('');
+  const [templateTypeFilter, setTemplateTypeFilter] = useState<string>('all');
+  const [templateCategoryFilter, setTemplateCategoryFilter] = useState<string>('all');
+
+  // Template form state
+  const [templateName, setTemplateName] = useState('');
+  const [templateType, setTemplateType] = useState<string>('email');
+  const [templateSubject, setTemplateSubject] = useState('');
+  const [templateContent, setTemplateContent] = useState('');
+  const [templateCategory, setTemplateCategory] = useState<string>('general');
 
   // Form state for new message
   const [messageType, setMessageType] = useState<string>('');
@@ -336,6 +392,114 @@ export default function Communications() {
         return undefined;
     }
   };
+
+  // Template form reset helper
+  const resetTemplateForm = () => {
+    setTemplateName('');
+    setTemplateType('email');
+    setTemplateSubject('');
+    setTemplateContent('');
+    setTemplateCategory('general');
+  };
+
+  // Handle create template
+  const handleCreateTemplate = async () => {
+    if (!templateName || !templateType || !templateContent) {
+      return;
+    }
+
+    await createTemplateMutation.mutateAsync({
+      name: templateName,
+      type: templateType as MessageType,
+      subject: templateSubject,
+      body: templateContent,
+      category: templateCategory as TemplateCategory,
+    });
+
+    resetTemplateForm();
+    setIsCreateTemplateOpen(false);
+  };
+
+  // Handle edit template
+  const handleEditTemplate = async () => {
+    if (!templateToEdit || !templateName || !templateType || !templateContent) {
+      return;
+    }
+
+    await updateTemplateMutation.mutateAsync({
+      templateId: templateToEdit.id,
+      data: {
+        name: templateName,
+        type: templateType as MessageType,
+        subject: templateSubject,
+        body: templateContent,
+        category: templateCategory as TemplateCategory,
+      },
+    });
+
+    resetTemplateForm();
+    setTemplateToEdit(null);
+    setIsEditTemplateOpen(false);
+  };
+
+  // Handle delete template
+  const handleDeleteTemplate = async () => {
+    if (!templateToDelete) return;
+
+    await deleteTemplateMutation.mutateAsync(templateToDelete.id);
+    setTemplateToDelete(null);
+  };
+
+  // Handle duplicate template
+  const handleDuplicateTemplate = async () => {
+    if (!templateToDuplicate || !duplicateTemplateName) return;
+
+    await duplicateTemplateMutation.mutateAsync({
+      templateId: templateToDuplicate.id,
+      name: duplicateTemplateName,
+    });
+
+    setTemplateToDuplicate(null);
+    setDuplicateTemplateName('');
+    setIsDuplicateTemplateOpen(false);
+  };
+
+  // Open duplicate dialog with template data
+  const openDuplicateTemplate = (template: Template) => {
+    setTemplateToDuplicate(template);
+    setDuplicateTemplateName(`${template.name} (Copy)`);
+    setIsDuplicateTemplateOpen(true);
+  };
+
+  // Open edit dialog with template data
+  const openEditTemplate = (template: Template) => {
+    setTemplateToEdit(template);
+    setTemplateName(template.name);
+    setTemplateType(template.type);
+    setTemplateSubject(template.subject);
+    setTemplateContent(template.content);
+    setTemplateCategory(template.category);
+    setIsEditTemplateOpen(true);
+  };
+
+  // Use template to pre-fill message composer
+  const useTemplate = (template: Template) => {
+    setMessageType(template.type);
+    setSubject(template.subject);
+    setContent(template.content);
+    setIsComposeOpen(true);
+  };
+
+  // Filter templates
+  const filteredTemplates = templates.filter((template) => {
+    const matchesSearch =
+      template.name.toLowerCase().includes(templateSearchQuery.toLowerCase()) ||
+      template.subject.toLowerCase().includes(templateSearchQuery.toLowerCase()) ||
+      template.content.toLowerCase().includes(templateSearchQuery.toLowerCase());
+    const matchesType = templateTypeFilter === 'all' || template.type === templateTypeFilter;
+    const matchesCategory = templateCategoryFilter === 'all' || template.category === templateCategoryFilter;
+    return matchesSearch && matchesType && matchesCategory;
+  });
 
   const handleSendMessage = async () => {
     if (!messageType || !recipients || !subject || !content) {
@@ -413,8 +577,45 @@ export default function Communications() {
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Compose Message</DialogTitle>
+              <DialogDescription>
+                Create and send a message to your church members
+              </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
+              {/* Template Selector */}
+              {templates.length > 0 && (
+                <div className="grid gap-2">
+                  <Label>Start from Template (optional)</Label>
+                  <Select
+                    value=""
+                    onValueChange={(templateId) => {
+                      const template = templates.find((t) => t.id === templateId);
+                      if (template) {
+                        setMessageType(template.type);
+                        setSubject(template.subject);
+                        setContent(template.content);
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a template..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templates.map((template) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          <div className="flex items-center gap-2">
+                            <span>{template.name}</span>
+                            <Badge variant="outline" className="text-xs">
+                              {template.type}
+                            </Badge>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="msgType">Message Type</Label>
@@ -704,15 +905,182 @@ export default function Communications() {
         </TabsContent>
 
         <TabsContent value="templates" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <p className="text-sm text-muted-foreground">
-              Save time with reusable message templates
-            </p>
-            <Button variant="outline">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Template
-            </Button>
+          {/* Template Header with Actions */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">Message Templates</h2>
+              <p className="text-sm text-muted-foreground">
+                Save time with reusable message templates
+              </p>
+            </div>
+            <Dialog open={isCreateTemplateOpen} onOpenChange={setIsCreateTemplateOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  onClick={() => {
+                    resetTemplateForm();
+                    setIsCreateTemplateOpen(true);
+                  }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Template
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Create Template</DialogTitle>
+                  <DialogDescription>
+                    Create a reusable message template for quick communication
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="templateName">Template Name *</Label>
+                      <Input
+                        id="templateName"
+                        placeholder="e.g., Weekly Newsletter"
+                        value={templateName}
+                        onChange={(e) => setTemplateName(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="templateType">Type *</Label>
+                      <Select value={templateType} onValueChange={setTemplateType}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="email">
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4" />
+                              Email
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="sms">
+                            <div className="flex items-center gap-2">
+                              <MessageSquare className="h-4 w-4" />
+                              SMS
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="push">
+                            <div className="flex items-center gap-2">
+                              <Bell className="h-4 w-4" />
+                              Push Notification
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="templateCategory">Category</Label>
+                    <Select value={templateCategory} onValueChange={setTemplateCategory}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TEMPLATE_CATEGORIES.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat.charAt(0).toUpperCase() + cat.slice(1).replace('-', ' ')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {templateType === 'email' && (
+                    <div className="grid gap-2">
+                      <Label htmlFor="templateSubject">Subject Line</Label>
+                      <Input
+                        id="templateSubject"
+                        placeholder="Enter email subject"
+                        value={templateSubject}
+                        onChange={(e) => setTemplateSubject(e.target.value)}
+                      />
+                    </div>
+                  )}
+                  <div className="grid gap-2">
+                    <Label htmlFor="templateContent">Content *</Label>
+                    <textarea
+                      id="templateContent"
+                      className="min-h-[150px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                      placeholder="Write your template content here... You can use variables like {{firstName}}, {{churchName}}, etc."
+                      value={templateContent}
+                      onChange={(e) => setTemplateContent(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Available variables: {'{{firstName}}'}, {'{{lastName}}'}, {'{{churchName}}'}, {'{{date}}'}
+                    </p>
+                  </div>
+                  <div className="flex justify-end gap-2 mt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        resetTemplateForm();
+                        setIsCreateTemplateOpen(false);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleCreateTemplate}
+                      disabled={createTemplateMutation.isPending || !templateName || !templateContent}
+                    >
+                      {createTemplateMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        <>
+                          <LayoutTemplate className="mr-2 h-4 w-4" />
+                          Create Template
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
+
+          {/* Template Filters */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search templates..."
+                value={templateSearchQuery}
+                onChange={(e) => setTemplateSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={templateTypeFilter} onValueChange={setTemplateTypeFilter}>
+              <SelectTrigger className="w-full sm:w-[150px]">
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="email">Email</SelectItem>
+                <SelectItem value="sms">SMS</SelectItem>
+                <SelectItem value="push">Push Notification</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={templateCategoryFilter} onValueChange={setTemplateCategoryFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {TEMPLATE_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat.charAt(0).toUpperCase() + cat.slice(1).replace('-', ' ')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Template Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {isLoadingTemplates ? (
               <>
@@ -723,27 +1091,91 @@ export default function Communications() {
                 <TemplateCardSkeleton />
                 <TemplateCardSkeleton />
               </>
-            ) : templates.length === 0 ? (
+            ) : filteredTemplates.length === 0 ? (
               <Card className="col-span-full">
-                <CardContent className="p-8 text-center text-muted-foreground">
-                  No templates found.
+                <CardContent className="p-8 text-center">
+                  <LayoutTemplate className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No templates found</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {templates.length === 0
+                      ? 'Create your first template to get started.'
+                      : 'No templates match your search criteria.'}
+                  </p>
+                  {templates.length === 0 && (
+                    <Button onClick={() => setIsCreateTemplateOpen(true)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Template
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ) : (
-              templates.map((template) => (
-                <Card key={template.id} className="hover:shadow-md transition-shadow cursor-pointer">
+              filteredTemplates.map((template) => (
+                <Card key={template.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <Badge variant="outline">{template.type}</Badge>
-                      <Badge variant="secondary">{template.category}</Badge>
+                      <Badge variant="outline" className="flex items-center gap-1">
+                        {template.type === 'email' && <Mail className="h-3 w-3" />}
+                        {template.type === 'sms' && <MessageSquare className="h-3 w-3" />}
+                        {template.type === 'push' && <Bell className="h-3 w-3" />}
+                        {template.type}
+                      </Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => useTemplate(template)}>
+                            <Send className="mr-2 h-4 w-4" />
+                            Use Template
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openEditTemplate(template)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openDuplicateTemplate(template)}>
+                            <Copy className="mr-2 h-4 w-4" />
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => setTemplateToDelete(template)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                     <CardTitle className="text-base mt-2">{template.name}</CardTitle>
+                    {template.subject && (
+                      <p className="text-sm text-muted-foreground line-clamp-1">
+                        {template.subject}
+                      </p>
+                    )}
                   </CardHeader>
                   <CardContent>
-                    <p className="text-xs text-muted-foreground">
-                      Last used: {new Date(template.lastUsed).toLocaleDateString()}
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                      {template.content}
                     </p>
-                    <Button variant="outline" className="w-full mt-3" size="sm">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">
+                        Updated: {new Date(template.lastUsed).toLocaleDateString()}
+                      </p>
+                      <Badge variant="secondary" className="text-xs">
+                        {template.category}
+                      </Badge>
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="w-full mt-3"
+                      size="sm"
+                      onClick={() => useTemplate(template)}
+                    >
+                      <Send className="mr-2 h-4 w-4" />
                       Use Template
                     </Button>
                   </CardContent>
@@ -751,6 +1183,212 @@ export default function Communications() {
               ))
             )}
           </div>
+
+          {/* Edit Template Dialog */}
+          <Dialog open={isEditTemplateOpen} onOpenChange={setIsEditTemplateOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Edit Template</DialogTitle>
+                <DialogDescription>
+                  Update your message template
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="editTemplateName">Template Name *</Label>
+                    <Input
+                      id="editTemplateName"
+                      placeholder="e.g., Weekly Newsletter"
+                      value={templateName}
+                      onChange={(e) => setTemplateName(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="editTemplateType">Type *</Label>
+                    <Select value={templateType} onValueChange={setTemplateType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="email">
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4" />
+                            Email
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="sms">
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="h-4 w-4" />
+                            SMS
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="push">
+                          <div className="flex items-center gap-2">
+                            <Bell className="h-4 w-4" />
+                            Push Notification
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="editTemplateCategory">Category</Label>
+                  <Select value={templateCategory} onValueChange={setTemplateCategory}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TEMPLATE_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat.charAt(0).toUpperCase() + cat.slice(1).replace('-', ' ')}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {templateType === 'email' && (
+                  <div className="grid gap-2">
+                    <Label htmlFor="editTemplateSubject">Subject Line</Label>
+                    <Input
+                      id="editTemplateSubject"
+                      placeholder="Enter email subject"
+                      value={templateSubject}
+                      onChange={(e) => setTemplateSubject(e.target.value)}
+                    />
+                  </div>
+                )}
+                <div className="grid gap-2">
+                  <Label htmlFor="editTemplateContent">Content *</Label>
+                  <textarea
+                    id="editTemplateContent"
+                    className="min-h-[150px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                    placeholder="Write your template content here..."
+                    value={templateContent}
+                    onChange={(e) => setTemplateContent(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Available variables: {'{{firstName}}'}, {'{{lastName}}'}, {'{{churchName}}'}, {'{{date}}'}
+                  </p>
+                </div>
+                <div className="flex justify-end gap-2 mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      resetTemplateForm();
+                      setTemplateToEdit(null);
+                      setIsEditTemplateOpen(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleEditTemplate}
+                    disabled={updateTemplateMutation.isPending || !templateName || !templateContent}
+                  >
+                    {updateTemplateMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Delete Template Confirmation Dialog */}
+          <AlertDialog
+            open={templateToDelete !== null}
+            onOpenChange={(open) => !open && setTemplateToDelete(null)}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Template</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete the template "{templateToDelete?.name}"? This action
+                  cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteTemplate}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {deleteTemplateMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </>
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          {/* Duplicate Template Dialog */}
+          <Dialog open={isDuplicateTemplateOpen} onOpenChange={setIsDuplicateTemplateOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Duplicate Template</DialogTitle>
+                <DialogDescription>
+                  Create a copy of "{templateToDuplicate?.name}" with a new name
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="duplicateTemplateName">New Template Name *</Label>
+                  <Input
+                    id="duplicateTemplateName"
+                    placeholder="Enter name for the duplicate"
+                    value={duplicateTemplateName}
+                    onChange={(e) => setDuplicateTemplateName(e.target.value)}
+                  />
+                </div>
+                <div className="flex justify-end gap-2 mt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setTemplateToDuplicate(null);
+                      setDuplicateTemplateName('');
+                      setIsDuplicateTemplateOpen(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleDuplicateTemplate}
+                    disabled={duplicateTemplateMutation.isPending || !duplicateTemplateName}
+                  >
+                    {duplicateTemplateMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Duplicating...
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="mr-2 h-4 w-4" />
+                        Duplicate
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         <TabsContent value="announcements" className="space-y-4">

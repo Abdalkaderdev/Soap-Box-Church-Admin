@@ -27,6 +27,7 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
+import { exportToCSV, memberExportColumns, generateExportFilename } from "@/lib/exportUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -328,7 +329,7 @@ export default function MembersList() {
     setShowBulkActions(false);
   };
 
-  // Handle export
+  // Handle export via API (xlsx)
   const handleExport = async (format: "csv" | "xlsx") => {
     try {
       const blob = await exportMembers.mutateAsync({ format, filters });
@@ -341,6 +342,15 @@ export default function MembersList() {
     } catch (error) {
       console.error("Export failed:", error);
     }
+  };
+
+  // Handle client-side CSV export
+  const handleClientExport = () => {
+    exportToCSV(
+      members as unknown as Record<string, unknown>[],
+      generateExportFilename('members'),
+      memberExportColumns
+    );
   };
 
   // Handle delete member
@@ -598,8 +608,10 @@ export default function MembersList() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="font-serif">
-              <DropdownMenuItem onClick={() => handleExport("csv")}>Export as CSV</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport("xlsx")}>Export as Excel</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleClientExport} disabled={members.length === 0}>
+                Export as CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport("xlsx")}>Export as Excel (Server)</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Button variant="outline" size="sm" className="border-[#5D4037]/30 text-[#5D4037] hover:bg-[#5D4037]/10 font-serif">

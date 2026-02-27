@@ -25,6 +25,9 @@ const Attendance = lazy(() => import("./pages/attendance/Attendance"));
 const Visitors = lazy(() => import("./pages/visitors/Visitors"));
 const GivingStatements = lazy(() => import("./pages/statements/GivingStatements"));
 
+// Admin pages
+const JobsManagement = lazy(() => import("./pages/admin/JobsManagement"));
+
 // Financial Dashboard (promoted from upcoming to main feature)
 const FinancialDashboard = lazy(() => import("./pages/upcoming/FinancialDashboard"));
 
@@ -86,6 +89,7 @@ export const routes = {
   attendance: "/attendance",
   visitors: "/visitors",
   statements: "/statements",
+  jobs: "/jobs",
   communications: "/communications",
   volunteers: "/volunteers",
   discipleship: "/discipleship",
@@ -173,6 +177,9 @@ export function AppRoutes() {
 
         {/* Giving Statements */}
         <Route path="/statements" component={GivingStatements} />
+
+        {/* Jobs Management */}
+        <Route path="/jobs" component={JobsManagement} />
 
         {/* Communications */}
         <Route path="/communications" component={Communications} />

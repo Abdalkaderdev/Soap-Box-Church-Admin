@@ -9,7 +9,9 @@ import {
   CheckCircle2,
   Plus,
   Loader2,
+  Download,
 } from "lucide-react";
+import { exportToCSV, attendanceExportColumns, generateExportFilename } from "@/lib/exportUtils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -205,6 +207,20 @@ export default function Attendance() {
               <SelectItem value="12months">12 Months</SelectItem>
             </SelectContent>
           </Select>
+          <Button
+            variant="outline"
+            onClick={() => {
+              exportToCSV(
+                services as unknown as Record<string, unknown>[],
+                generateExportFilename('attendance'),
+                attendanceExportColumns
+              );
+            }}
+            disabled={loadingServices || services.length === 0}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
               <Button>

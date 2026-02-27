@@ -19,6 +19,7 @@ import {
   FileText,
   Loader2,
 } from "lucide-react";
+import { exportToCSV, donationExportColumns, generateExportFilename } from "@/lib/exportUtils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -231,9 +232,23 @@ export default function DonationsList() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={() => {
+              const dataToExport = filteredDonations.map(d => ({
+                ...d,
+                member: d.member || undefined,
+              }));
+              exportToCSV(
+                dataToExport as Record<string, unknown>[],
+                generateExportFilename('donations'),
+                donationExportColumns
+              );
+            }}
+            disabled={isLoading || filteredDonations.length === 0}
+          >
             <Download className="h-4 w-4 mr-2" />
-            Export
+            Export CSV
           </Button>
           <Link href="/donations/new">
             <Button>
