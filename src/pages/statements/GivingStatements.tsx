@@ -360,38 +360,36 @@ export default function GivingStatements() {
                   </Button>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Year</TableHead>
-                      <TableHead>Generated</TableHead>
-                      <TableHead className="text-center">Statements</TableHead>
-                      <TableHead className="text-center">Emails Sent</TableHead>
-                      <TableHead className="text-right">Total Amount</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                <>
+                  {/* Mobile Card View */}
+                  <div className="md:hidden space-y-3">
                     {batches.map((batch) => (
-                      <TableRow key={batch.id}>
-                        <TableCell className="font-semibold">{batch.statementYear}</TableCell>
-                        <TableCell>{formatDate(batch.generatedAt)}</TableCell>
-                        <TableCell className="text-center">{batch.totalStatements}</TableCell>
-                        <TableCell className="text-center">
-                          {batch.emailsSent} / {batch.totalStatements}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(batch.totalFiatAmount)}
-                        </TableCell>
-                        <TableCell>
+                      <div key={batch.id} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="text-lg font-semibold">{batch.statementYear}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Generated {formatDate(batch.generatedAt)}
+                            </p>
+                          </div>
                           <Badge
                             variant={batch.status === "completed" ? "default" : "secondary"}
                           >
                             {batch.status}
                           </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Statements: </span>
+                            <span className="font-medium">{batch.totalStatements}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Emails: </span>
+                            <span className="font-medium">{batch.emailsSent} / {batch.totalStatements}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">{formatCurrency(batch.totalFiatAmount)}</span>
                           <Button
                             variant="outline"
                             size="sm"
@@ -400,11 +398,60 @@ export default function GivingStatements() {
                             <Eye className="h-4 w-4 mr-2" />
                             View
                           </Button>
-                        </TableCell>
-                      </TableRow>
+                        </div>
+                      </div>
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Year</TableHead>
+                          <TableHead>Generated</TableHead>
+                          <TableHead className="text-center">Statements</TableHead>
+                          <TableHead className="text-center">Emails Sent</TableHead>
+                          <TableHead className="text-right">Total Amount</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {batches.map((batch) => (
+                          <TableRow key={batch.id}>
+                            <TableCell className="font-semibold">{batch.statementYear}</TableCell>
+                            <TableCell>{formatDate(batch.generatedAt)}</TableCell>
+                            <TableCell className="text-center">{batch.totalStatements}</TableCell>
+                            <TableCell className="text-center">
+                              {batch.emailsSent} / {batch.totalStatements}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {formatCurrency(batch.totalFiatAmount)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={batch.status === "completed" ? "default" : "secondary"}
+                              >
+                                {batch.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSelectedBatch(batch)}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                View
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
@@ -491,35 +538,18 @@ export default function GivingStatements() {
                       ))}
                     </div>
                   ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Statement #</TableHead>
-                          <TableHead>Donor</TableHead>
-                          <TableHead>Email</TableHead>
-                          <TableHead className="text-center">Donations</TableHead>
-                          <TableHead className="text-right">Total</TableHead>
-                          <TableHead>Email Status</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
+                    <>
+                      {/* Mobile Card View */}
+                      <div className="md:hidden space-y-3">
                         {statements.map((statement) => (
-                          <TableRow key={statement.id}>
-                            <TableCell className="font-mono text-sm">
-                              {statement.statementNumber}
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              {statement.donorName || "Unknown"}
-                            </TableCell>
-                            <TableCell className="text-sm text-muted-foreground">
-                              {statement.donorEmail || "-"}
-                            </TableCell>
-                            <TableCell className="text-center">{statement.donationCount}</TableCell>
-                            <TableCell className="text-right font-semibold">
-                              {formatCurrency(statement.fiatTotal)}
-                            </TableCell>
-                            <TableCell>
+                          <div key={statement.id} className="border rounded-lg p-4 space-y-3">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <p className="font-medium">{statement.donorName || "Unknown"}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {statement.donorEmail || "-"}
+                                </p>
+                              </div>
                               {statement.emailSent ? (
                                 <Badge variant="default" className="gap-1">
                                   <CheckCircle2 className="h-3 w-3" />
@@ -531,12 +561,24 @@ export default function GivingStatements() {
                                   Pending
                                 </Badge>
                               )}
-                            </TableCell>
-                            <TableCell className="text-right">
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-mono text-muted-foreground">
+                                #{statement.statementNumber}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {statement.donationCount} donations
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-lg font-semibold">
+                                {formatCurrency(statement.fiatTotal)}
+                              </span>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
+                                  <Button variant="outline" size="sm">
+                                    Actions
+                                    <MoreHorizontal className="h-4 w-4 ml-2" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
@@ -558,11 +600,87 @@ export default function GivingStatements() {
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
+                            </div>
+                          </div>
                         ))}
-                      </TableBody>
-                    </Table>
+                      </div>
+
+                      {/* Desktop Table View */}
+                      <div className="hidden md:block overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Statement #</TableHead>
+                              <TableHead>Donor</TableHead>
+                              <TableHead>Email</TableHead>
+                              <TableHead className="text-center">Donations</TableHead>
+                              <TableHead className="text-right">Total</TableHead>
+                              <TableHead>Email Status</TableHead>
+                              <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {statements.map((statement) => (
+                              <TableRow key={statement.id}>
+                                <TableCell className="font-mono text-sm">
+                                  {statement.statementNumber}
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  {statement.donorName || "Unknown"}
+                                </TableCell>
+                                <TableCell className="text-sm text-muted-foreground">
+                                  {statement.donorEmail || "-"}
+                                </TableCell>
+                                <TableCell className="text-center">{statement.donationCount}</TableCell>
+                                <TableCell className="text-right font-semibold">
+                                  {formatCurrency(statement.fiatTotal)}
+                                </TableCell>
+                                <TableCell>
+                                  {statement.emailSent ? (
+                                    <Badge variant="default" className="gap-1">
+                                      <CheckCircle2 className="h-3 w-3" />
+                                      Sent
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="secondary" className="gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      Pending
+                                    </Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem>
+                                        <Download className="h-4 w-4 mr-2" />
+                                        Download PDF
+                                      </DropdownMenuItem>
+                                      {statement.donorEmail && !statement.emailSent && (
+                                        <DropdownMenuItem
+                                          onClick={() => sendStatement.mutate(statement.id)}
+                                        >
+                                          <Send className="h-4 w-4 mr-2" />
+                                          Send Email
+                                        </DropdownMenuItem>
+                                      )}
+                                      <DropdownMenuItem>
+                                        <Eye className="h-4 w-4 mr-2" />
+                                        Preview
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </>
                   )}
                 </CardContent>
               </Card>

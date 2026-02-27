@@ -445,43 +445,18 @@ export default function Attendance() {
               </Button>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Date & Time</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-center">Attendance</TableHead>
-                  <TableHead className="text-center">Visitors</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-3">
                 {services.map((service) => (
-                  <TableRow key={service.id}>
-                    <TableCell className="font-medium">{service.name}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        {formatDate(service.serviceDate)}
-                        <Clock className="h-4 w-4 text-muted-foreground ml-2" />
-                        {service.startTime}
+                  <div key={service.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="font-medium">{service.name}</p>
+                        <Badge variant="outline" className="mt-1">
+                          {getServiceTypeLabel(service.serviceType)}
+                        </Badge>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{getServiceTypeLabel(service.serviceType)}</Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span className="font-semibold">{service.actualAttendance || 0}</span>
-                      {service.expectedAttendance && (
-                        <span className="text-muted-foreground"> / {service.expectedAttendance}</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {service.firstTimeVisitors || 0}
-                    </TableCell>
-                    <TableCell>
                       <Badge
                         variant={
                           service.status === "completed"
@@ -493,24 +468,114 @@ export default function Attendance() {
                       >
                         {service.status}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedService(service);
-                          setIsCheckInOpen(true);
-                        }}
-                      >
-                        <CheckCircle2 className="h-4 w-4 mr-2" />
-                        Check-in
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4" />
+                      {formatDate(service.serviceDate)}
+                      <Clock className="h-4 w-4 ml-2" />
+                      {service.startTime}
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <span className="text-muted-foreground">Attendance: </span>
+                          <span className="font-semibold">{service.actualAttendance || 0}</span>
+                          {service.expectedAttendance && (
+                            <span className="text-muted-foreground"> / {service.expectedAttendance}</span>
+                          )}
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Visitors: </span>
+                          <span className="font-semibold">{service.firstTimeVisitors || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        setSelectedService(service);
+                        setIsCheckInOpen(true);
+                      }}
+                    >
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      Check-in
+                    </Button>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Service</TableHead>
+                      <TableHead>Date & Time</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead className="text-center">Attendance</TableHead>
+                      <TableHead className="text-center">Visitors</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {services.map((service) => (
+                      <TableRow key={service.id}>
+                        <TableCell className="font-medium">{service.name}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            {formatDate(service.serviceDate)}
+                            <Clock className="h-4 w-4 text-muted-foreground ml-2" />
+                            {service.startTime}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{getServiceTypeLabel(service.serviceType)}</Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="font-semibold">{service.actualAttendance || 0}</span>
+                          {service.expectedAttendance && (
+                            <span className="text-muted-foreground"> / {service.expectedAttendance}</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {service.firstTimeVisitors || 0}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              service.status === "completed"
+                                ? "default"
+                                : service.status === "in_progress"
+                                ? "secondary"
+                                : "outline"
+                            }
+                          >
+                            {service.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedService(service);
+                              setIsCheckInOpen(true);
+                            }}
+                          >
+                            <CheckCircle2 className="h-4 w-4 mr-2" />
+                            Check-in
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
