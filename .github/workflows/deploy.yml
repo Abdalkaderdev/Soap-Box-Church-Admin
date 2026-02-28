@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - staging
+      - 'security/**'
   workflow_dispatch:
 
 env:
@@ -59,11 +61,16 @@ jobs:
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/ingress.yaml
 
+          # Determine namespace based on branch
+          NAMESPACE=${{ github.ref == 'refs/heads/main' && 'soapbox' || 'soapbox-staging' }}
+
           # Update the deployment with the new image tag
           kubectl set image deployment/church-admin \
             church-admin=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
-            -n soapbox
+            -n $NAMESPACE
 
       - name: Verify deployment
+        env:
+          NAMESPACE: ${{ github.ref == 'refs/heads/main' && 'soapbox' || 'soapbox-staging' }}
         run: |
-          kubectl rollout status deployment/church-admin -n soapbox --timeout=300s
+          kubectl rollout status deployment/church-admin -n ${{ env.NAMESPACE }} --timeout=300s
