@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Card,
@@ -307,9 +307,13 @@ export default function CheckIn() {
   // Transform services for display
   const services: DisplayService[] = (todaysServices || []).map(transformService);
 
+  // Track if we've set the default service to avoid re-running effect
+  const hasSetDefaultService = useRef(false);
+
   // Set default selected service
   useEffect(() => {
-    if (services.length > 0 && !selectedService) {
+    if (services.length > 0 && !selectedService && !hasSetDefaultService.current) {
+      hasSetDefaultService.current = true;
       const activeService = services.find((s) => s.isActive);
       setSelectedService(activeService?.id || services[0].id);
     }

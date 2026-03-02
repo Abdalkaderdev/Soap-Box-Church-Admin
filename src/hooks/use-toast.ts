@@ -19,7 +19,7 @@ interface Toast extends ToastOptions {
 }
 
 // Global state for toasts (simple implementation)
-let toastListeners: Set<(toasts: Toast[]) => void> = new Set();
+const toastListeners: Set<(toasts: Toast[]) => void> = new Set();
 let toasts: Toast[] = [];
 let toastIdCounter = 0;
 

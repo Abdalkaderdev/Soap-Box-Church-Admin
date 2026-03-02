@@ -323,7 +323,7 @@ export default function JobsManagement() {
       resetJobForm();
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Failed to Create Job',
         description: error.message || 'An error occurred while creating the job.',
@@ -348,7 +348,7 @@ export default function JobsManagement() {
       resetJobForm();
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Failed to Update Job',
         description: error.message || 'An error occurred while updating the job.',
@@ -371,7 +371,7 @@ export default function JobsManagement() {
       setDeleteJobId(null);
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Failed to Delete Job',
         description: error.message || 'An error occurred while deleting the job.',
@@ -394,7 +394,7 @@ export default function JobsManagement() {
       queryClient.invalidateQueries({ queryKey: ['applications'] });
       queryClient.invalidateQueries({ queryKey: ['job-applications'] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Failed to Update Status',
         description: error.message || 'An error occurred while updating the status.',

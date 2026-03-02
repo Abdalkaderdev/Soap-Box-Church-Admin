@@ -89,7 +89,8 @@ export function useAuth() {
 
   // Mark as initialized once we've determined auth state
   useEffect(() => {
-    if (!hasToken || !isLoading || storedUser) {
+    const shouldInitialize = !hasToken || !isLoading || storedUser;
+    if (shouldInitialize) {
       setIsInitialized(true);
     }
   }, [hasToken, isLoading, storedUser]);

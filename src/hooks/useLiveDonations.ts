@@ -11,6 +11,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getAuthToken } from '@/lib/api';
 
+// Forward declaration type for the connect function
+type ConnectFunction = () => void;
+
 export interface LiveDonation {
   id: string;
   amount: number;
@@ -71,6 +74,9 @@ export function useLiveDonations(options: UseLiveDonationsOptions = {}): UseLive
   const clearDonations = useCallback(() => {
     setDonations([]);
   }, []);
+
+  // Ref to hold the connect function for use in setTimeout callbacks
+  const connectRef = useRef<ConnectFunction | null>(null);
 
   const connect = useCallback(() => {
     // Close existing connection
@@ -155,7 +161,7 @@ export function useLiveDonations(options: UseLiveDonationsOptions = {}): UseLive
           setError('Connection lost. Reconnecting...');
 
           reconnectTimeoutRef.current = setTimeout(() => {
-            connect();
+            connectRef.current?.();
           }, delay);
         } else {
           setError('Unable to connect to live donation stream. Please refresh the page to try again.');
@@ -166,6 +172,9 @@ export function useLiveDonations(options: UseLiveDonationsOptions = {}): UseLive
       setIsConnected(false);
     }
   }, [enabled, isAuthenticated, churchId, maxDonations]);
+
+  // Update the ref after connect is defined
+  connectRef.current = connect;
 
   const reconnect = useCallback(() => {
     reconnectAttempts.current = 0;

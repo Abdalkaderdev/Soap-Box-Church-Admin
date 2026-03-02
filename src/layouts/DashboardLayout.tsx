@@ -134,6 +134,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 }
 
 // Export a simple wrapper for pages that need the layout
+// eslint-disable-next-line react-refresh/only-export-components
 export function withDashboardLayout<P extends object>(
   Component: React.ComponentType<P>
 ): React.FC<P> {
