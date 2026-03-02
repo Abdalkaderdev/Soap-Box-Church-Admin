@@ -158,7 +158,8 @@ const LiveDonationFeedComponent = ({
   maxVisible = 10,
   showToasts = true,
   toastPosition = 'top-right',
-  toastDuration: _ = 5000,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  toastDuration = 5000,
   showConnectionStatus = true,
   className,
   initialDonations = [],

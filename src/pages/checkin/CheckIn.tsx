@@ -311,6 +311,7 @@ export default function CheckIn() {
   const hasSetDefaultService = useRef(false);
 
   // Set default selected service
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (services.length > 0 && !selectedService && !hasSetDefaultService.current) {
       hasSetDefaultService.current = true;

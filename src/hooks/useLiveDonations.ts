@@ -174,7 +174,9 @@ export function useLiveDonations(options: UseLiveDonationsOptions = {}): UseLive
   }, [enabled, isAuthenticated, churchId, maxDonations]);
 
   // Update the ref after connect is defined
-  connectRef.current = connect;
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
 
   const reconnect = useCallback(() => {
     reconnectAttempts.current = 0;

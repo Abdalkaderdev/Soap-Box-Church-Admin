@@ -486,7 +486,7 @@ export default function Communications() {
   };
 
   // Use template to pre-fill message composer
-  const useTemplate = (template: Template) => {
+  const applyTemplate = (template: Template) => {
     setMessageType(template.type);
     setSubject(template.subject);
     setContent(template.content);
@@ -1191,7 +1191,7 @@ export default function Communications() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => useTemplate(template)}>
+                          <DropdownMenuItem onClick={() => applyTemplate(template)}>
                             <Send className="mr-2 h-4 w-4" />
                             Use Template
                           </DropdownMenuItem>
@@ -1237,7 +1237,7 @@ export default function Communications() {
                       variant="outline"
                       className="w-full mt-3"
                       size="sm"
-                      onClick={() => useTemplate(template)}
+                      onClick={() => applyTemplate(template)}
                     >
                       <Send className="mr-2 h-4 w-4" />
                       Use Template

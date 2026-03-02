@@ -88,6 +88,7 @@ export function useAuth() {
   } as Church : null);
 
   // Mark as initialized once we've determined auth state
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     const shouldInitialize = !hasToken || !isLoading || storedUser;
     if (shouldInitialize) {

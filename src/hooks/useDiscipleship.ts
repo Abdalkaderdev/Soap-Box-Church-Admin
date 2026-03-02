@@ -302,7 +302,8 @@ export function useUpdateDiscipleshipLesson() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ lessonId, planId: _planId, ...input }: Partial<CreateLessonInput> & { lessonId: number; planId: number }) =>
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    mutationFn: ({ lessonId, planId, ...input }: Partial<CreateLessonInput> & { lessonId: number; planId: number }) =>
       api.patch<DiscipleshipLesson>(`/church/${churchId}/discipleship/lessons/${lessonId}`, input),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: discipleshipKeys.plan(churchId, variables.planId) });
