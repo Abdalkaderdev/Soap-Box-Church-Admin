@@ -73,7 +73,6 @@ import {
   useVolunteerSchedule,
   useVolunteerStats,
 } from '@/hooks/useVolunteers';
-import { useAuth } from '@/hooks/useAuth';
 import type { BackgroundCheckStatus, Volunteer as ApiVolunteer, MinistryTeam as ApiMinistryTeam, VolunteerAssignment } from '@/types';
 
 // ============================================================================

@@ -177,7 +177,8 @@ describe('Authentication Flow', () => {
   describe('Permission Checks', () => {
     it('admin role has all permissions', () => {
       const adminUser = { role: 'admin' };
-      const checkPermission = (_permission: string) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const checkPermission = (_: string) => {
         if (adminUser.role === 'admin') return true;
         return false;
       };
