@@ -712,7 +712,7 @@ export default function EventsList() {
   const pastEvents = events.filter((e: ApiEvent) => e.status === 'completed');
 
   // Group events by series (using seriesId from event if available)
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  /* eslint-disable react-hooks/preserve-manual-memoization */
   const eventsBySeries = useMemo(() => {
     const grouped: Record<string, { seriesName: string; events: ApiEvent[] }> = {};
     const ungrouped: ApiEvent[] = [];
@@ -731,6 +731,7 @@ export default function EventsList() {
 
     return { grouped, ungrouped };
   }, [upcomingEvents]);
+  /* eslint-enable react-hooks/preserve-manual-memoization */
 
   const getSeriesName = (eventId: string) => {
     const event = events.find((e) => e.id === eventId) as ApiEvent & { seriesName?: string } | undefined;

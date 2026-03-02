@@ -206,10 +206,10 @@ export default function Settings() {
   });
 
   // Integration settings query
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {
     data: integrationSettings,
     isLoading: integrationsLoading,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     error: _integrationsError,
   } = useQuery({
     queryKey: settingsQueryKeys.integrations(churchId),
@@ -229,10 +229,10 @@ export default function Settings() {
   });
 
   // Team members query
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {
     data: teamMembers,
     isLoading: teamLoading,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     error: _teamError,
   } = useQuery({
     queryKey: settingsQueryKeys.team(churchId),
@@ -251,10 +251,10 @@ export default function Settings() {
   });
 
   // Funds query for giving settings
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {
     data: funds,
     isLoading: fundsLoading,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     error: _fundsError,
   } = useQuery({
     queryKey: settingsQueryKeys.funds(churchId),
@@ -853,7 +853,7 @@ export default function Settings() {
                                     handleUpdateServiceTime(service.id, "name", e.target.value);
                                   }
                                 }}
-                                onChange={(e) => {
+                                onChange={() => {
                                   // Update local display immediately for better UX
                                   // The actual API call happens on blur
                                 }}

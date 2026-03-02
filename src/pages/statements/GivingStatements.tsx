@@ -147,6 +147,7 @@ export default function GivingStatements() {
   const generateStatements = useMutation({
     mutationFn: (data: typeof generateForm) =>
       api.post(`/church/${churchId}/statements/generate`, data),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onSuccess: (result: any) => {
       queryClient.invalidateQueries({ queryKey: ["statement-batches"] });
       setIsGenerateOpen(false);

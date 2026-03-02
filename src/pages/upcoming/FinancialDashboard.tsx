@@ -114,6 +114,7 @@ export default function FinancialDashboard() {
   });
 
   // Fetch funds for category breakdown
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: _funds } = useFunds();
 
   const formatCurrency = (value: number) => {
@@ -143,6 +144,7 @@ export default function FinancialDashboard() {
     : 0;
 
   // Transform trends for chart
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const chartData = useMemo(() => {
     if (!stats?.trend) return [];
     return stats.trend.map((t) => ({
@@ -152,9 +154,11 @@ export default function FinancialDashboard() {
       total: t.amount,
       donors: t.count,
     }));
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
   }, [stats?.trend]);
 
   // Transform fund breakdown for pie chart
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const categories = useMemo(() => {
     if (!dashboard?.topFunds) return [];
     return dashboard.topFunds.map((tf, index) => ({
@@ -163,6 +167,7 @@ export default function FinancialDashboard() {
       percent: Math.round(tf.percentage),
       color: CHART_COLORS[index % CHART_COLORS.length],
     }));
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
   }, [dashboard?.topFunds]);
 
   // Recent donations
