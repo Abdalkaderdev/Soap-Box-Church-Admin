@@ -513,8 +513,8 @@ export default function Reports() {
   });
 
   // Membership growth
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     data: _membershipGrowth,
     isLoading: isMembershipGrowthLoading,
   } = useMembershipGrowth({

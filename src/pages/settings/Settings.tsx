@@ -206,6 +206,7 @@ export default function Settings() {
   });
 
   // Integration settings query
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {
     data: integrationSettings,
     isLoading: integrationsLoading,
@@ -228,6 +229,7 @@ export default function Settings() {
   });
 
   // Team members query
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {
     data: teamMembers,
     isLoading: teamLoading,
@@ -249,6 +251,7 @@ export default function Settings() {
   });
 
   // Funds query for giving settings
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {
     data: funds,
     isLoading: fundsLoading,
@@ -412,6 +415,7 @@ export default function Settings() {
 
   useEffect(() => {
     if (generalSettings) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Reset form when settings load
       setGeneralForm({});
     }
   }, [generalSettings]);
