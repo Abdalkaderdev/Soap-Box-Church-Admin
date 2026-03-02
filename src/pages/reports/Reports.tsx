@@ -180,7 +180,7 @@ const CUSTOM_REPORT_FIELDS: CustomReportField[] = [
 
 function getDateRangeParams(dateRange: string): { startDate: string; endDate: string } {
   const endDate = new Date();
-  let startDate = new Date();
+  const startDate = new Date();
 
   switch (dateRange) {
     case '7days':
@@ -513,6 +513,7 @@ export default function Reports() {
   });
 
   // Membership growth
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {
     data: _membershipGrowth,
     isLoading: isMembershipGrowthLoading,

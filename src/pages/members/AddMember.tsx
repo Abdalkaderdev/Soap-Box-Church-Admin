@@ -12,7 +12,6 @@ import {
   Check,
   Plus,
   Trash2,
-  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+// Alert components removed - not currently used
 
 // Available groups for selection
 const availableGroups = [
@@ -62,6 +61,7 @@ export default function AddMember() {
   const [, setLocation] = useLocation();
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Form state
@@ -154,6 +154,7 @@ export default function AddMember() {
     setSubmitError(null);
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const memberData = {
         ...formData,
         groups: selectedGroups,

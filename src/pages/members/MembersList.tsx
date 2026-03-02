@@ -185,6 +185,7 @@ function formatUpcomingDate(dateStr: string): string {
 }
 
 export default function MembersList() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { churchId: _churchId } = useAuth();
 
   // Local UI state

@@ -75,6 +75,59 @@ const statusLabels: Record<Sermon['status'], string> = {
   'archived': 'Archived',
 };
 
+// Loading skeleton for stats cards - defined outside component to avoid re-creation during render
+const StatsCardSkeleton = () => (
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-4 w-4" />
+    </CardHeader>
+    <CardContent>
+      <Skeleton className="h-8 w-12 mb-1" />
+      <Skeleton className="h-3 w-20" />
+    </CardContent>
+  </Card>
+);
+
+// Loading skeleton for sermon cards - defined outside component to avoid re-creation during render
+const SermonCardSkeleton = () => (
+  <Card className="border-ivory-200">
+    <CardContent className="p-5">
+      <div className="flex items-start gap-4">
+        <Skeleton className="h-11 w-11 rounded-xl" />
+        <div className="space-y-2 flex-1">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-5 w-16" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-20" />
+          </div>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+// Loading skeleton for series cards - defined outside component to avoid re-creation during render
+const SeriesCardSkeleton = () => (
+  <Card className="border-ivory-200">
+    <CardHeader>
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-5 w-16" />
+        <Skeleton className="h-4 w-20" />
+      </div>
+      <Skeleton className="h-6 w-40 mt-2" />
+      <Skeleton className="h-4 w-full mt-2" />
+    </CardHeader>
+    <CardContent>
+      <Skeleton className="h-4 w-32" />
+      <Skeleton className="h-9 w-full mt-4" />
+    </CardContent>
+  </Card>
+);
+
 export default function SermonPrep() {
   const { churchId } = useAuth();
   const queryClient = useQueryClient();
@@ -251,59 +304,6 @@ export default function SermonPrep() {
   const handleDeleteSeries = (seriesId: string) => {
     deleteSeriesMutation.mutate(seriesId);
   };
-
-  // Loading skeleton for stats cards
-  const StatsCardSkeleton = () => (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-4 w-4" />
-      </CardHeader>
-      <CardContent>
-        <Skeleton className="h-8 w-12 mb-1" />
-        <Skeleton className="h-3 w-20" />
-      </CardContent>
-    </Card>
-  );
-
-  // Loading skeleton for sermon cards
-  const SermonCardSkeleton = () => (
-    <Card className="border-ivory-200">
-      <CardContent className="p-5">
-        <div className="flex items-start gap-4">
-          <Skeleton className="h-11 w-11 rounded-xl" />
-          <div className="space-y-2 flex-1">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-5 w-48" />
-              <Skeleton className="h-5 w-16" />
-            </div>
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-20" />
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  // Loading skeleton for series cards
-  const SeriesCardSkeleton = () => (
-    <Card className="border-ivory-200">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-5 w-16" />
-          <Skeleton className="h-4 w-20" />
-        </div>
-        <Skeleton className="h-6 w-40 mt-2" />
-        <Skeleton className="h-4 w-full mt-2" />
-      </CardHeader>
-      <CardContent>
-        <Skeleton className="h-4 w-32" />
-        <Skeleton className="h-9 w-full mt-4" />
-      </CardContent>
-    </Card>
-  );
 
   if (!churchId) {
     return (
