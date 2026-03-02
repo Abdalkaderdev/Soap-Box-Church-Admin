@@ -194,8 +194,8 @@ describe('Authentication Flow', () => {
         volunteer: ['members:read', 'events:read', 'volunteers:read'],
       };
 
-      const checkPermission = (_permission: string) => {
-        return permissions[volunteerUser.role]?.includes(permission) || false;
+      const checkPermission = (perm: string) => {
+        return permissions[volunteerUser.role]?.includes(perm) || false;
       };
 
       expect(checkPermission('members:read')).toBe(true);
@@ -209,8 +209,8 @@ describe('Authentication Flow', () => {
         member: ['events:read'],
       };
 
-      const checkPermission = (_permission: string) => {
-        return permissions[memberUser.role]?.includes(permission) || false;
+      const checkPermission = (perm: string) => {
+        return permissions[memberUser.role]?.includes(perm) || false;
       };
 
       expect(checkPermission('events:read')).toBe(true);

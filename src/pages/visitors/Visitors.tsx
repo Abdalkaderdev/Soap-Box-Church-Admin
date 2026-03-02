@@ -122,7 +122,7 @@ export default function Visitors() {
     queryFn: () => {
       const params = new URLSearchParams();
       if (statusFilter !== "all") params.append("status", statusFilter);
-      return api.get<{ data: Visitor[]; pagination: any }>(
+      return api.get<{ data: Visitor[]; pagination: { total: number; page: number; limit: number } }>(
         `/church/${churchId}/visitors?${params.toString()}`
       );
     },

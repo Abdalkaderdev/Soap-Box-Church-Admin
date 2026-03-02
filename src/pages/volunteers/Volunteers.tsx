@@ -958,9 +958,6 @@ function EmptyTeamsState() {
 // ============================================================================
 
 export default function Volunteers() {
-  // All hooks must be called at the top level, unconditionally
-  const { churchId: _churchId } = useAuth();
-
   // Data fetching hooks
   const { data: volunteersResponse, isLoading: volunteersLoading, error: volunteersError } = useVolunteers();
   const { data: teamsData, isLoading: teamsLoading } = useMinistryTeams();
