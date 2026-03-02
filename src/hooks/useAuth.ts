@@ -3,7 +3,7 @@
  * Handles user authentication, church info, and SSO integration
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   api,
@@ -55,7 +55,6 @@ function isStoredAuthenticated(): boolean {
  */
 export function useAuth() {
   const queryClient = useQueryClient();
-  const [isInitialized, setIsInitialized] = useState(false);
 
   // Check if we have a token
   const hasToken = Boolean(getAuthToken());
@@ -87,14 +86,11 @@ export function useAuth() {
     name: 'Church', // Default name when we only have churchId
   } as Church : null);
 
-  // Mark as initialized once we've determined auth state
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => {
-    const shouldInitialize = !hasToken || !isLoading || storedUser;
-    if (shouldInitialize) {
-      setIsInitialized(true);
-    }
-  }, [hasToken, isLoading, storedUser]);
+  // Compute initialized state - true when no token, or not loading, or have stored user
+  const isInitialized = useMemo(
+    () => !hasToken || !isLoading || Boolean(storedUser),
+    [hasToken, isLoading, storedUser]
+  );
 
   /**
    * Redirect to SSO login page

@@ -185,6 +185,7 @@ export function useLiveDonations(options: UseLiveDonationsOptions = {}): UseLive
 
   // Connect on mount and when dependencies change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- connect is a legitimate async subscription
     connect();
 
     return () => {
