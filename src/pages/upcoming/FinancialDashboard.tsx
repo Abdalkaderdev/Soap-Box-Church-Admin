@@ -143,8 +143,8 @@ export default function FinancialDashboard() {
     ? ((totalThisMonth - lastMonthAmount) / lastMonthAmount) * 100
     : 0;
 
+  /* eslint-disable react-hooks/preserve-manual-memoization */
   // Transform trends for chart
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const chartData = useMemo(() => {
     if (!stats?.trend) return [];
     return stats.trend.map((t) => ({
@@ -154,11 +154,9 @@ export default function FinancialDashboard() {
       total: t.amount,
       donors: t.count,
     }));
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
   }, [stats?.trend]);
 
   // Transform fund breakdown for pie chart
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const categories = useMemo(() => {
     if (!dashboard?.topFunds) return [];
     return dashboard.topFunds.map((tf, index) => ({
@@ -167,7 +165,6 @@ export default function FinancialDashboard() {
       percent: Math.round(tf.percentage),
       color: CHART_COLORS[index % CHART_COLORS.length],
     }));
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
   }, [dashboard?.topFunds]);
 
   // Recent donations
@@ -184,6 +181,7 @@ export default function FinancialDashboard() {
       rank: index + 1,
     }));
   }, [dashboard?.topDonors]);
+  /* eslint-enable react-hooks/preserve-manual-memoization */
 
   // Calculate one-time vs recurring estimates
   const totalAmount = stats?.totalAmount || totalThisYear;
