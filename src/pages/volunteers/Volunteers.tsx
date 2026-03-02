@@ -1533,7 +1533,7 @@ export default function Volunteers() {
               </div>
 
               {/* Service Stats */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-3 rounded-lg bg-muted/50">
                   <div className="text-2xl font-bold text-primary">{detailsVolunteer.totalHours}</div>
                   <div className="text-xs text-muted-foreground">Total Hours</div>
@@ -1542,16 +1542,12 @@ export default function Volunteers() {
                   <div className="text-2xl font-bold text-primary">{detailsVolunteer.hoursThisMonth}</div>
                   <div className="text-xs text-muted-foreground">This Month</div>
                 </div>
-                <div className="text-center p-3 rounded-lg bg-muted/50">
-                  <div className="text-2xl font-bold text-primary">{detailsVolunteer.shiftsCompleted}</div>
-                  <div className="text-xs text-muted-foreground">Shifts</div>
-                </div>
               </div>
 
               {/* Background Check Status */}
               <div className="flex items-center justify-between p-3 rounded-lg border">
                 <div className="flex items-center gap-2">
-                  {detailsVolunteer.backgroundCheckStatus === 'cleared' ? (
+                  {detailsVolunteer.backgroundCheckStatus === 'approved' ? (
                     <ShieldCheck className="h-5 w-5 text-green-500" />
                   ) : detailsVolunteer.backgroundCheckStatus === 'pending' ? (
                     <Shield className="h-5 w-5 text-amber-500" />
@@ -1561,17 +1557,17 @@ export default function Volunteers() {
                   <span className="font-medium">Background Check</span>
                 </div>
                 <Badge
-                  variant={detailsVolunteer.backgroundCheckStatus === 'cleared' ? 'default' : 'secondary'}
+                  variant={detailsVolunteer.backgroundCheckStatus === 'approved' ? 'default' : 'secondary'}
                   className={
-                    detailsVolunteer.backgroundCheckStatus === 'cleared'
+                    detailsVolunteer.backgroundCheckStatus === 'approved'
                       ? 'bg-green-100 text-green-800'
                       : detailsVolunteer.backgroundCheckStatus === 'pending'
                       ? 'bg-amber-100 text-amber-800'
                       : ''
                   }
                 >
-                  {detailsVolunteer.backgroundCheckStatus === 'cleared'
-                    ? 'Cleared'
+                  {detailsVolunteer.backgroundCheckStatus === 'approved'
+                    ? 'Approved'
                     : detailsVolunteer.backgroundCheckStatus === 'pending'
                     ? 'Pending'
                     : 'Not Started'}
@@ -1583,7 +1579,7 @@ export default function Volunteers() {
                 <Calendar className="h-4 w-4" />
                 <span>
                   Volunteering since{' '}
-                  {new Date(detailsVolunteer.joinDate).toLocaleDateString('en-US', {
+                  {new Date(detailsVolunteer.joinedDate).toLocaleDateString('en-US', {
                     month: 'long',
                     year: 'numeric',
                   })}

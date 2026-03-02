@@ -61,8 +61,7 @@ export default function AddMember() {
   const [, setLocation] = useLocation();
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [_submitError, setSubmitError] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -154,8 +153,7 @@ export default function AddMember() {
     setSubmitError(null);
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const memberData = {
+      const _memberData = {
         ...formData,
         groups: selectedGroups,
         familyMembers,

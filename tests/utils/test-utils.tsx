@@ -4,8 +4,10 @@
  */
 /* eslint-disable react-refresh/only-export-components */
 
-import React, { ReactElement, ReactNode } from 'react';
-import { render, RenderOptions, RenderResult } from '@testing-library/react';
+import type { ReactElement, ReactNode } from 'react';
+import React from 'react';
+import type { RenderOptions, RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router } from 'wouter';
 
