@@ -98,8 +98,9 @@ function App() {
   const authState = useAuthState();
   const { isAuthenticated, isLoading, user, logout } = authState;
 
-  // Public pages don't use the main layout
-  const isPublicPage = location === "/login" || location === "/" || location === "/features" || location === "/pricing";
+  // Public pages don't use the main layout (marketing/auth pages)
+  const publicPages = ["/", "/login", "/features", "/about", "/contact", "/privacy", "/terms"];
+  const isPublicPage = publicPages.includes(location);
 
   // Handle authentication redirects
   useEffect(() => {

@@ -79,8 +79,14 @@ import {
   useUpdateTemplate,
   useDeleteTemplate,
   useDuplicateTemplate,
+  useCommunityPosts,
+  useCreateCommunityPost,
+  useUpdateCommunityPost,
+  useDeleteCommunityPost,
+  useTogglePinCommunityPost,
   type Announcement,
   type MessageFilters,
+  type CommunityPost,
 } from '@/hooks/useCommunications';
 import { useAuth } from '@/hooks/useAuth';
 import type { Message as ApiMessage, MessageTemplate, MessageType, RecipientFilter, TemplateCategory } from '@/types';
@@ -122,55 +128,30 @@ const TEMPLATE_CATEGORIES: TemplateCategory[] = [
   'general',
 ];
 
-interface CommunityPost {
-  id: string;
-  content: string;
-  author: string;
-  authorRole: string;
-  createdAt: string;
-  likes: number;
-  comments: number;
-  hasImage: boolean;
-  pinned: boolean;
+// Community post loading skeleton
+function CommunityPostSkeleton() {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex gap-4">
+          <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
+          <div className="flex-1 space-y-3">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-16 w-full" />
+            <div className="flex gap-4 pt-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
-
-// TODO: Replace with real API when community posts endpoint is available
-// Currently there is no communityPostsApi in the backend
-const mockCommunityPosts: CommunityPost[] = [
-  {
-    id: '1',
-    content: 'Reminder: Our Easter service times will be at 8am, 10am, and 12pm. Invite your friends and family! ',
-    author: 'Pastor John',
-    authorRole: 'Senior Pastor',
-    createdAt: '2026-02-25T10:00:00Z',
-    likes: 45,
-    comments: 12,
-    hasImage: false,
-    pinned: true,
-  },
-  {
-    id: '2',
-    content: 'Thank you to everyone who volunteered at the food drive this weekend. Together we packed over 500 meals for families in need!',
-    author: 'Sarah Mitchell',
-    authorRole: 'Outreach Coordinator',
-    createdAt: '2026-02-24T15:30:00Z',
-    likes: 89,
-    comments: 23,
-    hasImage: true,
-    pinned: false,
-  },
-  {
-    id: '3',
-    content: 'Youth group meets every Wednesday at 7pm. This week we\'re discussing "Finding Your Purpose". All teens welcome!',
-    author: 'Mike Thompson',
-    authorRole: 'Youth Pastor',
-    createdAt: '2026-02-23T09:00:00Z',
-    likes: 32,
-    comments: 8,
-    hasImage: false,
-    pinned: false,
-  },
-];
 
 const typeIcons: Record<Message['type'], React.ReactNode> = {
   email: <Mail className="h-4 w-4" />,
@@ -292,6 +273,21 @@ export default function Communications() {
   const deleteTemplateMutation = useDeleteTemplate();
   const duplicateTemplateMutation = useDuplicateTemplate();
 
+  // Community posts hooks
+  const {
+    data: communityPostsData,
+    isLoading: isLoadingCommunityPosts,
+    error: communityPostsError,
+  } = useCommunityPosts();
+
+  const createCommunityPostMutation = useCreateCommunityPost();
+  const updateCommunityPostMutation = useUpdateCommunityPost();
+  const deleteCommunityPostMutation = useDeleteCommunityPost();
+  const togglePinMutation = useTogglePinCommunityPost();
+
+  // Community posts data
+  const communityPosts: CommunityPost[] = communityPostsData?.data ?? [];
+
   // Map API messages to UI format
   const messages: Message[] = (messagesData?.data ?? []).map((msg: ApiMessage) => ({
     id: msg.id,
@@ -351,6 +347,13 @@ export default function Communications() {
   const [content, setContent] = useState('');
   const [scheduleForLater, setScheduleForLater] = useState(false);
 
+  // Community posts state
+  const [newPostContent, setNewPostContent] = useState('');
+  const [isPostSubmitting, setIsPostSubmitting] = useState(false);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editingPostContent, setEditingPostContent] = useState('');
+  const [postToDelete, setPostToDelete] = useState<CommunityPost | null>(null);
+
   const filteredMessages = messages.filter((msg) => {
     const matchesSearch = msg.subject.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = typeFilter === 'all' || msg.type === typeFilter;
@@ -363,7 +366,7 @@ export default function Communications() {
   const avgOpenRate = statsData?.averageOpenRate ? Math.round(statsData.averageOpenRate) : 0;
   const scheduledCount = messages.filter((m) => m.status === 'scheduled').length;
 
-  const error = messagesError || templatesError || announcementsError || statsError;
+  const error = messagesError || templatesError || announcementsError || statsError || communityPostsError;
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -542,6 +545,67 @@ export default function Communications() {
     setContent('');
     setScheduleForLater(false);
     setIsComposeOpen(false);
+  };
+
+  // Community posts handlers
+  const handleCreateCommunityPost = async () => {
+    if (!newPostContent.trim()) return;
+
+    setIsPostSubmitting(true);
+    try {
+      await createCommunityPostMutation.mutateAsync({
+        content: newPostContent.trim(),
+      });
+      setNewPostContent('');
+    } catch (err) {
+      console.error('Failed to create post:', err);
+    } finally {
+      setIsPostSubmitting(false);
+    }
+  };
+
+  const handleUpdateCommunityPost = async () => {
+    if (!editingPostId || !editingPostContent.trim()) return;
+
+    try {
+      await updateCommunityPostMutation.mutateAsync({
+        postId: editingPostId,
+        data: { content: editingPostContent.trim() },
+      });
+      setEditingPostId(null);
+      setEditingPostContent('');
+    } catch (err) {
+      console.error('Failed to update post:', err);
+    }
+  };
+
+  const handleDeleteCommunityPost = async () => {
+    if (!postToDelete) return;
+
+    try {
+      await deleteCommunityPostMutation.mutateAsync(postToDelete.id);
+      setPostToDelete(null);
+    } catch (err) {
+      console.error('Failed to delete post:', err);
+    }
+  };
+
+  const handleTogglePinPost = async (postId: string) => {
+    try {
+      await togglePinMutation.mutateAsync(postId);
+    } catch (err) {
+      console.error('Failed to toggle pin:', err);
+    }
+  };
+
+  const startEditingPost = (post: CommunityPost) => {
+    setEditingPostId(post.id);
+    setEditingPostContent(post.content);
+  };
+
+  const cancelEditingPost = () => {
+    setEditingPostId(null);
+    setEditingPostContent('');
   };
 
   if (error) {
@@ -1468,6 +1532,9 @@ export default function Communications() {
                   <textarea
                     className="w-full min-h-[80px] rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
                     placeholder="Share an update with your community..."
+                    value={newPostContent}
+                    onChange={(e) => setNewPostContent(e.target.value)}
+                    disabled={isPostSubmitting}
                   />
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex gap-2">
@@ -1480,9 +1547,23 @@ export default function Communications() {
                         Event
                       </Button>
                     </div>
-                    <Button size="sm" className="bg-primary hover:bg-primary/90">
-                      <Share2 className="h-4 w-4 mr-2" />
-                      Post to Community
+                    <Button
+                      size="sm"
+                      className="bg-primary hover:bg-primary/90"
+                      onClick={handleCreateCommunityPost}
+                      disabled={!newPostContent.trim() || isPostSubmitting}
+                    >
+                      {isPostSubmitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Posting...
+                        </>
+                      ) : (
+                        <>
+                          <Share2 className="h-4 w-4 mr-2" />
+                          Post to Community
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -1490,83 +1571,188 @@ export default function Communications() {
             </CardContent>
           </Card>
 
-          {/* Posts List - TODO: Replace with real API when available */}
+          {/* Posts List */}
           <div className="space-y-4">
-            {mockCommunityPosts.map((post) => (
-              <Card key={post.id} className={post.pinned ? 'border-primary/30 bg-primary/5' : ''}>
-                <CardContent className="p-4">
-                  <div className="flex gap-4">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm font-semibold text-primary">
-                        {post.author.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold">{post.author}</span>
-                          <Badge variant="secondary" className="text-xs">{post.authorRole}</Badge>
-                          {post.pinned && (
-                            <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">
-                              Pinned
-                            </Badge>
-                          )}
-                        </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit Post
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              {post.pinned ? 'Unpin' : 'Pin'} Post
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {new Date(post.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit',
-                        })}
-                      </p>
-                      <p className="mt-3 text-sm leading-relaxed">{post.content}</p>
-                      {post.hasImage && (
-                        <div className="mt-3 rounded-lg bg-muted h-48 flex items-center justify-center">
-                          <Image className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div className="flex items-center gap-6 mt-4 pt-3 border-t">
-                        <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
-                          <Heart className="h-4 w-4" />
-                          <span>{post.likes}</span>
-                        </button>
-                        <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
-                          <MessageCircle className="h-4 w-4" />
-                          <span>{post.comments} comments</span>
-                        </button>
-                        <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors ml-auto">
-                          <Share2 className="h-4 w-4" />
-                          <span>Share</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+            {isLoadingCommunityPosts ? (
+              <>
+                <CommunityPostSkeleton />
+                <CommunityPostSkeleton />
+                <CommunityPostSkeleton />
+              </>
+            ) : communityPosts.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <Megaphone className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No community posts yet</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Be the first to share an update with your community!
+                  </p>
                 </CardContent>
               </Card>
-            ))}
+            ) : (
+              communityPosts.map((post) => (
+                <Card key={post.id} className={post.pinned ? 'border-primary/30 bg-primary/5' : ''}>
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      {post.authorProfileImage ? (
+                        <img
+                          src={post.authorProfileImage}
+                          alt={post.author}
+                          className="h-10 w-10 rounded-full object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-semibold text-primary">
+                            {post.author.split(' ').map(n => n[0]).join('')}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold">{post.author}</span>
+                            <Badge variant="secondary" className="text-xs">{post.authorRole}</Badge>
+                            {post.pinned && (
+                              <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">
+                                Pinned
+                              </Badge>
+                            )}
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => startEditingPost(post)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Post
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleTogglePinPost(post.id)}>
+                                {post.pinned ? 'Unpin' : 'Pin'} Post
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => setPostToDelete(post)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {new Date(post.createdAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                          })}
+                        </p>
+
+                        {/* Show edit form or content */}
+                        {editingPostId === post.id ? (
+                          <div className="mt-3 space-y-2">
+                            <textarea
+                              className="w-full min-h-[80px] rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                              value={editingPostContent}
+                              onChange={(e) => setEditingPostContent(e.target.value)}
+                            />
+                            <div className="flex gap-2 justify-end">
+                              <Button variant="outline" size="sm" onClick={cancelEditingPost}>
+                                Cancel
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={handleUpdateCommunityPost}
+                                disabled={updateCommunityPostMutation.isPending || !editingPostContent.trim()}
+                              >
+                                {updateCommunityPostMutation.isPending ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                    Saving...
+                                  </>
+                                ) : (
+                                  'Save Changes'
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="mt-3 text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
+                        )}
+
+                        {post.hasImage && post.imageUrl && (
+                          <div className="mt-3 rounded-lg overflow-hidden">
+                            <img
+                              src={post.imageUrl}
+                              alt="Post image"
+                              className="w-full max-h-96 object-cover"
+                            />
+                          </div>
+                        )}
+                        {post.hasImage && !post.imageUrl && (
+                          <div className="mt-3 rounded-lg bg-muted h-48 flex items-center justify-center">
+                            <Image className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex items-center gap-6 mt-4 pt-3 border-t">
+                          <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+                            <Heart className="h-4 w-4" />
+                            <span>{post.likes}</span>
+                          </button>
+                          <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+                            <MessageCircle className="h-4 w-4" />
+                            <span>{post.comments} comments</span>
+                          </button>
+                          <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors ml-auto">
+                            <Share2 className="h-4 w-4" />
+                            <span>Share</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
+
+          {/* Delete Post Confirmation Dialog */}
+          <AlertDialog
+            open={postToDelete !== null}
+            onOpenChange={(open) => !open && setPostToDelete(null)}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Post</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this post? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteCommunityPost}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {deleteCommunityPostMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </>
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </TabsContent>
       </Tabs>
     </div>

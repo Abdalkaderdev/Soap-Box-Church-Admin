@@ -144,7 +144,6 @@ export default function MemberDetails() {
 
   const handleSave = () => {
     // In a real app, this would save to the backend
-    console.log("Saving member data:", formData);
     setIsEditing(false);
   };
 
@@ -167,7 +166,6 @@ export default function MemberDetails() {
 
   const handleDelete = () => {
     // In a real app, this would delete from the backend
-    console.log("Deleting member:", member.id);
     setDeleteDialogOpen(false);
     setLocation("/members");
   };

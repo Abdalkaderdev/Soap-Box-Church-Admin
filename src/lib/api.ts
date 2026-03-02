@@ -2742,21 +2742,62 @@ export const settingsApi = {
     api.post<void>(`/church/${churchId}/settings/team/${userId}/resend-invite`),
 };
 
-// ============================================================================
-// DEVELOPMENT LOGGING
-// ============================================================================
+// ----------------------------------------------------------------------------
+// SERVICE TIMES API
+// ----------------------------------------------------------------------------
 
-if (import.meta.env.DEV) {
-  addRequestInterceptor((config, url) => {
-    console.log(`[API Request] ${config.method || 'GET'} ${url}`);
-    return config;
-  });
-
-  addResponseInterceptor((response) => {
-    console.log(`[API Response] ${response.status} ${response.url}`);
-    return response;
-  });
+export interface ServiceTime {
+  id: string;
+  day: string;
+  time: string;
+  name: string;
+  endTime?: string;
+  description?: string;
+  isActive?: boolean;
 }
+
+export interface ServiceTimeCreateInput {
+  name: string;
+  day: string;
+  time: string;
+  endTime?: string;
+  description?: string;
+}
+
+export interface ServiceTimeUpdateInput {
+  name?: string;
+  day?: string;
+  time?: string;
+  endTime?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+export const serviceTimesApi = {
+  /**
+   * Get all service times for a church
+   */
+  list: (churchId: string) =>
+    api.get<{ success: boolean; data: ServiceTime[] }>(`/church/${churchId}/service-times`),
+
+  /**
+   * Create a new service time
+   */
+  create: (churchId: string, data: ServiceTimeCreateInput) =>
+    api.post<{ success: boolean; data: ServiceTime }>(`/church/${churchId}/service-times`, data),
+
+  /**
+   * Update a service time
+   */
+  update: (churchId: string, serviceTimeId: string, data: ServiceTimeUpdateInput) =>
+    api.put<{ success: boolean; data: ServiceTime }>(`/church/${churchId}/service-times/${serviceTimeId}`, data),
+
+  /**
+   * Delete a service time
+   */
+  delete: (churchId: string, serviceTimeId: string) =>
+    api.delete<{ success: boolean }>(`/church/${churchId}/service-times/${serviceTimeId}`),
+};
 
 // ============================================================================
 // EXPORTS

@@ -102,20 +102,18 @@ export function useLiveDonations(options: UseLiveDonationsOptions = {}): UseLive
       eventSourceRef.current = eventSource;
 
       eventSource.onopen = () => {
-        console.log('[LiveDonations] SSE connection opened');
         setIsConnected(true);
         setError(null);
         reconnectAttempts.current = 0;
       };
 
-      eventSource.addEventListener('connected', (event) => {
-        console.log('[LiveDonations] Connection confirmed:', event.data);
+      eventSource.addEventListener('connected', () => {
+        // Connection confirmed
       });
 
       eventSource.addEventListener('donation', (event) => {
         try {
           const donation: LiveDonation = JSON.parse(event.data);
-          console.log('[LiveDonations] New donation received:', donation.id);
 
           setDonations((prev) => {
             // Prevent duplicates
@@ -131,8 +129,8 @@ export function useLiveDonations(options: UseLiveDonationsOptions = {}): UseLive
           if (onDonationRef.current) {
             onDonationRef.current(donation);
           }
-        } catch (parseError) {
-          console.error('[LiveDonations] Failed to parse donation event:', parseError);
+        } catch {
+          // Failed to parse donation event - ignore malformed data
         }
       });
 
@@ -141,7 +139,6 @@ export function useLiveDonations(options: UseLiveDonationsOptions = {}): UseLive
       });
 
       eventSource.onerror = () => {
-        console.error('[LiveDonations] SSE error');
         setIsConnected(false);
 
         // Close the errored connection
@@ -155,23 +152,17 @@ export function useLiveDonations(options: UseLiveDonationsOptions = {}): UseLive
             30000 // Max 30 seconds
           );
           reconnectAttempts.current += 1;
-
-          console.log(
-            `[LiveDonations] Reconnecting in ${delay}ms (attempt ${reconnectAttempts.current})`
-          );
           setError('Connection lost. Reconnecting...');
 
           reconnectTimeoutRef.current = setTimeout(() => {
             connect();
           }, delay);
         } else {
-          setError('Connection lost. Please refresh the page.');
-          console.error('[LiveDonations] Max reconnection attempts reached');
+          setError('Unable to connect to live donation stream. Please refresh the page to try again.');
         }
       };
-    } catch (connectError) {
-      console.error('[LiveDonations] Failed to create EventSource:', connectError);
-      setError('Failed to connect to donation stream');
+    } catch {
+      setError('Unable to connect to the live donation stream. Please check your connection and try again.');
       setIsConnected(false);
     }
   }, [enabled, isAuthenticated, churchId, maxDonations]);

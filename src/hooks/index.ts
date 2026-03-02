@@ -152,7 +152,14 @@ export {
   useDuplicateTemplate,
   useResendMessage,
   useTemplateVariables,
+  // Community posts hooks
+  useCommunityPosts,
+  useCreateCommunityPost,
+  useUpdateCommunityPost,
+  useDeleteCommunityPost,
+  useTogglePinCommunityPost,
   type MessageFilters,
+  type CommunityPost,
 } from './useCommunications';
 
 // Reports hooks

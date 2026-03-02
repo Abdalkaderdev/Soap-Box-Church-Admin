@@ -77,12 +77,6 @@ export function useToast() {
 
   const toast = useCallback((options: ToastOptions) => {
     const id = addToast(options);
-
-    // Also log to console for debugging
-    const icon = options.variant === 'destructive' ? '[ERROR]' :
-                 options.variant === 'success' ? '[SUCCESS]' : '[INFO]';
-    console.log(`${icon} ${options.title}${options.description ? ': ' + options.description : ''}`);
-
     return { id, dismiss: () => dismissToast(id) };
   }, []);
 

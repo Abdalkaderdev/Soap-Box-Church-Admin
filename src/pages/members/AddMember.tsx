@@ -11,7 +11,8 @@ import {
   Users,
   Check,
   Plus,
-  Trash2
+  Trash2,
+  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Available groups for selection
 const availableGroups = [
@@ -60,6 +62,7 @@ export default function AddMember() {
   const [, setLocation] = useLocation();
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -148,23 +151,22 @@ export default function AddMember() {
     }
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
-    // Simulate API call
     try {
       const memberData = {
         ...formData,
         groups: selectedGroups,
         familyMembers,
       };
-      console.log("Creating member:", memberData);
 
       // In a real app, this would be an API call
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Redirect to members list on success
       setLocation("/members");
-    } catch (error) {
-      console.error("Error creating member:", error);
+    } catch {
+      setSubmitError("Unable to create member. Please check your connection and try again.");
     } finally {
       setIsSubmitting(false);
     }

@@ -50,23 +50,14 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   settingsApi,
   fundsApi,
+  serviceTimesApi,
   type GeneralSettings,
   type NotificationSettings as ApiNotificationSettings,
   type IntegrationSettings,
   type AppearanceSettings,
+  type ServiceTime,
 } from "@/lib/api";
 import type { Fund } from "@/types";
-
-// ===================================================================
-// Types
-// ===================================================================
-
-interface ServiceTime {
-  id: string;
-  day: string;
-  time: string;
-  name: string;
-}
 
 interface TeamMember {
   id: string;
@@ -92,6 +83,7 @@ const settingsQueryKeys = {
   team: (churchId: string | null) => [...settingsQueryKeys.all(churchId), 'team'] as const,
   roles: (churchId: string | null) => [...settingsQueryKeys.all(churchId), 'roles'] as const,
   funds: (churchId: string | null) => ['funds', churchId] as const,
+  serviceTimes: (churchId: string | null) => ['serviceTimes', churchId] as const,
 };
 
 // ===================================================================
@@ -267,6 +259,19 @@ export default function Settings() {
     enabled: !!churchId,
   });
 
+  // Service times query
+  const {
+    data: serviceTimesData,
+    isLoading: serviceTimesLoading,
+  } = useQuery({
+    queryKey: settingsQueryKeys.serviceTimes(churchId),
+    queryFn: async () => {
+      const response = await serviceTimesApi.list(churchId!);
+      return response.data;
+    },
+    enabled: !!churchId,
+  });
+
   // ===================================================================
   // API Mutations
   // ===================================================================
@@ -350,6 +355,33 @@ export default function Settings() {
     },
   });
 
+  // Create service time mutation
+  const createServiceTimeMutation = useMutation({
+    mutationFn: (data: { name: string; day: string; time: string }) =>
+      serviceTimesApi.create(churchId!, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: settingsQueryKeys.serviceTimes(churchId) });
+    },
+  });
+
+  // Update service time mutation
+  const updateServiceTimeMutation = useMutation({
+    mutationFn: ({ serviceTimeId, data }: { serviceTimeId: string; data: { name?: string; day?: string; time?: string } }) =>
+      serviceTimesApi.update(churchId!, serviceTimeId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: settingsQueryKeys.serviceTimes(churchId) });
+    },
+  });
+
+  // Delete service time mutation
+  const deleteServiceTimeMutation = useMutation({
+    mutationFn: (serviceTimeId: string) =>
+      serviceTimesApi.delete(churchId!, serviceTimeId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: settingsQueryKeys.serviceTimes(churchId) });
+    },
+  });
+
   // ===================================================================
   // Form states
   // ===================================================================
@@ -359,12 +391,8 @@ export default function Settings() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Service times state (local until we have API support)
-  const [serviceTimes, setServiceTimes] = useState<ServiceTime[]>([
-    { id: "1", day: "Sunday", time: "09:00", name: "Early Service" },
-    { id: "2", day: "Sunday", time: "11:00", name: "Main Service" },
-    { id: "3", day: "Wednesday", time: "19:00", name: "Bible Study" },
-  ]);
+  // Service times derived from API data
+  const serviceTimes = serviceTimesData || [];
 
   // Team member invite states
   const [inviteEmail, setInviteEmail] = useState("");
@@ -449,18 +477,35 @@ export default function Settings() {
     }
   };
 
-  const handleAddServiceTime = () => {
-    const newService: ServiceTime = {
-      id: Date.now().toString(),
-      day: "Sunday",
-      time: "10:00",
-      name: "New Service",
-    };
-    setServiceTimes([...serviceTimes, newService]);
+  const handleAddServiceTime = async () => {
+    try {
+      await createServiceTimeMutation.mutateAsync({
+        name: "New Service",
+        day: "Sunday",
+        time: "10:00",
+      });
+    } catch {
+      // Error handled by mutation
+    }
   };
 
-  const handleRemoveServiceTime = (id: string) => {
-    setServiceTimes(serviceTimes.filter((s) => s.id !== id));
+  const handleRemoveServiceTime = async (id: string) => {
+    try {
+      await deleteServiceTimeMutation.mutateAsync(id);
+    } catch {
+      // Error handled by mutation
+    }
+  };
+
+  const handleUpdateServiceTime = async (id: string, field: keyof ServiceTime, value: string) => {
+    try {
+      await updateServiceTimeMutation.mutateAsync({
+        serviceTimeId: id,
+        data: { [field]: value },
+      });
+    } catch {
+      // Error handled by mutation
+    }
   };
 
   const handleNotificationToggle = async (setting: keyof ApiNotificationSettings, value: boolean) => {
@@ -783,82 +828,98 @@ export default function Settings() {
                 icon={<Clock className="h-5 w-5" />}
               >
                 <div className="space-y-4">
-                  {serviceTimes.map((service) => (
-                    <div
-                      key={service.id}
-                      className="flex items-center gap-4 p-4 rounded-lg border border-border/60 bg-muted/30"
-                    >
-                      <div className="flex-1 grid grid-cols-3 gap-4">
-                        <div className="space-y-1.5">
-                          <Label className="text-xs text-muted-foreground">Service Name</Label>
-                          <Input
-                            value={service.name}
-                            onChange={(e) => {
-                              setServiceTimes(
-                                serviceTimes.map((s) =>
-                                  s.id === service.id ? { ...s, name: e.target.value } : s
-                                )
-                              );
-                            }}
-                            className="h-9"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs text-muted-foreground">Day</Label>
-                          <Select
-                            value={service.day}
-                            onValueChange={(value) => {
-                              setServiceTimes(
-                                serviceTimes.map((s) =>
-                                  s.id === service.id ? { ...s, day: value } : s
-                                )
-                              );
-                            }}
-                          >
-                            <SelectTrigger className="h-9">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map(
-                                (day) => (
-                                  <SelectItem key={day} value={day}>
-                                    {day}
-                                  </SelectItem>
-                                )
-                              )}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs text-muted-foreground">Time</Label>
-                          <Input
-                            type="time"
-                            value={service.time}
-                            onChange={(e) => {
-                              setServiceTimes(
-                                serviceTimes.map((s) =>
-                                  s.id === service.id ? { ...s, time: e.target.value } : s
-                                )
-                              );
-                            }}
-                            className="h-9"
-                          />
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveServiceTime(service.id)}
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                  {serviceTimesLoading ? (
+                    <div className="flex items-center justify-center p-4">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
-                  ))}
-                  <Button variant="outline" onClick={handleAddServiceTime} className="w-full">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Service Time
-                  </Button>
+                  ) : (
+                    <>
+                      {serviceTimes.map((service) => (
+                        <div
+                          key={service.id}
+                          className="flex items-center gap-4 p-4 rounded-lg border border-border/60 bg-muted/30"
+                        >
+                          <div className="flex-1 grid grid-cols-3 gap-4">
+                            <div className="space-y-1.5">
+                              <Label className="text-xs text-muted-foreground">Service Name</Label>
+                              <Input
+                                value={service.name}
+                                onBlur={(e) => {
+                                  if (e.target.value !== service.name) {
+                                    handleUpdateServiceTime(service.id, "name", e.target.value);
+                                  }
+                                }}
+                                onChange={(e) => {
+                                  // Update local display immediately for better UX
+                                  // The actual API call happens on blur
+                                }}
+                                defaultValue={service.name}
+                                className="h-9"
+                                disabled={updateServiceTimeMutation.isPending}
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label className="text-xs text-muted-foreground">Day</Label>
+                              <Select
+                                value={service.day}
+                                onValueChange={(value) => handleUpdateServiceTime(service.id, "day", value)}
+                                disabled={updateServiceTimeMutation.isPending}
+                              >
+                                <SelectTrigger className="h-9">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map(
+                                    (day) => (
+                                      <SelectItem key={day} value={day}>
+                                        {day}
+                                      </SelectItem>
+                                    )
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label className="text-xs text-muted-foreground">Time</Label>
+                              <Input
+                                type="time"
+                                value={service.time}
+                                onChange={(e) => handleUpdateServiceTime(service.id, "time", e.target.value)}
+                                className="h-9"
+                                disabled={updateServiceTimeMutation.isPending}
+                              />
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveServiceTime(service.id)}
+                            className="text-muted-foreground hover:text-destructive"
+                            disabled={deleteServiceTimeMutation.isPending}
+                          >
+                            {deleteServiceTimeMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        onClick={handleAddServiceTime}
+                        className="w-full"
+                        disabled={createServiceTimeMutation.isPending}
+                      >
+                        {createServiceTimeMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Plus className="h-4 w-4 mr-2" />
+                        )}
+                        Add Service Time
+                      </Button>
+                    </>
+                  )}
                 </div>
               </FormSection>
             </>

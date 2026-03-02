@@ -989,6 +989,8 @@ export default function Volunteers() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [thankYouVolunteer, setThankYouVolunteer] = useState<VolunteerUI | null>(null);
   const [showThankYouDialog, setShowThankYouDialog] = useState(false);
+  const [detailsVolunteer, setDetailsVolunteer] = useState<VolunteerUI | null>(null);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
 
   // Map API volunteers to UI format
   const volunteers: VolunteerUI[] = (volunteersResponse?.data ?? []).map(mapApiVolunteerToUI);
@@ -1028,7 +1030,8 @@ export default function Volunteers() {
   };
 
   const handleViewDetails = (volunteer: VolunteerUI) => {
-    console.log('View details for:', volunteer.name);
+    setDetailsVolunteer(volunteer);
+    setShowDetailsDialog(true);
   };
 
   const handlePreviousWeek = () => {
@@ -1487,6 +1490,132 @@ export default function Volunteers() {
         open={showThankYouDialog}
         onOpenChange={setShowThankYouDialog}
       />
+
+      {/* Volunteer Details Dialog */}
+      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Volunteer Details</DialogTitle>
+            <DialogDescription>
+              View volunteer information and service history
+            </DialogDescription>
+          </DialogHeader>
+          {detailsVolunteer && (
+            <div className="space-y-6">
+              {/* Profile Header */}
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarFallback className="text-lg bg-primary/10 text-primary">
+                    {detailsVolunteer.name.split(' ').map((n) => n[0]).join('')}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-lg font-semibold">{detailsVolunteer.name}</h3>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Mail className="h-3.5 w-3.5" />
+                    {detailsVolunteer.email}
+                  </div>
+                  {detailsVolunteer.phone && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Phone className="h-3.5 w-3.5" />
+                      {detailsVolunteer.phone}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Ministry Teams */}
+              <div>
+                <h4 className="text-sm font-medium mb-2">Ministry Teams</h4>
+                <div className="flex flex-wrap gap-2">
+                  {detailsVolunteer.teams.map((team) => (
+                    <Badge key={team} variant="secondary">
+                      {team}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Service Stats */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <div className="text-2xl font-bold text-primary">{detailsVolunteer.totalHours}</div>
+                  <div className="text-xs text-muted-foreground">Total Hours</div>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <div className="text-2xl font-bold text-primary">{detailsVolunteer.hoursThisMonth}</div>
+                  <div className="text-xs text-muted-foreground">This Month</div>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <div className="text-2xl font-bold text-primary">{detailsVolunteer.shiftsCompleted}</div>
+                  <div className="text-xs text-muted-foreground">Shifts</div>
+                </div>
+              </div>
+
+              {/* Background Check Status */}
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <div className="flex items-center gap-2">
+                  {detailsVolunteer.backgroundCheckStatus === 'cleared' ? (
+                    <ShieldCheck className="h-5 w-5 text-green-500" />
+                  ) : detailsVolunteer.backgroundCheckStatus === 'pending' ? (
+                    <Shield className="h-5 w-5 text-amber-500" />
+                  ) : (
+                    <ShieldX className="h-5 w-5 text-muted-foreground" />
+                  )}
+                  <span className="font-medium">Background Check</span>
+                </div>
+                <Badge
+                  variant={detailsVolunteer.backgroundCheckStatus === 'cleared' ? 'default' : 'secondary'}
+                  className={
+                    detailsVolunteer.backgroundCheckStatus === 'cleared'
+                      ? 'bg-green-100 text-green-800'
+                      : detailsVolunteer.backgroundCheckStatus === 'pending'
+                      ? 'bg-amber-100 text-amber-800'
+                      : ''
+                  }
+                >
+                  {detailsVolunteer.backgroundCheckStatus === 'cleared'
+                    ? 'Cleared'
+                    : detailsVolunteer.backgroundCheckStatus === 'pending'
+                    ? 'Pending'
+                    : 'Not Started'}
+                </Badge>
+              </div>
+
+              {/* Member Since */}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span>
+                  Volunteering since{' '}
+                  {new Date(detailsVolunteer.joinDate).toLocaleDateString('en-US', {
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setShowDetailsDialog(false);
+                    handleSendThankYou(detailsVolunteer);
+                  }}
+                >
+                  <Heart className="h-4 w-4 mr-2" />
+                  Send Thank You
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Email
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

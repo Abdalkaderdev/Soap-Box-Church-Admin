@@ -629,6 +629,164 @@ export function useDeleteAnnouncement() {
   });
 }
 
+// ===================================================================
+// COMMUNITY POSTS HOOKS
+// ===================================================================
+
+// Community Post types
+export interface CommunityPost {
+  id: string;
+  content: string;
+  author: string;
+  authorRole: string;
+  authorProfileImage?: string | null;
+  createdAt: string;
+  likes: number;
+  comments: number;
+  hasImage: boolean;
+  imageUrl?: string | null;
+  pinned: boolean;
+}
+
+export interface CommunityPostCreateInput {
+  content: string;
+  hasImage?: boolean;
+  imageUrl?: string;
+  pinned?: boolean;
+}
+
+export interface CommunityPostUpdateInput {
+  content?: string;
+  hasImage?: boolean;
+  imageUrl?: string;
+  pinned?: boolean;
+}
+
+// Query key factory for community posts
+const communityPostKeys = {
+  all: (churchId: string) => ['church', churchId, 'community-posts'] as const,
+  list: (churchId: string, params?: { page?: number; pageSize?: number }) =>
+    [...communityPostKeys.all(churchId), 'list', params] as const,
+  detail: (churchId: string, postId: string) =>
+    [...communityPostKeys.all(churchId), postId] as const,
+};
+
+/**
+ * Hook for fetching community posts with pagination
+ */
+export function useCommunityPosts(params?: { page?: number; pageSize?: number }) {
+  const { churchId } = useAuth();
+
+  return useQuery<{
+    data: CommunityPost[];
+    pagination: { page: number; pageSize: number; total: number; totalPages: number };
+  }>({
+    queryKey: communityPostKeys.list(churchId!, params),
+    queryFn: async () => {
+      const response = await api.get<{
+        success: boolean;
+        data: CommunityPost[];
+        pagination: { page: number; pageSize: number; total: number; totalPages: number };
+      }>(`/church/${churchId}/community-posts`, {
+        page: params?.page || 1,
+        pageSize: params?.pageSize || 20,
+      });
+      return {
+        data: response.data || [],
+        pagination: response.pagination || { page: 1, pageSize: 20, total: 0, totalPages: 0 },
+      };
+    },
+    enabled: Boolean(churchId),
+  });
+}
+
+/**
+ * Hook for creating a community post
+ */
+export function useCreateCommunityPost() {
+  const { churchId } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<CommunityPost, Error, CommunityPostCreateInput>({
+    mutationFn: async (data) => {
+      const response = await api.post<{ success: boolean; data: CommunityPost }>(
+        `/church/${churchId}/community-posts`,
+        data
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: communityPostKeys.all(churchId!),
+      });
+    },
+  });
+}
+
+/**
+ * Hook for updating a community post
+ */
+export function useUpdateCommunityPost() {
+  const { churchId } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<CommunityPost, Error, { postId: string; data: CommunityPostUpdateInput }>({
+    mutationFn: async ({ postId, data }) => {
+      const response = await api.put<{ success: boolean; data: CommunityPost }>(
+        `/church/${churchId}/community-posts/${postId}`,
+        data
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: communityPostKeys.all(churchId!),
+      });
+    },
+  });
+}
+
+/**
+ * Hook for deleting a community post
+ */
+export function useDeleteCommunityPost() {
+  const { churchId } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, string>({
+    mutationFn: async (postId) => {
+      await api.delete<{ success: boolean }>(`/church/${churchId}/community-posts/${postId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: communityPostKeys.all(churchId!),
+      });
+    },
+  });
+}
+
+/**
+ * Hook for toggling pin status of a community post
+ */
+export function useTogglePinCommunityPost() {
+  const { churchId } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<{ pinned: boolean }, Error, string>({
+    mutationFn: async (postId) => {
+      const response = await api.post<{ success: boolean; data: { pinned: boolean } }>(
+        `/church/${churchId}/community-posts/${postId}/pin`
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: communityPostKeys.all(churchId!),
+      });
+    },
+  });
+}
+
 /**
  * Combined hook for Communications page - provides messages, templates, announcements, and send functionality
  */
