@@ -154,14 +154,8 @@ export default function AddMember() {
     setSubmitError(null);
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const _memberData = {
-        ...formData,
-        groups: selectedGroups,
-        familyMembers,
-      };
-
-      // In a real app, this would be an API call
+      // TODO: Replace with actual API call
+      // Data to be sent: { ...formData, groups: selectedGroups, familyMembers }
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Redirect to members list on success
