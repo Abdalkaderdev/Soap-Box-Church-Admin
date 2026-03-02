@@ -6,7 +6,7 @@
 import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
-import { mockChurchInfo, mockUserPreferences } from '../mocks/handlers';
+// Handlers imported for MSW server setup
 
 describe('Settings Management', () => {
   describe('Church Information API', () => {
@@ -299,14 +299,6 @@ describe('Settings Management', () => {
 
   describe('Settings Form Validation', () => {
     it('validates timezone format', () => {
-      const validTimezones = [
-        'America/Chicago',
-        'America/New_York',
-        'America/Los_Angeles',
-        'Europe/London',
-        'Asia/Tokyo',
-      ];
-
       const validateTimezone = (tz: string): boolean => {
         try {
           Intl.DateTimeFormat(undefined, { timeZone: tz });
@@ -339,7 +331,7 @@ describe('Settings Management', () => {
     it('validates phone number format', () => {
       const validatePhone = (phone: string): boolean => {
         // Accept various common phone formats
-        const phoneRegex = /^[\d\s\-\(\)\.+]+$/;
+        const phoneRegex = /^[\d\s\-().+]+$/;
         return phoneRegex.test(phone) && phone.replace(/\D/g, '').length >= 10;
       };
 

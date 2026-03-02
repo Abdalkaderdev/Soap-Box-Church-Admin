@@ -248,7 +248,7 @@ export interface EventCreateInput {
   status?: EventStatus;
 }
 
-export interface EventUpdateInput extends Partial<EventCreateInput> {}
+export type EventUpdateInput = Partial<EventCreateInput>;
 
 export interface Attendee {
   id: string;

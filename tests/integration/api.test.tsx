@@ -3,7 +3,7 @@
  * Tests API client, request handling, error handling, and pagination
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { http, HttpResponse, delay } from 'msw';
 import { server } from '../mocks/server';
 

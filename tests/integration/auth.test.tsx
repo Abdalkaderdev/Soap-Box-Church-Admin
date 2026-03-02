@@ -3,12 +3,12 @@
  * Tests user login flow, session management, and authentication state
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
-import { render, createTestQueryClient } from '../utils/test-utils';
+import { render } from '../utils/test-utils';
 
 // Mock Login component for testing
 function MockLoginPage() {
@@ -177,7 +177,7 @@ describe('Authentication Flow', () => {
   describe('Permission Checks', () => {
     it('admin role has all permissions', () => {
       const adminUser = { role: 'admin' };
-      const checkPermission = (permission: string) => {
+      const checkPermission = (_permission: string) => {
         if (adminUser.role === 'admin') return true;
         return false;
       };
@@ -194,7 +194,7 @@ describe('Authentication Flow', () => {
         volunteer: ['members:read', 'events:read', 'volunteers:read'],
       };
 
-      const checkPermission = (permission: string) => {
+      const checkPermission = (_permission: string) => {
         return permissions[volunteerUser.role]?.includes(permission) || false;
       };
 
@@ -209,7 +209,7 @@ describe('Authentication Flow', () => {
         member: ['events:read'],
       };
 
-      const checkPermission = (permission: string) => {
+      const checkPermission = (_permission: string) => {
         return permissions[memberUser.role]?.includes(permission) || false;
       };
 

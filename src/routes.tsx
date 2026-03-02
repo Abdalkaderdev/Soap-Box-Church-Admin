@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { Route, Switch } from "wouter";
 import { lazy, Suspense } from "react";
 

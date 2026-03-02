@@ -2,6 +2,7 @@
  * Test Utilities
  * Custom render functions and test helpers for integration testing
  */
+/* eslint-disable react-refresh/only-export-components */
 
 import React, { ReactElement, ReactNode } from 'react';
 import { render, RenderOptions, RenderResult } from '@testing-library/react';
