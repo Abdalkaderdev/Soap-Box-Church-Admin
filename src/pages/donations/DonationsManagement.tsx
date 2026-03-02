@@ -232,7 +232,7 @@ export default function DonationsManagement() {
         description: 'Your CSV file will download shortly.',
         variant: 'success',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Export Failed',
         description: 'Failed to export donations. Please try again.',
@@ -258,7 +258,7 @@ export default function DonationsManagement() {
         description: 'Your Excel file will download shortly.',
         variant: 'success',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Export Failed',
         description: 'Failed to export donations. Please try again.',
@@ -277,7 +277,8 @@ export default function DonationsManagement() {
       });
       setRefundDonation(null);
       refetch();
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as Error;
       toast({
         title: 'Refund Failed',
         description: error.message || 'Failed to process refund. Please try again.',
@@ -294,7 +295,7 @@ export default function DonationsManagement() {
         description: 'The donation receipt has been sent to the donor.',
         variant: 'success',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Failed to Send',
         description: 'Could not send the receipt. Please try again.',
