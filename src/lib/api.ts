@@ -312,33 +312,94 @@ function buildUrl(endpoint: string, params?: QueryParams): string {
 }
 
 /**
- * Main API request function with full type safety
+ * Unified API request function supporting both calling conventions:
+ *
+ * Pattern 1 (method-first, migrated components):
+ *   apiRequest('POST', '/api/endpoint', body)
+ *   apiRequest('GET', '/api/endpoint')
+ *
+ * Pattern 2 (endpoint-first with options):
+ *   apiRequest('/api/endpoint', { method: 'POST', body: JSON.stringify(data) })
  */
+
+// Overload signatures
+export async function apiRequest<T>(
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+  url: string,
+  body?: unknown,
+  customHeaders?: Record<string, string>
+): Promise<T>;
 export async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {},
+  options?: RequestInit,
   params?: QueryParams
+): Promise<T>;
+
+// Implementation
+export async function apiRequest<T>(
+  arg1: string,
+  arg2?: string | RequestInit,
+  arg3?: unknown | QueryParams,
+  arg4?: Record<string, string>
 ): Promise<T> {
-  const url = buildUrl(endpoint, params);
+  // Detect which calling convention is being used
+  const isMethodFirst = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'].includes(arg1);
 
-  // Build default headers
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    ...(options.headers as Record<string, string> || {}),
-  };
+  let url: string;
+  let config: RequestInit;
 
-  // Add auth token if available
-  const token = getAuthToken();
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  if (isMethodFirst) {
+    // Pattern 1: apiRequest(method, url, body?, headers?)
+    const method = arg1 as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+    url = buildUrl(arg2 as string);
+    const body = arg3;
+    const customHeaders = arg4 || {};
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      ...customHeaders,
+    };
+
+    const token = getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    config = {
+      method,
+      headers,
+      credentials: 'include',
+    };
+
+    if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+      config.body = JSON.stringify(body);
+    }
+  } else {
+    // Pattern 2: apiRequest(endpoint, options?, params?)
+    const endpoint = arg1;
+    const options = (arg2 as RequestInit) || {};
+    const params = arg3 as QueryParams | undefined;
+
+    url = buildUrl(endpoint, params);
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      ...(options.headers as Record<string, string> || {}),
+    };
+
+    const token = getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    config = {
+      ...options,
+      headers,
+      credentials: 'include',
+    };
   }
-
-  let config: RequestInit = {
-    ...options,
-    headers,
-    credentials: 'include', // Include cookies for SSO
-  };
 
   // Run request interceptors
   config = await runRequestInterceptors(config, url);
@@ -353,16 +414,13 @@ export async function apiRequest<T>(
   if (response.status === 401) {
     const refreshed = await handleTokenRefresh();
     if (refreshed) {
-      // Retry the request with new token
       const newToken = getAuthToken();
-      if (newToken) {
-        headers['Authorization'] = `Bearer ${newToken}`;
-        config.headers = headers;
-        response = await fetch(url, config);
-        response = await runResponseInterceptors(response);
+      if (newToken && config.headers) {
+        (config.headers as Record<string, string>)['Authorization'] = `Bearer ${newToken}`;
       }
+      response = await fetch(url, config);
+      response = await runResponseInterceptors(response);
     } else {
-      // Clear tokens and redirect to login
       clearAuthTokens();
       const loginUrl = import.meta.env.VITE_SSO_LOGIN_URL || 'https://soapboxsuperapp.com/login';
       window.location.href = `${loginUrl}?redirect=${encodeURIComponent(window.location.href)}`;

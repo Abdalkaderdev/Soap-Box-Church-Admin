@@ -28,6 +28,48 @@ const GivingStatements = lazy(() => import("./pages/statements/GivingStatements"
 
 // Admin pages
 const JobsManagement = lazy(() => import("./pages/admin/JobsManagement"));
+const ReadingPlansAdmin = lazy(() => import("./pages/reading-plans/ReadingPlansAdmin"));
+const DevotionalsAdmin = lazy(() => import("./pages/devotionals/DevotionalsAdmin"));
+const SpiritualDashboard = lazy(() => import("./pages/spiritual/SpiritualDashboard"));
+const GamificationAdmin = lazy(() => import("./pages/gamification/GamificationAdmin"));
+
+// Ministry Admin pages
+const MinistryAdminEvents = lazy(() => import("./pages/ministry/MinistryAdminEvents"));
+const MinistryAdminGroups = lazy(() => import("./pages/ministry/MinistryAdminGroups"));
+const MinistryAdminModeration = lazy(() => import("./pages/ministry/MinistryAdminModeration"));
+const MinistryAdminPrayer = lazy(() => import("./pages/ministry/MinistryAdminPrayer"));
+const MinistryAdminReports = lazy(() => import("./pages/ministry/MinistryAdminReports"));
+const MinistryAdminResources = lazy(() => import("./pages/ministry/MinistryAdminResources"));
+const MinistryAdminSettings = lazy(() => import("./pages/ministry/MinistryAdminSettings"));
+const MinistryAdminVolunteers = lazy(() => import("./pages/ministry/MinistryAdminVolunteers"));
+
+// Group Admin pages
+const GroupAdminMembers = lazy(() => import("./pages/group-admin/GroupAdminMembers"));
+const GroupAdminModeration = lazy(() => import("./pages/group-admin/GroupAdminModeration"));
+const GroupAdminResources = lazy(() => import("./pages/group-admin/GroupAdminResources"));
+const GroupAdminSettings = lazy(() => import("./pages/group-admin/GroupAdminSettings"));
+
+// Management pages
+const MemberManagement = lazy(() => import("./pages/management/member-management"));
+const VolunteerManagement = lazy(() => import("./pages/management/volunteer-management"));
+const StaffManagement = lazy(() => import("./pages/management/staff-management"));
+const MediaManagement = lazy(() => import("./pages/management/media-management"));
+const BackgroundCheckManagement = lazy(() => import("./pages/management/background-check-management"));
+
+// Analytics pages
+const AdminAnalytics = lazy(() => import("./pages/analytics/AdminAnalytics"));
+const AnalyticsDashboard = lazy(() => import("./pages/analytics/analytics-dashboard"));
+const EngagementAnalytics = lazy(() => import("./pages/analytics/EngagementAnalytics"));
+
+// Content & Tools pages
+const BulkCommunication = lazy(() => import("./pages/content/BulkCommunication"));
+const ContentDistribution = lazy(() => import("./pages/content/ContentDistributionPage"));
+const CommunityAdmin = lazy(() => import("./pages/content/CommunityAdmin"));
+const MinistryModeration = lazy(() => import("./pages/moderation/ministry-moderation"));
+const GroupModeration = lazy(() => import("./pages/moderation/group-moderation"));
+const SermonStudio = lazy(() => import("./pages/tools/SermonStudioPage"));
+const QRManagement = lazy(() => import("./pages/tools/qr-management"));
+const TaxReporting = lazy(() => import("./pages/tools/TaxReporting"));
 
 // Financial Dashboard (promoted from upcoming to main feature)
 const FinancialDashboard = lazy(() => import("./pages/upcoming/FinancialDashboard"));
@@ -91,6 +133,10 @@ export const routes = {
   visitors: "/visitors",
   statements: "/statements",
   jobs: "/jobs",
+  readingPlansAdmin: "/reading-plans-admin",
+  devotionalsAdmin: "/devotionals-admin",
+  spiritualDashboard: "/spiritual-dashboard",
+  gamificationAdmin: "/gamification-admin",
   communications: "/communications",
   volunteers: "/volunteers",
   discipleship: "/discipleship",
@@ -113,6 +159,53 @@ export const routes = {
     memberDirectory: "/upcoming/member-directory",
     pledgeTracking: "/upcoming/pledge-tracking",
     announcements: "/upcoming/announcements",
+  },
+  // Ministry Admin
+  ministry: {
+    events: "/ministry/events",
+    groups: "/ministry/groups",
+    moderation: "/ministry/moderation",
+    prayer: "/ministry/prayer",
+    reports: "/ministry/reports",
+    resources: "/ministry/resources",
+    settings: "/ministry/settings",
+    volunteers: "/ministry/volunteers",
+  },
+  // Group Admin
+  groupAdmin: {
+    members: "/group-admin/members",
+    moderation: "/group-admin/moderation",
+    resources: "/group-admin/resources",
+    settings: "/group-admin/settings",
+  },
+  // Management
+  management: {
+    members: "/management/members",
+    volunteers: "/management/volunteers",
+    staff: "/management/staff",
+    media: "/management/media",
+    backgroundChecks: "/management/background-checks",
+  },
+  // Analytics
+  analytics: {
+    main: "/analytics",
+    dashboard: "/analytics/dashboard",
+    engagement: "/analytics/engagement",
+  },
+  // Content & Tools
+  content: {
+    bulkCommunication: "/content/bulk-communication",
+    distribution: "/content/distribution",
+    communityAdmin: "/content/community-admin",
+  },
+  moderation: {
+    ministry: "/moderation/ministry",
+    groups: "/moderation/groups",
+  },
+  tools: {
+    sermonStudio: "/tools/sermon-studio",
+    qrManagement: "/tools/qr-management",
+    taxReporting: "/tools/tax-reporting",
   },
 } as const;
 
@@ -182,6 +275,18 @@ export function AppRoutes() {
         {/* Jobs Management */}
         <Route path="/jobs" component={JobsManagement} />
 
+        {/* Reading Plans Admin */}
+        <Route path="/reading-plans-admin" component={ReadingPlansAdmin} />
+
+        {/* Devotionals Admin */}
+        <Route path="/devotionals-admin" component={DevotionalsAdmin} />
+
+        {/* Spiritual Dashboard */}
+        <Route path="/spiritual-dashboard" component={SpiritualDashboard} />
+
+        {/* Gamification Admin */}
+        <Route path="/gamification-admin" component={GamificationAdmin} />
+
         {/* Communications */}
         <Route path="/communications" component={Communications} />
 
@@ -223,6 +328,48 @@ export function AppRoutes() {
         <Route path="/upcoming/member-directory" component={MemberDirectory} />
         <Route path="/upcoming/pledge-tracking" component={PledgeTracking} />
         <Route path="/upcoming/announcements" component={Announcements} />
+
+        {/* Ministry Admin */}
+        <Route path="/ministry/events" component={MinistryAdminEvents} />
+        <Route path="/ministry/groups" component={MinistryAdminGroups} />
+        <Route path="/ministry/moderation" component={MinistryAdminModeration} />
+        <Route path="/ministry/prayer" component={MinistryAdminPrayer} />
+        <Route path="/ministry/reports" component={MinistryAdminReports} />
+        <Route path="/ministry/resources" component={MinistryAdminResources} />
+        <Route path="/ministry/settings" component={MinistryAdminSettings} />
+        <Route path="/ministry/volunteers" component={MinistryAdminVolunteers} />
+
+        {/* Group Admin */}
+        <Route path="/group-admin/members" component={GroupAdminMembers} />
+        <Route path="/group-admin/moderation" component={GroupAdminModeration} />
+        <Route path="/group-admin/resources" component={GroupAdminResources} />
+        <Route path="/group-admin/settings" component={GroupAdminSettings} />
+
+        {/* Management */}
+        <Route path="/management/members" component={MemberManagement} />
+        <Route path="/management/volunteers" component={VolunteerManagement} />
+        <Route path="/management/staff" component={StaffManagement} />
+        <Route path="/management/media" component={MediaManagement} />
+        <Route path="/management/background-checks" component={BackgroundCheckManagement} />
+
+        {/* Analytics */}
+        <Route path="/analytics/dashboard" component={AnalyticsDashboard} />
+        <Route path="/analytics/engagement" component={EngagementAnalytics} />
+        <Route path="/analytics" component={AdminAnalytics} />
+
+        {/* Content */}
+        <Route path="/content/bulk-communication" component={BulkCommunication} />
+        <Route path="/content/distribution" component={ContentDistribution} />
+        <Route path="/content/community-admin" component={CommunityAdmin} />
+
+        {/* Moderation */}
+        <Route path="/moderation/ministry" component={MinistryModeration} />
+        <Route path="/moderation/groups" component={GroupModeration} />
+
+        {/* Tools */}
+        <Route path="/tools/sermon-studio" component={SermonStudio} />
+        <Route path="/tools/qr-management" component={QRManagement} />
+        <Route path="/tools/tax-reporting" component={TaxReporting} />
 
         {/* 404 fallback */}
         <Route>

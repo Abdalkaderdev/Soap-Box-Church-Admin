@@ -34,6 +34,26 @@ import {
   CalendarClock,
   Megaphone,
   LineChart,
+  // Spiritual growth icons
+  Flame,
+  Cross,
+  BookHeart,
+  Trophy,
+  // New admin section icons
+  Briefcase,
+  BarChart2,
+  FileStack,
+  Shield,
+  Wrench,
+  Film,
+  UserCog,
+  MessageSquare,
+  QrCode,
+  Receipt,
+  TrendingUp,
+  Send,
+  Share2,
+  Users2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -121,6 +141,30 @@ const navigationItems = [
   },
 ];
 
+// Spiritual growth admin section
+const spiritualAdminItems = [
+  {
+    title: "Spiritual Dashboard",
+    href: routes.spiritualDashboard,
+    icon: Heart,
+  },
+  {
+    title: "Reading Plans",
+    href: routes.readingPlansAdmin,
+    icon: BookHeart,
+  },
+  {
+    title: "Devotionals",
+    href: routes.devotionalsAdmin,
+    icon: Cross,
+  },
+  {
+    title: "Gamification",
+    href: routes.gamificationAdmin,
+    icon: Trophy,
+  },
+];
+
 // Upcoming features (Coming Soon)
 const upcomingFeatures = [
   {
@@ -152,6 +196,160 @@ const upcomingFeatures = [
     title: "Announcements",
     href: routes.upcoming.announcements,
     icon: Megaphone,
+  },
+];
+
+// Ministry Admin section
+const ministryAdminItems = [
+  {
+    title: "Events",
+    href: routes.ministry.events,
+    icon: Calendar,
+  },
+  {
+    title: "Groups",
+    href: routes.ministry.groups,
+    icon: UsersRound,
+  },
+  {
+    title: "Moderation",
+    href: routes.ministry.moderation,
+    icon: Shield,
+  },
+  {
+    title: "Prayer",
+    href: routes.ministry.prayer,
+    icon: HandHeart,
+  },
+  {
+    title: "Reports",
+    href: routes.ministry.reports,
+    icon: BarChart3,
+  },
+  {
+    title: "Resources",
+    href: routes.ministry.resources,
+    icon: FileStack,
+  },
+  {
+    title: "Settings",
+    href: routes.ministry.settings,
+    icon: Settings,
+  },
+  {
+    title: "Volunteers",
+    href: routes.ministry.volunteers,
+    icon: Heart,
+  },
+];
+
+// Group Admin section
+const groupAdminItems = [
+  {
+    title: "Members",
+    href: routes.groupAdmin.members,
+    icon: Users,
+  },
+  {
+    title: "Moderation",
+    href: routes.groupAdmin.moderation,
+    icon: Shield,
+  },
+  {
+    title: "Resources",
+    href: routes.groupAdmin.resources,
+    icon: FileStack,
+  },
+  {
+    title: "Settings",
+    href: routes.groupAdmin.settings,
+    icon: Settings,
+  },
+];
+
+// Management section
+const managementItems = [
+  {
+    title: "Members",
+    href: routes.management.members,
+    icon: UserCog,
+  },
+  {
+    title: "Volunteers",
+    href: routes.management.volunteers,
+    icon: Heart,
+  },
+  {
+    title: "Staff",
+    href: routes.management.staff,
+    icon: Briefcase,
+  },
+  {
+    title: "Media",
+    href: routes.management.media,
+    icon: Film,
+  },
+  {
+    title: "Background Checks",
+    href: routes.management.backgroundChecks,
+    icon: ClipboardCheck,
+  },
+];
+
+// Analytics section
+const analyticsItems = [
+  {
+    title: "Overview",
+    href: routes.analytics.main,
+    icon: BarChart2,
+  },
+  {
+    title: "Dashboard",
+    href: routes.analytics.dashboard,
+    icon: TrendingUp,
+  },
+  {
+    title: "Engagement",
+    href: routes.analytics.engagement,
+    icon: Users2,
+  },
+];
+
+// Content section
+const contentItems = [
+  {
+    title: "Bulk Communication",
+    href: routes.content.bulkCommunication,
+    icon: Send,
+  },
+  {
+    title: "Distribution",
+    href: routes.content.distribution,
+    icon: Share2,
+  },
+  {
+    title: "Community Admin",
+    href: routes.content.communityAdmin,
+    icon: MessageSquare,
+  },
+];
+
+// Tools section
+const toolsItems = [
+  {
+    title: "Sermon Studio",
+    href: routes.tools.sermonStudio,
+    icon: BookMarked,
+  },
+  {
+    title: "QR Management",
+    href: routes.tools.qrManagement,
+    icon: QrCode,
+  },
+  {
+    title: "Tax Reporting",
+    href: routes.tools.taxReporting,
+    icon: Receipt,
   },
 ];
 
@@ -245,6 +443,181 @@ export function Sidebar() {
                   isActive(item.href) ? "text-sidebar-primary" : "text-walnut-400"
                 )} />
                 <span className="flex-1 text-left font-medium">{item.title}</span>
+              </Button>
+            </Link>
+          ))}
+
+          {/* Spiritual Growth Admin Section */}
+          <Separator className="my-4 bg-walnut-700/30" />
+          <p className="px-3 mb-3 text-[10px] font-semibold text-purple-400/80 uppercase tracking-widest flex items-center gap-2">
+            <Flame className="h-3 w-3" />
+            Spiritual Growth
+          </p>
+          {spiritualAdminItems.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-3 text-ivory-300/80 hover:bg-purple-900/30 hover:text-purple-200 transition-all duration-200 h-10 rounded-lg",
+                  isActive(item.href) &&
+                    "bg-purple-900/40 text-purple-200 font-medium border-l-[3px] border-l-purple-500 rounded-l-none"
+                )}
+              >
+                <item.icon className={cn(
+                  "h-[16px] w-[16px] transition-colors",
+                  isActive(item.href) ? "text-purple-400" : "text-purple-500/50"
+                )} />
+                <span className="flex-1 text-left text-sm">{item.title}</span>
+              </Button>
+            </Link>
+          ))}
+
+          {/* Ministry Admin Section */}
+          <Separator className="my-4 bg-walnut-700/30" />
+          <p className="px-3 mb-3 text-[10px] font-semibold text-blue-400/80 uppercase tracking-widest flex items-center gap-2">
+            <Briefcase className="h-3 w-3" />
+            Ministry Admin
+          </p>
+          {ministryAdminItems.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-3 text-ivory-300/80 hover:bg-blue-900/30 hover:text-blue-200 transition-all duration-200 h-10 rounded-lg",
+                  isActive(item.href) &&
+                    "bg-blue-900/40 text-blue-200 font-medium border-l-[3px] border-l-blue-500 rounded-l-none"
+                )}
+              >
+                <item.icon className={cn(
+                  "h-[16px] w-[16px] transition-colors",
+                  isActive(item.href) ? "text-blue-400" : "text-blue-500/50"
+                )} />
+                <span className="flex-1 text-left text-sm">{item.title}</span>
+              </Button>
+            </Link>
+          ))}
+
+          {/* Group Admin Section */}
+          <Separator className="my-4 bg-walnut-700/30" />
+          <p className="px-3 mb-3 text-[10px] font-semibold text-green-400/80 uppercase tracking-widest flex items-center gap-2">
+            <UsersRound className="h-3 w-3" />
+            Group Admin
+          </p>
+          {groupAdminItems.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-3 text-ivory-300/80 hover:bg-green-900/30 hover:text-green-200 transition-all duration-200 h-10 rounded-lg",
+                  isActive(item.href) &&
+                    "bg-green-900/40 text-green-200 font-medium border-l-[3px] border-l-green-500 rounded-l-none"
+                )}
+              >
+                <item.icon className={cn(
+                  "h-[16px] w-[16px] transition-colors",
+                  isActive(item.href) ? "text-green-400" : "text-green-500/50"
+                )} />
+                <span className="flex-1 text-left text-sm">{item.title}</span>
+              </Button>
+            </Link>
+          ))}
+
+          {/* Management Section */}
+          <Separator className="my-4 bg-walnut-700/30" />
+          <p className="px-3 mb-3 text-[10px] font-semibold text-orange-400/80 uppercase tracking-widest flex items-center gap-2">
+            <UserCog className="h-3 w-3" />
+            Management
+          </p>
+          {managementItems.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-3 text-ivory-300/80 hover:bg-orange-900/30 hover:text-orange-200 transition-all duration-200 h-10 rounded-lg",
+                  isActive(item.href) &&
+                    "bg-orange-900/40 text-orange-200 font-medium border-l-[3px] border-l-orange-500 rounded-l-none"
+                )}
+              >
+                <item.icon className={cn(
+                  "h-[16px] w-[16px] transition-colors",
+                  isActive(item.href) ? "text-orange-400" : "text-orange-500/50"
+                )} />
+                <span className="flex-1 text-left text-sm">{item.title}</span>
+              </Button>
+            </Link>
+          ))}
+
+          {/* Analytics Section */}
+          <Separator className="my-4 bg-walnut-700/30" />
+          <p className="px-3 mb-3 text-[10px] font-semibold text-cyan-400/80 uppercase tracking-widest flex items-center gap-2">
+            <BarChart2 className="h-3 w-3" />
+            Analytics
+          </p>
+          {analyticsItems.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-3 text-ivory-300/80 hover:bg-cyan-900/30 hover:text-cyan-200 transition-all duration-200 h-10 rounded-lg",
+                  isActive(item.href) &&
+                    "bg-cyan-900/40 text-cyan-200 font-medium border-l-[3px] border-l-cyan-500 rounded-l-none"
+                )}
+              >
+                <item.icon className={cn(
+                  "h-[16px] w-[16px] transition-colors",
+                  isActive(item.href) ? "text-cyan-400" : "text-cyan-500/50"
+                )} />
+                <span className="flex-1 text-left text-sm">{item.title}</span>
+              </Button>
+            </Link>
+          ))}
+
+          {/* Content Section */}
+          <Separator className="my-4 bg-walnut-700/30" />
+          <p className="px-3 mb-3 text-[10px] font-semibold text-pink-400/80 uppercase tracking-widest flex items-center gap-2">
+            <FileStack className="h-3 w-3" />
+            Content
+          </p>
+          {contentItems.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-3 text-ivory-300/80 hover:bg-pink-900/30 hover:text-pink-200 transition-all duration-200 h-10 rounded-lg",
+                  isActive(item.href) &&
+                    "bg-pink-900/40 text-pink-200 font-medium border-l-[3px] border-l-pink-500 rounded-l-none"
+                )}
+              >
+                <item.icon className={cn(
+                  "h-[16px] w-[16px] transition-colors",
+                  isActive(item.href) ? "text-pink-400" : "text-pink-500/50"
+                )} />
+                <span className="flex-1 text-left text-sm">{item.title}</span>
+              </Button>
+            </Link>
+          ))}
+
+          {/* Tools Section */}
+          <Separator className="my-4 bg-walnut-700/30" />
+          <p className="px-3 mb-3 text-[10px] font-semibold text-teal-400/80 uppercase tracking-widest flex items-center gap-2">
+            <Wrench className="h-3 w-3" />
+            Tools
+          </p>
+          {toolsItems.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-3 text-ivory-300/80 hover:bg-teal-900/30 hover:text-teal-200 transition-all duration-200 h-10 rounded-lg",
+                  isActive(item.href) &&
+                    "bg-teal-900/40 text-teal-200 font-medium border-l-[3px] border-l-teal-500 rounded-l-none"
+                )}
+              >
+                <item.icon className={cn(
+                  "h-[16px] w-[16px] transition-colors",
+                  isActive(item.href) ? "text-teal-400" : "text-teal-500/50"
+                )} />
+                <span className="flex-1 text-left text-sm">{item.title}</span>
               </Button>
             </Link>
           ))}
