@@ -81,7 +81,7 @@ export default function CandlePriceAdmin() {
       setNotes("");
       setIsManualDialogOpen(false);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message || "Failed to set manual price",
@@ -90,19 +90,19 @@ export default function CandlePriceAdmin() {
     },
   });
 
-  const backfillMutation = useMutation({
+  const backfillMutation = useMutation<{ data: { processed: number; errors: number } }>({
     mutationFn: async () => {
       return apiRequest('/api/candle-price/backfill', {
         method: 'POST',
       });
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: { data: { processed: number; errors: number } }) => {
       toast({
         title: "Backfill Complete",
         description: `Processed ${data.data.processed} transactions with ${data.data.errors} errors`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message || "Failed to backfill prices",

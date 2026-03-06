@@ -135,14 +135,13 @@ export default function MinistryAdminModeration() {
     return matchesStatus && matchesType;
   });
 
-  const handleApproveContent = (_contentId: number) => {
+  const handleApproveContent = () => {
   };
 
-  const handleRemoveContent = (_contentId: number) => {
+  const handleRemoveContent = () => {
   };
 
-  const handleReviewContent = (_contentId: number) => {
-    // Handle content review logic here
+  const handleReviewContent = () => {
   };
 
   const getSeverityColor = (severity: string) => {
@@ -360,7 +359,7 @@ export default function MinistryAdminModeration() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleApproveContent(item.id)}
+                          onClick={() => handleApproveContent()}
                         >
                           <CheckCircle className="h-4 w-4 mr-2" />
                           Approve
@@ -368,7 +367,7 @@ export default function MinistryAdminModeration() {
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => handleRemoveContent(item.id)}
+                          onClick={() => handleRemoveContent()}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Remove
@@ -376,7 +375,7 @@ export default function MinistryAdminModeration() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleReviewContent(item.id)}
+                          onClick={() => handleReviewContent()}
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           Full Review

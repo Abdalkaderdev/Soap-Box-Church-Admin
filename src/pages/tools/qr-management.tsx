@@ -8,22 +8,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { z } from "zod";
 import { Trash2, Edit, QrCode, Download, Eye, EyeOff, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import QRCode from "qrcode";
 
-// QR Code form schema
-const qrCodeSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
-  description: z.string().optional(),
-  location: z.string().min(1, "Location is required"),
-  maxUsesPerDay: z.number().min(0).optional(),
-  validFrom: z.string().optional(),
-  validUntil: z.string().optional(),
-});
-
-type QrCodeFormData = z.infer<typeof qrCodeSchema>;
+interface QrCodeFormData {
+  name: string;
+  description?: string;
+  location: string;
+  maxUsesPerDay?: number;
+  validFrom?: string;
+  validUntil?: string;
+}
 
 interface QrCodeData {
   id: string;
@@ -82,7 +78,7 @@ export default function QrManagement() {
         }
       });
       setQrCodeDataUrl(dataUrl);
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to generate QR code image",
@@ -108,7 +104,7 @@ export default function QrManagement() {
   };
 
   // Fetch QR codes
-  const { data: qrCodes = [], isLoading, error: _error } = useQuery({
+  const { data: qrCodes = [], isLoading } = useQuery({
     queryKey: ['/api/qr-codes'],
     queryFn: async () => {
       return await apiRequest('/api/qr-codes', { method: 'GET' });
@@ -144,7 +140,7 @@ export default function QrManagement() {
         description: "The QR code has been created successfully.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       const errorMessage = error.message || "Failed to create QR code";
       toast({
         title: "Error",
@@ -169,7 +165,7 @@ export default function QrManagement() {
         description: "The QR code has been updated successfully.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message || "Failed to update QR code",
@@ -188,7 +184,7 @@ export default function QrManagement() {
         description: "The QR code has been deleted successfully.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message || "Failed to delete QR code",

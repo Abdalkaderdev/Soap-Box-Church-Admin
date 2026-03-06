@@ -48,6 +48,11 @@ interface Volunteer {
   backgroundChecks?: BackgroundCheck[];
 }
 
+function getDaysUntilExpiration(expiresAt: string): number {
+  const expirationDate = new Date(expiresAt);
+  return Math.ceil((expirationDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+}
+
 export default function BackgroundCheckManager() {
   const [selectedVolunteerId, setSelectedVolunteerId] = useState<number | null>(null);
   const [selectedCheckType, setSelectedCheckType] = useState("comprehensive");
@@ -377,8 +382,7 @@ export default function BackgroundCheckManager() {
                     {expiringChecks.map((item) => {
                       const check = item.backgroundCheck;
                       const volunteer = item.volunteer;
-                      const expirationDate = new Date(check.expiresAt);
-                      const daysUntilExpiration = Math.ceil((expirationDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                      const daysUntilExpiration = getDaysUntilExpiration(check.expiresAt);
 
                       return (
                         <TableRow key={check.id}>

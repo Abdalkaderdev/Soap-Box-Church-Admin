@@ -83,7 +83,8 @@ export function composeDisplayName(
   const handle = `@${email.split('@')[0] || 'user'}`;
 
   // Determine if user is staff (but exclude QA bots so they appear as regular users)
-  const isQABot = (user as any).isQaBot === true || (user as any).accountTag === 'QA' ||
+  const userRecord = user as User & { isQaBot?: boolean; accountTag?: string };
+  const isQABot = userRecord.isQaBot === true || userRecord.accountTag === 'QA' ||
                   user.email?.includes('@soapbox-qa.local') || user.id === 'ai-moderation';
   const isStaff = ['pastor', 'elder', 'admin', 'staff'].includes(flags.role) && !isQABot;
   const isVerified = flags.verified || flags.emailVerified || flags.phoneVerified;
@@ -127,10 +128,11 @@ export function composeDisplayName(
       }
       break;
 
-    case 'first_last_initial':
+    case 'first_last_initial': {
       const lastInitial = lastName ? ` ${lastName.charAt(0).toUpperCase()}.` : '';
       displayName = `${firstName}${lastInitial}` || firstName || 'User';
       break;
+    }
 
     case 'first':
       displayName = firstName || 'User';
@@ -224,7 +226,8 @@ function getDisplayFormat(policy: OrgPolicy, context: DisplayContext, isStaff: b
  */
 function getRoleBadge(role: string, user: User): string {
   // Hide role badges for QA bots so they appear as regular users
-  if ((user as any).isQaBot === true || (user as any).accountTag === 'QA' ||
+  const userRecord = user as User & { isQaBot?: boolean; accountTag?: string };
+  if (userRecord.isQaBot === true || userRecord.accountTag === 'QA' ||
       user.email?.includes('@soapbox-qa.local') || user.id === 'ai-moderation') {
     return '';
   }

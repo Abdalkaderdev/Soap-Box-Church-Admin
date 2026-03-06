@@ -104,10 +104,10 @@ export default function MinistryAdminEvents() {
     setCreateEventOpen(false);
   };
 
-  const handleEditEvent = (_eventId: number) => {
+  const handleEditEvent = () => {
   };
 
-  const handleDeleteEvent = (_eventId: number) => {
+  const handleDeleteEvent = () => {
   };
 
   const getStatusColor = (status: string) => {
@@ -448,10 +448,10 @@ export default function MinistryAdminEvents() {
                           <Button size="sm" variant="outline">
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleEditEvent(event.id)}>
+                          <Button size="sm" variant="outline" onClick={() => handleEditEvent()}>
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleDeleteEvent(event.id)}>
+                          <Button size="sm" variant="outline" onClick={() => handleDeleteEvent()}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>

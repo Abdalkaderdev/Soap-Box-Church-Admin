@@ -47,11 +47,12 @@ function MemberDirectory({ selectedChurch: propSelectedChurch, isMinistryAdmin =
     enabled: !skipChurchLogic,
   });
 
-  const userChurches = userChurchesData?.churches || [];
-  const adminChurches = skipChurchLogic ? [] : userChurches.filter((uc: Church) => {
+  const adminChurches = React.useMemo(() => {
+    const userChurches = userChurchesData?.churches || [];
+    if (skipChurchLogic) return [];
     const adminRoles = ['church_admin', 'admin', 'pastor', 'lead_pastor', 'system_admin', 'super_admin', 'soapbox_owner'];
-    return adminRoles.includes(uc.role);
-  });
+    return userChurches.filter((uc: Church) => adminRoles.includes(uc.role));
+  }, [skipChurchLogic, userChurchesData]);
 
   React.useEffect(() => {
     if (skipChurchLogic) return;

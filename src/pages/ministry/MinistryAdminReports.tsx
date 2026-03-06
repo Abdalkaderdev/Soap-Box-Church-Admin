@@ -179,12 +179,10 @@ export default function MinistryAdminReports() {
     setGenerateReportOpen(false);
   };
 
-  const handleExportReport = (_reportType: string) => {
-    // Handle report export logic here
+  const handleExportReport = () => {
   };
 
-  const handleScheduleReport = (_templateName: string) => {
-    // Handle report scheduling logic here
+  const handleScheduleReport = () => {
   };
 
   const getEngagementColor = (engagement: string) => {
@@ -487,7 +485,7 @@ export default function MinistryAdminReports() {
           </div>
 
           <div className="flex justify-center space-x-4">
-            <Button onClick={() => handleExportReport('overview')}>
+            <Button onClick={() => handleExportReport()}>
               <Download className="h-4 w-4 mr-2" />
               Export Overview Report
             </Button>
@@ -659,10 +657,10 @@ export default function MinistryAdminReports() {
                       <Button size="sm" variant="outline">
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleExportReport(template.name)}>
+                      <Button size="sm" variant="outline" onClick={() => handleExportReport()}>
                         <Download className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleScheduleReport(template.name)}>
+                      <Button size="sm" variant="outline" onClick={() => handleScheduleReport()}>
                         <CalendarIcon className="h-4 w-4" />
                       </Button>
                     </div>

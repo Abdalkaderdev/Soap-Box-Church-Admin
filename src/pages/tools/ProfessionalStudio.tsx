@@ -35,7 +35,8 @@ function ProfessionalStudio() {
   }
 
   // Check access: Torchbearer plan for individuals OR church admin (automatic Pro access)
-  const hasIndividualAccess = (user as any)?.subscriptionTier === 'torchbearer';
+  const userWithSub = user as (typeof user & { subscriptionTier?: string }) | null;
+  const hasIndividualAccess = userWithSub?.subscriptionTier === 'torchbearer';
   const hasChurchAdminAccess = churchAdminStatus?.hasProAccess || false;
   const hasAccess = hasIndividualAccess || hasChurchAdminAccess;
 
@@ -113,7 +114,7 @@ function ProfessionalStudio() {
             {/* Current Status */}
             <div className="bg-gray-800/50 rounded-lg p-4 space-y-2">
               <p className="text-gray-400 text-sm">
-                <strong>Your current plan:</strong> <span className="text-white capitalize">{(user as any)?.subscriptionTier || 'disciple'}</span>
+                <strong>Your current plan:</strong> <span className="text-white capitalize">{userWithSub?.subscriptionTier || 'disciple'}</span>
               </p>
               <p className="text-gray-400 text-sm">
                 To unlock Professional Studio, upgrade to Torchbearer or become a Church Admin.

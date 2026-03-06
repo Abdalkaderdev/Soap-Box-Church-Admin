@@ -27,6 +27,27 @@ import {
   Filter
 } from "lucide-react";
 
+interface Group {
+  id: number;
+  name: string;
+  description: string;
+  category: string;
+  leader: string;
+  coLeaders: string[];
+  members: number;
+  maxMembers: number;
+  status: string;
+  growth: string;
+  engagement: string;
+  meetingTime: string;
+  location: string;
+  lastActivity: string;
+  events: number;
+  posts: number;
+  weeklyAttendance: number;
+  founded: string;
+}
+
 export default function MinistryAdminGroups() {
   const { toast } = useToast();
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
@@ -35,10 +56,10 @@ export default function MinistryAdminGroups() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [viewGroupOpen, setViewGroupOpen] = useState(false);
   const [editGroupOpen, setEditGroupOpen] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
 
   // Mock groups data
-  const groups = [
+  const groups: Group[] = [
     {
       id: 1,
       name: "Young Adults Bible Study",

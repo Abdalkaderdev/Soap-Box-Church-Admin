@@ -155,16 +155,13 @@ export default function MinistryAdminPrayer() {
     setCreatePrayerOpen(false);
   };
 
-  const handleMarkAnswered = (_prayerId: number) => {
-    // Handle prayer answered logic here
+  const handleMarkAnswered = () => {
   };
 
-  const handleFlagPrayer = (_prayerId: number) => {
-    // Handle prayer flagging logic here
+  const handleFlagPrayer = () => {
   };
 
-  const handleViewPrayer = (_prayerId: number) => {
-    // Handle prayer viewing logic here
+  const handleViewPrayer = () => {
   };
 
   const getStatusColor = (status: string) => {
@@ -453,15 +450,15 @@ export default function MinistryAdminPrayer() {
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <Button size="sm" variant="outline" onClick={() => handleViewPrayer(prayer.id)}>
+                      <Button size="sm" variant="outline" onClick={() => handleViewPrayer()}>
                         <Eye className="h-4 w-4" />
                       </Button>
                       {!prayer.answered && (
-                        <Button size="sm" variant="outline" onClick={() => handleMarkAnswered(prayer.id)}>
+                        <Button size="sm" variant="outline" onClick={() => handleMarkAnswered()}>
                           <CheckCircle className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button size="sm" variant="outline" onClick={() => handleFlagPrayer(prayer.id)}>
+                      <Button size="sm" variant="outline" onClick={() => handleFlagPrayer()}>
                         <Flag className="h-4 w-4" />
                       </Button>
                     </div>

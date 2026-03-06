@@ -59,7 +59,11 @@ const formatSafeDate = (dateString: string | null | undefined, formatStr: string
   }
 };
 
-// Background Check Status Badge Component
+function checkIsExpiringSoon(expiryDate: string | undefined): boolean {
+  if (!expiryDate) return false;
+  return new Date(expiryDate) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+}
+
 const BackgroundCheckStatusBadge = ({ volunteer }: { volunteer: Volunteer }) => {
   const getStatusColor = (status?: string) => {
     switch (status) {
@@ -91,8 +95,7 @@ const BackgroundCheckStatusBadge = ({ volunteer }: { volunteer: Volunteer }) => 
     }
   };
 
-  const isExpiringSoon = volunteer.backgroundCheckExpiry ?
-    new Date(volunteer.backgroundCheckExpiry) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : false;
+  const isExpiringSoon = checkIsExpiringSoon(volunteer.backgroundCheckExpiry);
 
   return (
     <div className="flex items-center gap-2">

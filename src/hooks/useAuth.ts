@@ -246,12 +246,13 @@ export function useChurchId(): string {
  */
 export function useRequireAuth(options?: { redirectTo?: string }) {
   const auth = useAuth();
+  const { isLoading, isAuthenticated, redirectToLogin } = auth;
 
   useEffect(() => {
-    if (!auth.isLoading && !auth.isAuthenticated) {
-      auth.redirectToLogin(options?.redirectTo);
+    if (!isLoading && !isAuthenticated) {
+      redirectToLogin(options?.redirectTo);
     }
-  }, [auth.isLoading, auth.isAuthenticated, auth.redirectToLogin, options?.redirectTo]);
+  }, [isLoading, isAuthenticated, redirectToLogin, options?.redirectTo]);
 
   return auth;
 }

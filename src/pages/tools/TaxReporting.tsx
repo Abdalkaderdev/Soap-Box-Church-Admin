@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -170,7 +170,7 @@ export default function TaxReporting() {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [_location] = useLocation();
+  useLocation();
 
   const [selectedChurchId, setSelectedChurchId] = useState<number | null>(null);
 
@@ -179,7 +179,7 @@ export default function TaxReporting() {
     enabled: isAuthenticated,
   });
 
-  const churches = communitiesData?.communities?.filter(c => c.type === 'church') || [];
+  const churches = useMemo(() => communitiesData?.communities?.filter(c => c.type === 'church') || [], [communitiesData]);
   const selectedChurch = churches.find(c => c.id === selectedChurchId);
 
   useEffect(() => {
@@ -230,7 +230,7 @@ export default function TaxReporting() {
     generateOptions.includeFiat,
     generateOptions.includeCandle
   ];
-  const { data: filteredDonorSummaries, isLoading: _loadingPreview, refetch: _refetchPreview } = useQuery<{ summaries: DonorSummary[]; totalDonors: number }>({
+  const { data: filteredDonorSummaries } = useQuery<{ summaries: DonorSummary[]; totalDonors: number }>({
     queryKey: previewQueryKey,
     queryFn: () => {
       const params = new URLSearchParams({
@@ -302,7 +302,7 @@ export default function TaxReporting() {
     })).filter(donor => donor.totalFiat > 0 || donor.totalCandles > 0);
   };
 
-  const generateStatementsMutation = useMutation({
+  const generateStatementsMutation = useMutation<{ batch?: { totalStatements?: number } }>({
     mutationFn: async () => {
       return apiRequest(`/api/tax-reporting/${communityId}/statements/generate`, {
         method: 'POST',
@@ -313,7 +313,7 @@ export default function TaxReporting() {
         }),
       });
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: { batch?: { totalStatements?: number } }) => {
       toast({
         title: "Statements Generated",
         description: `Successfully generated ${data.batch?.totalStatements || 0} tax statements.`,
@@ -373,7 +373,7 @@ export default function TaxReporting() {
         title: "Export Complete",
         description: `Downloaded ${format.toUpperCase()} export successfully.`,
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Export Failed",
         description: "Failed to export data. Please try again.",
@@ -563,7 +563,7 @@ export default function TaxReporting() {
                         <Label>Candle Display Mode</Label>
                         <Select
                           value={generateOptions.candleDisplayMode}
-                          onValueChange={(v) => setGenerateOptions(prev => ({ ...prev, candleDisplayMode: v as any }))}
+                          onValueChange={(v) => setGenerateOptions(prev => ({ ...prev, candleDisplayMode: v as 'separate' | 'combined' | 'usd_only' }))}
                         >
                           <SelectTrigger>
                             <SelectValue />

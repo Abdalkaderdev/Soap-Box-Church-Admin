@@ -9,10 +9,18 @@ import { Shield, AlertCircle } from "lucide-react";
 export default function AdminAnalytics() {
   const { user, isLoading: authLoading } = useAuth();
 
+  const [, setLocation] = useLocation();
+
   const { data: userRole, isLoading: roleLoading } = useQuery({
     queryKey: ['/api/user/role'],
     enabled: !!user
   });
+
+  useEffect(() => {
+    if (!user && !authLoading) {
+      setLocation("/");
+    }
+  }, [user, authLoading, setLocation]);
 
   if (authLoading || roleLoading) {
     return (
@@ -21,14 +29,6 @@ export default function AdminAnalytics() {
       </div>
     );
   }
-
-  const [, setLocation] = useLocation();
-
-  useEffect(() => {
-    if (!user && !authLoading) {
-      setLocation("/");
-    }
-  }, [user, authLoading, setLocation]);
 
   if (!user) {
     return null;

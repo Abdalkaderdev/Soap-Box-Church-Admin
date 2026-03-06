@@ -229,7 +229,7 @@ export default function MembersList() {
   const exportMembers = useExportMembers();
 
   // Derived data
-  const members = membersData?.data || [];
+  const members = useMemo(() => membersData?.data || [], [membersData]);
   const pagination = membersData?.pagination;
   const totalPages = pagination?.totalPages || 1;
   const totalMembers = pagination?.totalItems || 0;

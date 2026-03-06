@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "../../App";
 import { useQuery } from "@tanstack/react-query";
 import { StaffManagement } from "../../components/StaffManagement";
@@ -6,6 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/ca
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Badge } from "../../components/ui/badge";
 import { UserCog, Building2 } from "lucide-react";
+
+interface Community {
+  id: number;
+  name: string;
+  type: string;
+  role: string;
+}
 
 export default function StaffManagementPage() {
   const { user } = useAuth();
@@ -15,19 +22,19 @@ export default function StaffManagementPage() {
   const { data: userCommunities = [], isLoading } = useQuery({
     queryKey: ["/api/users/communities"],
     enabled: !!user,
-  }) as { data: any[], isLoading: boolean };
+  }) as { data: Community[], isLoading: boolean };
 
   // Filter to only communities where user has admin access
-  const adminCommunities = (userCommunities || []).filter((community: any) => {
+  const adminCommunities = (userCommunities || []).filter((community: Community) => {
     const adminRoles = ['church_admin', 'church-admin', 'admin', 'pastor', 'lead-pastor', 'elder', 'soapbox_owner'];
     return adminRoles.includes(community.role);
   });
 
   // Auto-select first community if only one exists
-  useEffect(() => {
-    if (!selectedCommunityId && adminCommunities.length === 1) {
-      setSelectedCommunityId(adminCommunities[0].id);
-    }
+  const effectiveCommunityId = useMemo(() => {
+    if (selectedCommunityId) return selectedCommunityId;
+    if (adminCommunities.length === 1) return adminCommunities[0].id;
+    return null;
   }, [adminCommunities, selectedCommunityId]);
 
   if (isLoading) {
@@ -91,7 +98,7 @@ export default function StaffManagementPage() {
                   <SelectValue placeholder="Choose a community to manage" />
                 </SelectTrigger>
                 <SelectContent>
-                  {adminCommunities.map((community: any) => (
+                  {adminCommunities.map((community: Community) => (
                     <SelectItem key={community.id} value={community.id.toString()}>
                       <div className="flex items-center gap-2">
                         <span>{community.name}</span>
@@ -109,15 +116,15 @@ export default function StaffManagementPage() {
       )}
 
       {/* Staff Management Component */}
-      {selectedCommunityId && (
+      {effectiveCommunityId && (
         <StaffManagement
-          communityId={selectedCommunityId}
-          communityType={adminCommunities.find((c: any) => c.id === selectedCommunityId)?.type || "church"}
+          communityId={effectiveCommunityId}
+          communityType={adminCommunities.find((c: Community) => c.id === effectiveCommunityId)?.type || "church"}
         />
       )}
 
       {/* Placeholder for community selection */}
-      {!selectedCommunityId && adminCommunities.length > 1 && (
+      {!effectiveCommunityId && adminCommunities.length > 1 && (
         <Card>
           <CardContent className="py-12 text-center">
             <UserCog className="h-16 w-16 text-gray-400 mx-auto mb-4" />

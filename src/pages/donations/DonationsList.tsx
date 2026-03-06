@@ -124,7 +124,7 @@ export default function DonationsList() {
   const sendReceiptMutation = useSendDonationReceipt();
 
   // Get donations and pagination info
-  const donations = donationsData?.data || [];
+  const donations = useMemo(() => donationsData?.data || [], [donationsData]);
   const pagination = donationsData?.pagination;
   const totalPages = pagination?.totalPages || 1;
   const totalItems = pagination?.totalItems || 0;

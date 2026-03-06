@@ -10,6 +10,15 @@ import { Separator } from '@/components/ui/separator';
 
 // Placeholder types until context is migrated
 type ScopeType = 'all' | 'church' | 'ministry' | 'group';
+interface Community {
+  id: string | number;
+  name?: string;
+}
+interface AdminData {
+  churches: Community[];
+  ministries: Community[];
+  groups: Community[];
+}
 
 // Placeholder hook until CommunityScopeContext is migrated
 function useCommunityScope() {
@@ -52,7 +61,7 @@ function BulkCommunicationContent() {
     );
   }
 
-  const data = adminData as any;
+  const data = adminData as AdminData | undefined;
   const churches = data?.churches || [];
   const ministries = data?.ministries || [];
   const groups = data?.groups || [];
@@ -81,18 +90,18 @@ function BulkCommunicationContent() {
   const selectedCommunityId = scope.id;
 
   const filteredChurches = selectedScope === 'all' || selectedScope === 'church'
-    ? (selectedCommunityId ? churches.filter((c: any) => c.id.toString() === selectedCommunityId) : churches)
+    ? (selectedCommunityId ? churches.filter((c: Community) => c.id.toString() === selectedCommunityId) : churches)
     : [];
   const filteredMinistries = selectedScope === 'all' || selectedScope === 'ministry'
-    ? (selectedCommunityId ? ministries.filter((m: any) => m.id.toString() === selectedCommunityId) : ministries)
+    ? (selectedCommunityId ? ministries.filter((m: Community) => m.id.toString() === selectedCommunityId) : ministries)
     : [];
   const filteredGroups = selectedScope === 'all' || selectedScope === 'group'
-    ? (selectedCommunityId ? groups.filter((g: any) => g.id.toString() === selectedCommunityId) : groups)
+    ? (selectedCommunityId ? groups.filter((g: Community) => g.id.toString() === selectedCommunityId) : groups)
     : [];
 
   // Get selected community details for banner from context
   const selectedCommunity = scope.type !== 'all' && scope.id
-    ? [...churches, ...ministries, ...groups].find((c: any) => c.id.toString() === scope.id)
+    ? [...churches, ...ministries, ...groups].find((c: Community) => c.id.toString() === scope.id)
     : null;
 
   return (
@@ -113,7 +122,7 @@ function BulkCommunicationContent() {
 
       <div className="space-y-12">
         {/* Church Communication Hubs - TODO: Migrate UnifiedCommunicationHub component */}
-        {filteredChurches.map((church: any, index: number) => (
+        {filteredChurches.map((church: Community, index: number) => (
           <div key={`church-${church.id}`}>
             {index > 0 && <Separator className="my-12" />}
             <div className="p-6 border rounded-lg">
@@ -124,7 +133,7 @@ function BulkCommunicationContent() {
         ))}
 
         {/* Ministry Communication Hubs */}
-        {filteredMinistries.map((ministry: any, index: number) => (
+        {filteredMinistries.map((ministry: Community, index: number) => (
           <div key={`ministry-${ministry.id}`}>
             {(filteredChurches.length > 0 || index > 0) && <Separator className="my-12" />}
             <div className="p-6 border rounded-lg">
@@ -135,7 +144,7 @@ function BulkCommunicationContent() {
         ))}
 
         {/* Group Communication Hubs */}
-        {filteredGroups.map((group: any, index: number) => (
+        {filteredGroups.map((group: Community, index: number) => (
           <div key={`group-${group.id}`}>
             {((filteredChurches.length > 0 || filteredMinistries.length > 0) || index > 0) && <Separator className="my-12" />}
             <div className="p-6 border rounded-lg">

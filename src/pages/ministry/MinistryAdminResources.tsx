@@ -170,24 +170,19 @@ export default function MinistryAdminResources() {
     setCreateFolderOpen(false);
   };
 
-  const handleDownload = (_resourceId: number) => {
-    // Handle resource download logic here
+  const handleDownload = () => {
   };
 
-  const handleShare = (_resourceId: number) => {
-    // Handle resource sharing logic here
+  const handleShare = () => {
   };
 
-  const handleEdit = (_resourceId: number) => {
-    // Handle resource editing logic here
+  const handleEdit = () => {
   };
 
-  const handleDelete = (_resourceId: number) => {
-    // Handle resource deletion logic here
+  const handleDelete = () => {
   };
 
-  const handleToggleStar = (_resourceId: number) => {
-    // Handle resource star toggle logic here
+  const handleToggleStar = () => {
   };
 
   const getFileIcon = (type: string) => {
@@ -517,7 +512,7 @@ export default function MinistryAdminResources() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleToggleStar(resource.id)}
+                      onClick={() => handleToggleStar()}
                     >
                       <Star className={`h-4 w-4 ${resource.starred ? 'text-yellow-500 fill-current' : 'text-gray-400'}`} />
                     </Button>
@@ -557,19 +552,19 @@ export default function MinistryAdminResources() {
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <Button size="sm" variant="outline" onClick={() => handleDownload(resource.id)}>
+                    <Button size="sm" variant="outline" onClick={() => handleDownload()}>
                       <Download className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleShare(resource.id)}>
+                    <Button size="sm" variant="outline" onClick={() => handleShare()}>
                       <Share className="h-4 w-4" />
                     </Button>
                     <Button size="sm" variant="outline">
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(resource.id)}>
+                    <Button size="sm" variant="outline" onClick={() => handleEdit()}>
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleDelete(resource.id)}>
+                    <Button size="sm" variant="outline" onClick={() => handleDelete()}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>

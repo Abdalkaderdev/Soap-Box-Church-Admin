@@ -154,7 +154,7 @@ export default function GamificationAdmin() {
     rewardCandles: 100,
   });
 
-  const { data: _savedConfig } = useQuery({
+  useQuery({
     queryKey: ["gamification-config", churchId],
     queryFn: () => fetchConfig(churchId),
     initialData: defaultConfig,

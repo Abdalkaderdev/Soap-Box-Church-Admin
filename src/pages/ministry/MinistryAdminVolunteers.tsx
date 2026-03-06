@@ -170,12 +170,10 @@ export default function MinistryAdminVolunteers() {
     setCreateOpportunityOpen(false);
   };
 
-  const handleApplicationAction = (_applicationId: number, _action: 'approve' | 'reject' | 'interview') => {
-    // Handle application action logic here
+  const handleApplicationAction = () => {
   };
 
-  const handleEditOpportunity = (_opportunityId: number) => {
-    // Handle opportunity editing logic here
+  const handleEditOpportunity = () => {
   };
 
   return (
@@ -437,7 +435,7 @@ export default function MinistryAdminVolunteers() {
                           <Button size="sm" variant="outline">
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleEditOpportunity(opportunity.id)}>
+                          <Button size="sm" variant="outline" onClick={() => handleEditOpportunity()}>
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button size="sm" variant="outline">
@@ -513,21 +511,21 @@ export default function MinistryAdminVolunteers() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleApplicationAction(application.id, 'approve')}
+                            onClick={() => handleApplicationAction()}
                           >
                             <CheckCircle className="h-4 w-4" />
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleApplicationAction(application.id, 'interview')}
+                            onClick={() => handleApplicationAction()}
                           >
                             <User className="h-4 w-4" />
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleApplicationAction(application.id, 'reject')}
+                            onClick={() => handleApplicationAction()}
                           >
                             <AlertTriangle className="h-4 w-4" />
                           </Button>

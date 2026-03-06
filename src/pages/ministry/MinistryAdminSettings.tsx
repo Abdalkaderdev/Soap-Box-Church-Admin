@@ -93,8 +93,7 @@ export default function MinistryAdminSettings() {
     activeIntegrations: 4
   };
 
-  const handleSaveSettings = (_category: string) => {
-    // Save settings
+  const handleSaveSettings = () => {
   };
 
   const handleBackupData = () => {
@@ -309,7 +308,7 @@ export default function MinistryAdminSettings() {
                 </div>
               </div>
               <div className="flex justify-end">
-                <Button onClick={() => handleSaveSettings('general')}>
+                <Button onClick={() => handleSaveSettings()}>
                   <Save className="h-4 w-4 mr-2" />
                   Save Changes
                 </Button>
@@ -401,7 +400,7 @@ export default function MinistryAdminSettings() {
               </div>
 
               <div className="flex justify-end">
-                <Button onClick={() => handleSaveSettings('notifications')}>
+                <Button onClick={() => handleSaveSettings()}>
                   <Save className="h-4 w-4 mr-2" />
                   Save Changes
                 </Button>
@@ -504,7 +503,7 @@ export default function MinistryAdminSettings() {
               </div>
 
               <div className="flex justify-end">
-                <Button onClick={() => handleSaveSettings('privacy')}>
+                <Button onClick={() => handleSaveSettings()}>
                   <Save className="h-4 w-4 mr-2" />
                   Save Changes
                 </Button>
@@ -606,7 +605,7 @@ export default function MinistryAdminSettings() {
               </div>
 
               <div className="flex justify-end">
-                <Button onClick={() => handleSaveSettings('permissions')}>
+                <Button onClick={() => handleSaveSettings()}>
                   <Save className="h-4 w-4 mr-2" />
                   Save Changes
                 </Button>

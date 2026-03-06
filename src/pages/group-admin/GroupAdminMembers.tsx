@@ -102,13 +102,11 @@ export default function GroupAdminMembers() {
     setInviteDialogOpen(false);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleRoleChange = (memberId: number, newRole: string) => {
     // Implementation for changing member roles
     console.log(`Role change requested for member ${memberId} to ${newRole}`);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleRemoveMember = (memberId: number) => {
     // Implementation for removing members
     console.log(`Remove member requested for ${memberId}`);

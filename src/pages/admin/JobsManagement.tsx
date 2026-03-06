@@ -487,7 +487,7 @@ export default function JobsManagement() {
   // COMPUTED VALUES
   // ============================================================================
 
-  const jobs = jobsData?.data || [];
+  const jobs = useMemo(() => jobsData?.data || [], [jobsData]);
   const jobsPagination = jobsData?.pagination;
   const applications = applicationsData?.data || [];
   const applicationsPagination = applicationsData?.pagination;

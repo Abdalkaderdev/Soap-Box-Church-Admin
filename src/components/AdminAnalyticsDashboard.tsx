@@ -420,7 +420,7 @@ export function AdminAnalyticsDashboard() {
                 <div>
                   <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">Top Prayer Supporters This Week</h4>
                   <div className="space-y-2">
-                    {prayerData.membersWhoPrayedForOthers.slice(0, 5).map((member: any) => (
+                    {prayerData.membersWhoPrayedForOthers.slice(0, 5).map((member: { userId: string; name: string; email: string; prayersOffered: number }) => (
                       <div key={member.userId} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
                         <div>
                           <span className="font-medium text-gray-900 dark:text-white">{member.name}</span>
@@ -464,7 +464,7 @@ export function AdminAnalyticsDashboard() {
                 <div>
                   <h4 className="font-semibold mb-2 text-gray-900 dark:text-white">Recent Completions</h4>
                   <div className="space-y-2">
-                    {devotionalData.completions.slice(0, 5).map((completion: any) => (
+                    {devotionalData.completions.slice(0, 5).map((completion: { userId: string; name: string; series: string; progress: number }) => (
                       <div key={completion.userId} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
                         <div>
                           <span className="font-medium text-gray-900 dark:text-white">{completion.name}</span>
