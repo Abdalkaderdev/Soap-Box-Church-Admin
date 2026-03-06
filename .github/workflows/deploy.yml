@@ -26,6 +26,7 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'vite.config.ts'
+      - 'tailwind.config.js'
       - 'tsconfig*.json'
       - 'Dockerfile'
       - '.github/workflows/deploy.yml'
