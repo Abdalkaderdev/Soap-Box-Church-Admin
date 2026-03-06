@@ -54,6 +54,14 @@ import {
   Send,
   Share2,
   Users2,
+  // Organization structure icons
+  Landmark,
+  Building2,
+  Network,
+  Key,
+  CalendarCheck,
+  // Equipment icon
+  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -353,6 +361,44 @@ const toolsItems = [
   },
 ];
 
+// Organization Structure section
+const organizationItems = [
+  {
+    title: "Ministries",
+    href: routes.organization.ministries,
+    icon: Landmark,
+  },
+  {
+    title: "Departments",
+    href: routes.organization.departments,
+    icon: Building2,
+  },
+  {
+    title: "Teams",
+    href: routes.organization.teams,
+    icon: Network,
+  },
+  {
+    title: "Roles & Permissions",
+    href: routes.organization.roles,
+    icon: Key,
+  },
+  {
+    title: "Service Allocation",
+    href: routes.organization.serviceAllocation,
+    icon: CalendarCheck,
+  },
+];
+
+// Equipment & Assets
+const equipmentItems = [
+  {
+    title: "Equipment & Assets",
+    href: routes.equipment,
+    icon: Package,
+  },
+];
+
 const bottomNavigationItems = [
   {
     title: "Settings",
@@ -616,6 +662,56 @@ export function Sidebar() {
                 <item.icon className={cn(
                   "h-[16px] w-[16px] transition-colors",
                   isActive(item.href) ? "text-teal-400" : "text-teal-500/50"
+                )} />
+                <span className="flex-1 text-left text-sm">{item.title}</span>
+              </Button>
+            </Link>
+          ))}
+
+          {/* Organization Structure Section */}
+          <Separator className="my-4 bg-vesper-700/30" />
+          <p className="px-3 mb-3 text-[10px] font-semibold text-indigo-400/80 uppercase tracking-widest flex items-center gap-2">
+            <Landmark className="h-3 w-3" />
+            Organization
+          </p>
+          {organizationItems.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-3 text-grace-300/80 hover:bg-indigo-900/30 hover:text-indigo-200 transition-all duration-200 h-10 rounded-lg",
+                  isActive(item.href) &&
+                    "bg-indigo-900/40 text-indigo-200 font-medium border-l-[3px] border-l-indigo-500 rounded-l-none"
+                )}
+              >
+                <item.icon className={cn(
+                  "h-[16px] w-[16px] transition-colors",
+                  isActive(item.href) ? "text-indigo-400" : "text-indigo-500/50"
+                )} />
+                <span className="flex-1 text-left text-sm">{item.title}</span>
+              </Button>
+            </Link>
+          ))}
+
+          {/* Equipment & Assets Section */}
+          <Separator className="my-4 bg-vesper-700/30" />
+          <p className="px-3 mb-3 text-[10px] font-semibold text-emerald-400/80 uppercase tracking-widest flex items-center gap-2">
+            <Package className="h-3 w-3" />
+            Assets
+          </p>
+          {equipmentItems.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-3 text-grace-300/80 hover:bg-emerald-900/30 hover:text-emerald-200 transition-all duration-200 h-10 rounded-lg",
+                  isActive(item.href) &&
+                    "bg-emerald-900/40 text-emerald-200 font-medium border-l-[3px] border-l-emerald-500 rounded-l-none"
+                )}
+              >
+                <item.icon className={cn(
+                  "h-[16px] w-[16px] transition-colors",
+                  isActive(item.href) ? "text-emerald-400" : "text-emerald-500/50"
                 )} />
                 <span className="flex-1 text-left text-sm">{item.title}</span>
               </Button>

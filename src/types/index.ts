@@ -894,3 +894,229 @@ export interface CheckInStats {
   byService: { service: Service; count: number }[];
   trend: { date: string; checkIns: number; guests: number }[];
 }
+
+// ============================================================================
+// ORGANIZATION STRUCTURE TYPES
+// ============================================================================
+
+// Ministry - Major church categories (Youth, Women's, Worship, etc.)
+export interface Ministry {
+  id: string;
+  churchId: string;
+  name: string;
+  description?: string;
+  category: MinistryCategory;
+  leaderId?: string;
+  leader?: Member;
+  memberCount: number;
+  departmentCount: number;
+  imageUrl?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type MinistryCategory = 'youth' | 'children' | 'women' | 'men' | 'prayer' | 'outreach' | 'worship' | 'pastoral_care' | 'evangelism' | 'missions' | 'education' | 'other';
+
+export interface MinistryCreateInput {
+  name: string;
+  description?: string;
+  category: MinistryCategory;
+  leaderId?: string;
+  imageUrl?: string;
+}
+
+// Department - Operational areas (Sanitation, Production, Security, etc.)
+export interface Department {
+  id: string;
+  churchId: string;
+  ministryId?: string;
+  ministry?: Ministry;
+  name: string;
+  description?: string;
+  leaderId?: string;
+  leader?: Member;
+  memberCount: number;
+  teamCount: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DepartmentCreateInput {
+  name: string;
+  description?: string;
+  ministryId?: string;
+  leaderId?: string;
+}
+
+// Team - Sub-departments (Rubbish, Toilets, Grounds under Sanitation)
+export interface Team {
+  id: string;
+  churchId: string;
+  departmentId: string;
+  department?: Department;
+  name: string;
+  description?: string;
+  leaderId?: string;
+  leader?: Member;
+  members: TeamMember[];
+  memberCount: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeamMember {
+  id: string;
+  teamId: string;
+  memberId: string;
+  member?: Member;
+  role: TeamRole;
+  joinedAt: string;
+  status: 'active' | 'inactive';
+}
+
+export type TeamRole = 'team_leader' | 'assistant_leader' | 'member';
+
+export interface TeamCreateInput {
+  name: string;
+  description?: string;
+  departmentId: string;
+  leaderId?: string;
+}
+
+// Organizational Roles & Permissions
+export interface OrganizationRole {
+  id: string;
+  churchId: string;
+  name: string;
+  description?: string;
+  level: RoleLevel;
+  permissions: Permission[];
+  memberCount: number;
+  isSystem: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type RoleLevel = 'organization' | 'ministry' | 'department' | 'team';
+
+export interface Permission {
+  resource: string;
+  actions: ('create' | 'read' | 'update' | 'delete' | 'manage')[];
+}
+
+export interface RoleCreateInput {
+  name: string;
+  description?: string;
+  level: RoleLevel;
+  permissions: Permission[];
+}
+
+// Service Allocation - Volunteer scheduling to services
+export interface ServiceAllocation {
+  id: string;
+  churchId: string;
+  serviceId: string;
+  service?: Service;
+  teamId?: string;
+  team?: Team;
+  departmentId?: string;
+  department?: Department;
+  memberId: string;
+  member?: Member;
+  role: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  status: 'scheduled' | 'confirmed' | 'checked_in' | 'completed' | 'absent';
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ServiceAllocationCreateInput {
+  serviceId: string;
+  teamId?: string;
+  departmentId?: string;
+  memberId: string;
+  role: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  notes?: string;
+}
+
+// ============================================================================
+// EQUIPMENT & ASSETS TYPES
+// ============================================================================
+
+export interface Equipment {
+  id: string;
+  churchId: string;
+  name: string;
+  description?: string;
+  category: EquipmentCategory;
+  status: EquipmentStatus;
+  serialNumber?: string;
+  purchaseDate?: string;
+  purchasePrice?: number;
+  currentValue?: number;
+  location?: string;
+  assignedTo?: string;
+  assignedMember?: Member;
+  departmentId?: string;
+  department?: Department;
+  condition: 'excellent' | 'good' | 'fair' | 'poor' | 'needs_repair';
+  lastMaintenanceDate?: string;
+  nextMaintenanceDate?: string;
+  warranty?: string;
+  imageUrl?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type EquipmentCategory = 'audio_visual' | 'musical_instruments' | 'furniture' | 'technology' | 'kitchen' | 'maintenance' | 'vehicles' | 'office' | 'children' | 'outdoor' | 'other';
+export type EquipmentStatus = 'available' | 'in_use' | 'checked_out' | 'maintenance' | 'retired' | 'lost';
+
+export interface EquipmentCreateInput {
+  name: string;
+  description?: string;
+  category: EquipmentCategory;
+  serialNumber?: string;
+  purchaseDate?: string;
+  purchasePrice?: number;
+  location?: string;
+  departmentId?: string;
+  condition: Equipment['condition'];
+  warranty?: string;
+  notes?: string;
+}
+
+export interface EquipmentCheckout {
+  id: string;
+  equipmentId: string;
+  equipment?: Equipment;
+  checkedOutBy: string;
+  member?: Member;
+  checkedOutAt: string;
+  expectedReturnDate?: string;
+  returnedAt?: string;
+  condition: Equipment['condition'];
+  notes?: string;
+}
+
+export interface MaintenanceLog {
+  id: string;
+  equipmentId: string;
+  performedBy?: string;
+  type: 'routine' | 'repair' | 'inspection' | 'upgrade';
+  description: string;
+  cost?: number;
+  date: string;
+  nextScheduledDate?: string;
+  createdAt: string;
+}

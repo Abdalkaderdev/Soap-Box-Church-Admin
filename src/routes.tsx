@@ -71,6 +71,16 @@ const SermonStudio = lazy(() => import("./pages/tools/SermonStudioPage"));
 const QRManagement = lazy(() => import("./pages/tools/qr-management"));
 const TaxReporting = lazy(() => import("./pages/tools/TaxReporting"));
 
+// Organization Structure pages
+const MinistriesManagement = lazy(() => import("./pages/organization/MinistriesManagement"));
+const DepartmentsManagement = lazy(() => import("./pages/organization/DepartmentsManagement"));
+const TeamsManagement = lazy(() => import("./pages/organization/TeamsManagement"));
+const RolesPermissions = lazy(() => import("./pages/organization/RolesPermissions"));
+const ServiceAllocation = lazy(() => import("./pages/organization/ServiceAllocation"));
+
+// Equipment Management
+const EquipmentManagement = lazy(() => import("./pages/equipment/EquipmentManagement"));
+
 // Financial Dashboard (promoted from upcoming to main feature)
 const FinancialDashboard = lazy(() => import("./pages/upcoming/FinancialDashboard"));
 
@@ -207,6 +217,16 @@ export const routes = {
     qrManagement: "/tools/qr-management",
     taxReporting: "/tools/tax-reporting",
   },
+  // Organization Structure
+  organization: {
+    ministries: "/organization/ministries",
+    departments: "/organization/departments",
+    teams: "/organization/teams",
+    roles: "/organization/roles",
+    serviceAllocation: "/organization/service-allocation",
+  },
+  // Equipment & Assets
+  equipment: "/equipment",
 } as const;
 
 // Helper function to generate member details URL
@@ -370,6 +390,16 @@ export function AppRoutes() {
         <Route path="/tools/sermon-studio" component={SermonStudio} />
         <Route path="/tools/qr-management" component={QRManagement} />
         <Route path="/tools/tax-reporting" component={TaxReporting} />
+
+        {/* Organization Structure */}
+        <Route path="/organization/ministries" component={MinistriesManagement} />
+        <Route path="/organization/departments" component={DepartmentsManagement} />
+        <Route path="/organization/teams" component={TeamsManagement} />
+        <Route path="/organization/roles" component={RolesPermissions} />
+        <Route path="/organization/service-allocation" component={ServiceAllocation} />
+
+        {/* Equipment & Assets */}
+        <Route path="/equipment" component={EquipmentManagement} />
 
         {/* 404 fallback */}
         <Route>

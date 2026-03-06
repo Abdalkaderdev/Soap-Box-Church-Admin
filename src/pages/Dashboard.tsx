@@ -27,11 +27,13 @@ import {
   MapPin,
   HandHeart,
   Percent,
+  Cake,
+  BarChart3,
 } from "lucide-react";
 import { routes } from "@/routes";
 import { useAuth } from "@/hooks/useAuth";
-import { reportsApi, eventsApi, donationsApi, prayerApi } from "@/lib/api";
-import type { DashboardStats, Event, Donation, PrayerRequest } from "@/types";
+import { api, reportsApi, eventsApi, donationsApi, prayerApi } from "@/lib/api";
+import type { DashboardStats, Event, Donation, PrayerRequest, Member } from "@/types";
 
 // Get formatted date
 function getFormattedDate(): string {
@@ -61,6 +63,161 @@ interface DashboardStat {
   change: string;
   changeType: ChangeType;
   description: string;
+}
+
+// Demographics types
+interface AgeDistribution {
+  label: string;
+  count: number;
+  percentage: number;
+  color: string;
+}
+
+interface GenderDistribution {
+  male: number;
+  female: number;
+  other: number;
+  total: number;
+}
+
+interface BirthdayMember {
+  id: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+}
+
+interface NewMemberEntry {
+  id: string;
+  firstName: string;
+  lastName: string;
+  memberSince: string;
+}
+
+// Age group config with brand colors
+const ageGroupConfig: { label: string; min: number; max: number; color: string }[] = [
+  { label: "0-12", min: 0, max: 12, color: "bg-spirit-400" },
+  { label: "13-17", min: 13, max: 17, color: "bg-spirit-600" },
+  { label: "18-25", min: 18, max: 25, color: "bg-sanctuary-400" },
+  { label: "26-35", min: 26, max: 35, color: "bg-sanctuary-600" },
+  { label: "36-45", min: 36, max: 45, color: "bg-golden-400" },
+  { label: "46-55", min: 46, max: 55, color: "bg-golden-600" },
+  { label: "56-65", min: 56, max: 65, color: "bg-vesper-400" },
+  { label: "65+", min: 65, max: 200, color: "bg-vesper-600" },
+];
+
+// Helper to calculate age from date of birth
+function calculateAge(dateOfBirth: string): number {
+  const today = new Date();
+  const birth = new Date(dateOfBirth);
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+// Helper to compute age distribution from member data
+function computeAgeDistribution(members: Member[]): AgeDistribution[] {
+  const membersWithDob = members.filter((m) => m.dateOfBirth);
+  const total = membersWithDob.length;
+
+  return ageGroupConfig.map((group) => {
+    const count = membersWithDob.filter((m) => {
+      const age = calculateAge(m.dateOfBirth!);
+      return group.label === "65+"
+        ? age >= 65
+        : age >= group.min && age <= group.max;
+    }).length;
+    return {
+      label: group.label,
+      count,
+      percentage: total > 0 ? Math.round((count / total) * 100) : 0,
+      color: group.color,
+    };
+  });
+}
+
+// Helper to compute gender distribution from member data
+function computeGenderDistribution(members: Member[]): GenderDistribution {
+  const male = members.filter((m) => m.gender === "male").length;
+  const female = members.filter((m) => m.gender === "female").length;
+  const other = members.filter(
+    (m) => m.gender === "other" || m.gender === "prefer_not_to_say"
+  ).length;
+  return { male, female, other, total: members.length };
+}
+
+// Helper to get members with birthdays this month
+function getBirthdaysThisMonth(members: Member[]): BirthdayMember[] {
+  const currentMonth = new Date().getMonth();
+  return members
+    .filter((m) => {
+      if (!m.dateOfBirth) return false;
+      const birthMonth = new Date(m.dateOfBirth).getMonth();
+      return birthMonth === currentMonth;
+    })
+    .sort((a, b) => {
+      const dayA = new Date(a.dateOfBirth!).getDate();
+      const dayB = new Date(b.dateOfBirth!).getDate();
+      return dayA - dayB;
+    })
+    .slice(0, 5)
+    .map((m) => ({
+      id: m.id,
+      firstName: m.firstName,
+      lastName: m.lastName,
+      dateOfBirth: m.dateOfBirth!,
+    }));
+}
+
+// Helper to get newest members this month
+function getNewMembersThisMonth(members: Member[]): NewMemberEntry[] {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  return members
+    .filter((m) => {
+      const joinDate = new Date(m.memberSince || m.createdAt);
+      return (
+        joinDate.getMonth() === currentMonth &&
+        joinDate.getFullYear() === currentYear
+      );
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.memberSince || b.createdAt).getTime() -
+        new Date(a.memberSince || a.createdAt).getTime()
+    )
+    .slice(0, 5)
+    .map((m) => ({
+      id: m.id,
+      firstName: m.firstName,
+      lastName: m.lastName,
+      memberSince: m.memberSince || m.createdAt,
+    }));
+}
+
+// Helper to format birthday display
+function formatBirthday(dateOfBirth: string): string {
+  const date = new Date(dateOfBirth);
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+// Helper to format join date display
+function formatJoinDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+// Helper to get initials from name
+function getInitials(firstName: string, lastName: string): string {
+  return `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase();
 }
 
 const quickActions = [
@@ -274,6 +431,35 @@ function ActivityItemSkeleton() {
   );
 }
 
+function InsightCardSkeleton() {
+  return (
+    <Card className="border-grace-300 bg-white">
+      <CardHeader className="pb-4">
+        <Skeleton className="h-5 w-36 bg-grace-200" />
+        <Skeleton className="h-3 w-48 bg-grace-200" />
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Skeleton className="h-4 w-full bg-grace-200" />
+        <Skeleton className="h-4 w-4/5 bg-grace-200" />
+        <Skeleton className="h-4 w-3/5 bg-grace-200" />
+        <Skeleton className="h-4 w-2/5 bg-grace-200" />
+      </CardContent>
+    </Card>
+  );
+}
+
+function ListItemSkeleton() {
+  return (
+    <div className="flex items-center gap-3 py-2.5">
+      <Skeleton className="h-9 w-9 rounded-full bg-grace-200" />
+      <div className="flex-1">
+        <Skeleton className="h-4 w-28 mb-1 bg-grace-200" />
+        <Skeleton className="h-3 w-20 bg-grace-200" />
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { church, churchId } = useAuth();
   const churchName = church?.name || "Your Church";
@@ -321,6 +507,27 @@ export default function Dashboard() {
     queryFn: () => prayerApi.getUrgent(churchId!, 5),
     enabled: !!churchId,
   });
+
+  // Fetch all members for demographics insights
+  const {
+    data: allMembersData,
+    isLoading: isLoadingMembers,
+  } = useQuery({
+    queryKey: ["dashboard", "members-demographics", churchId],
+    queryFn: () =>
+      api.get<{ data: Member[]; pagination: { totalItems: number } }>(
+        `/church/${churchId}/members`,
+        { pageSize: 500, page: 1 }
+      ),
+    enabled: !!churchId,
+  });
+
+  // Derive insights from member data
+  const allMembers: Member[] = allMembersData?.data ?? [];
+  const ageDistribution = computeAgeDistribution(allMembers);
+  const genderDistribution = computeGenderDistribution(allMembers);
+  const birthdaysThisMonth = getBirthdaysThisMonth(allMembers);
+  const newMembersThisMonth = getNewMembersThisMonth(allMembers);
 
   // Transform stats data
   const stats: DashboardStat[] = dashboardStats
@@ -482,6 +689,340 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Member Insights - Age & Gender Distribution */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Age Distribution */}
+        {isLoadingMembers ? (
+          <InsightCardSkeleton />
+        ) : (
+          <Card className="border-grace-300 bg-white">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-vesper-900 font-serif flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-sanctuary-700" />
+                Age Distribution
+              </CardTitle>
+              <CardDescription className="text-vesper-600">
+                Member breakdown by age group
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {allMembers.length === 0 ? (
+                <div className="text-center py-8">
+                  <BarChart3 className="h-10 w-10 text-vesper-300 mx-auto mb-3" />
+                  <p className="text-sm text-vesper-600">No member data available</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {ageDistribution.map((group) => (
+                    <div key={group.label} className="flex items-center gap-3">
+                      <span className="text-xs font-medium text-vesper-700 w-10 text-right">
+                        {group.label}
+                      </span>
+                      <div className="flex-1 h-5 bg-grace-200 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${group.color} rounded-full transition-all duration-500`}
+                          style={{ width: `${Math.max(group.percentage, 2)}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-semibold text-vesper-800 w-14 text-right">
+                        {group.percentage}%
+                        <span className="text-vesper-500 font-normal ml-1">
+                          ({group.count})
+                        </span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Gender Distribution */}
+        {isLoadingMembers ? (
+          <InsightCardSkeleton />
+        ) : (
+          <Card className="border-grace-300 bg-white">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-vesper-900 font-serif flex items-center gap-2">
+                <Users className="h-5 w-5 text-spirit-700" />
+                Gender Distribution
+              </CardTitle>
+              <CardDescription className="text-vesper-600">
+                Community gender breakdown
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {allMembers.length === 0 ? (
+                <div className="text-center py-8">
+                  <Users className="h-10 w-10 text-vesper-300 mx-auto mb-3" />
+                  <p className="text-sm text-vesper-600">No member data available</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-6">
+                  {/* Donut visual using CSS */}
+                  <div className="relative w-40 h-40">
+                    <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                      {(() => {
+                        const total = genderDistribution.total || 1;
+                        const malePercent = (genderDistribution.male / total) * 100;
+                        const femalePercent = (genderDistribution.female / total) * 100;
+                        const otherPercent = (genderDistribution.other / total) * 100;
+                        const maleOffset = 0;
+                        const femaleOffset = malePercent;
+                        const otherOffset = malePercent + femalePercent;
+                        return (
+                          <>
+                            <circle
+                              cx="18"
+                              cy="18"
+                              r="15.9155"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3.5"
+                              className="text-sanctuary-500"
+                              strokeDasharray={`${malePercent} ${100 - malePercent}`}
+                              strokeDashoffset={`${-maleOffset}`}
+                            />
+                            <circle
+                              cx="18"
+                              cy="18"
+                              r="15.9155"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3.5"
+                              className="text-spirit-500"
+                              strokeDasharray={`${femalePercent} ${100 - femalePercent}`}
+                              strokeDashoffset={`${-femaleOffset}`}
+                            />
+                            {otherPercent > 0 && (
+                              <circle
+                                cx="18"
+                                cy="18"
+                                r="15.9155"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3.5"
+                                className="text-golden-500"
+                                strokeDasharray={`${otherPercent} ${100 - otherPercent}`}
+                                strokeDashoffset={`${-otherOffset}`}
+                              />
+                            )}
+                          </>
+                        );
+                      })()}
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <span className="text-2xl font-bold text-vesper-900 font-serif">
+                          {genderDistribution.total}
+                        </span>
+                        <p className="text-[10px] text-vesper-500 uppercase tracking-wide">
+                          Total
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Legend */}
+                  <div className="flex gap-6">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-sanctuary-500" />
+                      <div>
+                        <p className="text-sm font-semibold text-vesper-900">
+                          {genderDistribution.male}
+                        </p>
+                        <p className="text-xs text-vesper-600">
+                          Male ({genderDistribution.total > 0 ? Math.round((genderDistribution.male / genderDistribution.total) * 100) : 0}%)
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-spirit-500" />
+                      <div>
+                        <p className="text-sm font-semibold text-vesper-900">
+                          {genderDistribution.female}
+                        </p>
+                        <p className="text-xs text-vesper-600">
+                          Female ({genderDistribution.total > 0 ? Math.round((genderDistribution.female / genderDistribution.total) * 100) : 0}%)
+                        </p>
+                      </div>
+                    </div>
+                    {genderDistribution.other > 0 && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-golden-500" />
+                        <div>
+                          <p className="text-sm font-semibold text-vesper-900">
+                            {genderDistribution.other}
+                          </p>
+                          <p className="text-xs text-vesper-600">
+                            Other ({Math.round((genderDistribution.other / genderDistribution.total) * 100)}%)
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Member Insights - Birthdays & New Members */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Birthdays This Month */}
+        {isLoadingMembers ? (
+          <Card className="border-grace-300 bg-white">
+            <CardHeader className="pb-4">
+              <Skeleton className="h-5 w-40 bg-grace-200" />
+              <Skeleton className="h-3 w-48 bg-grace-200" />
+            </CardHeader>
+            <CardContent className="space-y-1">
+              <ListItemSkeleton />
+              <ListItemSkeleton />
+              <ListItemSkeleton />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-grace-300 bg-white">
+            <CardHeader className="flex flex-row items-center justify-between pb-4">
+              <div>
+                <CardTitle className="text-lg font-semibold text-vesper-900 font-serif flex items-center gap-2">
+                  <Cake className="h-5 w-5 text-golden-600" />
+                  Birthdays This Month
+                </CardTitle>
+                <CardDescription className="text-vesper-600">
+                  Celebrate with your community
+                </CardDescription>
+              </div>
+              <Link href={routes.members.list}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sanctuary-700 hover:text-sanctuary-800 hover:bg-sanctuary-50"
+                >
+                  View All
+                  <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              {birthdaysThisMonth.length === 0 ? (
+                <div className="text-center py-8">
+                  <Cake className="h-10 w-10 text-vesper-300 mx-auto mb-3" />
+                  <p className="text-sm text-vesper-600">No birthdays this month</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {birthdaysThisMonth.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center gap-3 py-2.5 border-b border-grace-200 last:border-0"
+                    >
+                      <div className="h-9 w-9 rounded-full bg-gradient-to-br from-golden-400 to-golden-600 flex items-center justify-center text-xs font-semibold text-white shadow-sm">
+                        {getInitials(member.firstName, member.lastName)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-vesper-900 truncate">
+                          {member.firstName} {member.lastName}
+                        </p>
+                        <p className="text-xs text-vesper-600">
+                          {formatBirthday(member.dateOfBirth)}
+                        </p>
+                      </div>
+                      <Badge className="bg-golden-100 text-golden-700 border-golden-200 hover:bg-golden-100 text-xs">
+                        {formatBirthday(member.dateOfBirth)}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* New Members This Month */}
+        {isLoadingMembers ? (
+          <Card className="border-grace-300 bg-white">
+            <CardHeader className="pb-4">
+              <Skeleton className="h-5 w-36 bg-grace-200" />
+              <Skeleton className="h-3 w-48 bg-grace-200" />
+            </CardHeader>
+            <CardContent className="space-y-1">
+              <ListItemSkeleton />
+              <ListItemSkeleton />
+              <ListItemSkeleton />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-grace-300 bg-white">
+            <CardHeader className="flex flex-row items-center justify-between pb-4">
+              <div>
+                <CardTitle className="text-lg font-semibold text-vesper-900 font-serif flex items-center gap-2">
+                  <UserPlus className="h-5 w-5 text-spirit-700" />
+                  New Members
+                </CardTitle>
+                <CardDescription className="text-vesper-600">
+                  Recently joined this month
+                </CardDescription>
+              </div>
+              <Link href={routes.members.list}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sanctuary-700 hover:text-sanctuary-800 hover:bg-sanctuary-50"
+                >
+                  View All
+                  <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              {newMembersThisMonth.length === 0 ? (
+                <div className="text-center py-8">
+                  <UserPlus className="h-10 w-10 text-vesper-300 mx-auto mb-3" />
+                  <p className="text-sm text-vesper-600">No new members this month</p>
+                  <Link href={routes.members.new}>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="text-sanctuary-700 mt-2"
+                    >
+                      Add a member
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {newMembersThisMonth.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center gap-3 py-2.5 border-b border-grace-200 last:border-0"
+                    >
+                      <div className="h-9 w-9 rounded-full bg-gradient-to-br from-spirit-400 to-spirit-600 flex items-center justify-center text-xs font-semibold text-white shadow-sm">
+                        {getInitials(member.firstName, member.lastName)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-vesper-900 truncate">
+                          {member.firstName} {member.lastName}
+                        </p>
+                        <p className="text-xs text-vesper-600">
+                          Joined {formatJoinDate(member.memberSince)}
+                        </p>
+                      </div>
+                      <Badge className="bg-spirit-100 text-spirit-700 border-spirit-200 hover:bg-spirit-100 text-xs">
+                        New
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       {/* Main Content Grid - Three Column */}
       <div className="grid gap-6 lg:grid-cols-3">
