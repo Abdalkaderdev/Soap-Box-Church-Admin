@@ -60,11 +60,11 @@ import type { Sermon, SermonCreateInput } from '@/types';
 
 // Status configuration
 const statusColors: Record<Sermon['status'], string> = {
-  'draft': 'bg-ivory-100 text-walnut-700 border-ivory-200',
+  'draft': 'bg-grace-100 text-vesper-700 border-grace-200',
   'review': 'bg-sidebar-primary/10 text-sidebar-primary border-sidebar-primary/20',
-  'approved': 'bg-sage-100 text-sage-700 border-sage-200',
-  'delivered': 'bg-burgundy-100 text-burgundy-700 border-burgundy-200',
-  'archived': 'bg-walnut-100 text-walnut-600 border-walnut-200',
+  'approved': 'bg-spirit-100 text-spirit-700 border-spirit-200',
+  'delivered': 'bg-sanctuary-100 text-sanctuary-700 border-sanctuary-200',
+  'archived': 'bg-vesper-100 text-vesper-600 border-vesper-200',
 };
 
 const statusLabels: Record<Sermon['status'], string> = {
@@ -91,7 +91,7 @@ const StatsCardSkeleton = () => (
 
 // Loading skeleton for sermon cards - defined outside component to avoid re-creation during render
 const SermonCardSkeleton = () => (
-  <Card className="border-ivory-200">
+  <Card className="border-grace-200">
     <CardContent className="p-5">
       <div className="flex items-start gap-4">
         <Skeleton className="h-11 w-11 rounded-xl" />
@@ -112,7 +112,7 @@ const SermonCardSkeleton = () => (
 
 // Loading skeleton for series cards - defined outside component to avoid re-creation during render
 const SeriesCardSkeleton = () => (
-  <Card className="border-ivory-200">
+  <Card className="border-grace-200">
     <CardHeader>
       <div className="flex items-center justify-between">
         <Skeleton className="h-5 w-16" />
@@ -309,7 +309,7 @@ export default function SermonPrep() {
     return (
       <div className="p-6">
         <Card>
-          <CardContent className="p-8 text-center text-walnut-500">
+          <CardContent className="p-8 text-center text-vesper-500">
             Please log in to access sermon preparation.
           </CardContent>
         </Card>
@@ -322,14 +322,14 @@ export default function SermonPrep() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-walnut-900">Sermon Preparation</h1>
-          <p className="text-walnut-600 mt-1">
+          <h1 className="font-serif text-3xl font-bold text-vesper-900">Sermon Preparation</h1>
+          <p className="text-vesper-600 mt-1">
             Plan, prepare, and organize your messages
           </p>
         </div>
         <Dialog open={isNewSermonOpen} onOpenChange={setIsNewSermonOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-burgundy-700 hover:bg-burgundy-800 text-ivory-50">
+            <Button className="bg-sanctuary-700 hover:bg-sanctuary-800 text-grace-50">
               <Plus className="mr-2 h-4 w-4" />
               New Sermon
             </Button>
@@ -388,7 +388,7 @@ export default function SermonPrep() {
                 </Button>
                 <Button
                   onClick={handleCreateSermon}
-                  className="bg-burgundy-700 hover:bg-burgundy-800"
+                  className="bg-sanctuary-700 hover:bg-sanctuary-800"
                   disabled={createSermonMutation.isPending || !newSermonTitle.trim()}
                 >
                   {createSermonMutation.isPending ? (
@@ -415,52 +415,52 @@ export default function SermonPrep() {
           </>
         ) : (
           <>
-            <Card className="bg-gradient-to-br from-burgundy-50 to-burgundy-100/50 border-burgundy-200/50">
+            <Card className="bg-gradient-to-br from-sanctuary-50 to-sanctuary-100/50 border-sanctuary-200/50">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-burgundy-700">Total Sermons</CardTitle>
-                <BookOpen className="h-4 w-4 text-burgundy-500" />
+                <CardTitle className="text-sm font-medium text-sanctuary-700">Total Sermons</CardTitle>
+                <BookOpen className="h-4 w-4 text-sanctuary-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-serif text-burgundy-900">
+                <div className="text-2xl font-bold font-serif text-sanctuary-900">
                   {stats?.totalSermons ?? 0}
                 </div>
-                <p className="text-xs text-burgundy-600">In your library</p>
+                <p className="text-xs text-sanctuary-600">In your library</p>
               </CardContent>
             </Card>
             <Card className="bg-gradient-to-br from-sidebar-primary/5 to-sidebar-primary/10 border-sidebar-primary/20">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-walnut-700">In Progress</CardTitle>
+                <CardTitle className="text-sm font-medium text-vesper-700">In Progress</CardTitle>
                 <PenTool className="h-4 w-4 text-sidebar-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-serif text-walnut-900">
+                <div className="text-2xl font-bold font-serif text-vesper-900">
                   {(stats?.byStatus?.draft ?? 0) + (stats?.byStatus?.review ?? 0)}
                 </div>
-                <p className="text-xs text-walnut-600">Being prepared</p>
+                <p className="text-xs text-vesper-600">Being prepared</p>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-sage-50 to-sage-100/50 border-sage-200/50">
+            <Card className="bg-gradient-to-br from-spirit-50 to-spirit-100/50 border-spirit-200/50">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-sage-700">Ready to Deliver</CardTitle>
-                <FileText className="h-4 w-4 text-sage-500" />
+                <CardTitle className="text-sm font-medium text-spirit-700">Ready to Deliver</CardTitle>
+                <FileText className="h-4 w-4 text-spirit-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-serif text-sage-900">
+                <div className="text-2xl font-bold font-serif text-spirit-900">
                   {stats?.byStatus?.approved ?? 0}
                 </div>
-                <p className="text-xs text-sage-600">Completed sermons</p>
+                <p className="text-xs text-spirit-600">Completed sermons</p>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-ivory-50 to-ivory-100/50 border-ivory-200/50">
+            <Card className="bg-gradient-to-br from-grace-50 to-grace-100/50 border-grace-200/50">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-walnut-700">Active Series</CardTitle>
-                <BookMarked className="h-4 w-4 text-walnut-500" />
+                <CardTitle className="text-sm font-medium text-vesper-700">Active Series</CardTitle>
+                <BookMarked className="h-4 w-4 text-vesper-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-serif text-walnut-900">
+                <div className="text-2xl font-bold font-serif text-vesper-900">
                   {stats?.totalSeries ?? 0}
                 </div>
-                <p className="text-xs text-walnut-600">Ongoing series</p>
+                <p className="text-xs text-vesper-600">Ongoing series</p>
               </CardContent>
             </Card>
           </>
@@ -469,7 +469,7 @@ export default function SermonPrep() {
 
       {/* Upcoming Sermons Banner */}
       {upcomingLoading ? (
-        <Card className="bg-gradient-to-r from-burgundy-800 to-burgundy-900 text-ivory-50 border-0">
+        <Card className="bg-gradient-to-r from-sanctuary-800 to-sanctuary-900 text-grace-50 border-0">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Calendar className="h-5 w-5 text-sidebar-primary" />
@@ -487,7 +487,7 @@ export default function SermonPrep() {
           </CardContent>
         </Card>
       ) : upcomingSermons && upcomingSermons.length > 0 ? (
-        <Card className="bg-gradient-to-r from-burgundy-800 to-burgundy-900 text-ivory-50 border-0">
+        <Card className="bg-gradient-to-r from-sanctuary-800 to-sanctuary-900 text-grace-50 border-0">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Calendar className="h-5 w-5 text-sidebar-primary" />
@@ -500,8 +500,8 @@ export default function SermonPrep() {
                     <Clock className="h-3.5 w-3.5" />
                     {sermon.scheduledDate ? formatDate(sermon.scheduledDate) : 'Not scheduled'}
                   </div>
-                  <h4 className="font-semibold text-ivory-100">{sermon.title}</h4>
-                  <p className="text-ivory-300 text-sm mt-1">
+                  <h4 className="font-semibold text-grace-100">{sermon.title}</h4>
+                  <p className="text-grace-300 text-sm mt-1">
                     {sermon.scriptureReferences?.join(', ') || 'No scripture'}
                   </p>
                   <Badge className={`${statusColors[sermon.status]} mt-2`}>
@@ -515,7 +515,7 @@ export default function SermonPrep() {
       ) : null}
 
       <Tabs defaultValue="sermons" className="space-y-4">
-        <TabsList className="bg-ivory-100/50 border border-ivory-200">
+        <TabsList className="bg-grace-100/50 border border-grace-200">
           <TabsTrigger value="sermons" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
             <FileText className="mr-2 h-4 w-4" />
             Sermons
@@ -534,16 +534,16 @@ export default function SermonPrep() {
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-walnut-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-vesper-400" />
               <Input
                 placeholder="Search sermons..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 border-ivory-200 focus:border-burgundy-300"
+                className="pl-10 border-grace-200 focus:border-sanctuary-300"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[180px] border-ivory-200">
+              <SelectTrigger className="w-full sm:w-[180px] border-grace-200">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -573,27 +573,27 @@ export default function SermonPrep() {
               </Card>
             ) : sermons.length === 0 ? (
               <Card>
-                <CardContent className="p-8 text-center text-walnut-500">
+                <CardContent className="p-8 text-center text-vesper-500">
                   No sermons found. Create your first sermon to get started.
                 </CardContent>
               </Card>
             ) : (
               sermons.map((sermon) => (
-                <Card key={sermon.id} className="hover:shadow-warm transition-shadow border-ivory-200">
+                <Card key={sermon.id} className="hover:shadow-warm transition-shadow border-grace-200">
                   <CardContent className="p-5">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4">
-                        <div className="p-3 bg-burgundy-50 rounded-xl border border-burgundy-100">
-                          <BookOpen className="h-5 w-5 text-burgundy-600" />
+                        <div className="p-3 bg-sanctuary-50 rounded-xl border border-sanctuary-100">
+                          <BookOpen className="h-5 w-5 text-sanctuary-600" />
                         </div>
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-serif font-semibold text-lg text-walnut-900">{sermon.title}</h3>
+                            <h3 className="font-serif font-semibold text-lg text-vesper-900">{sermon.title}</h3>
                             <Badge variant="outline" className={statusColors[sermon.status]}>
                               {statusLabels[sermon.status]}
                             </Badge>
                           </div>
-                          <div className="flex items-center gap-3 text-sm text-walnut-600">
+                          <div className="flex items-center gap-3 text-sm text-vesper-600">
                             {sermon.scriptureReferences && sermon.scriptureReferences.length > 0 && (
                               <span className="flex items-center gap-1">
                                 <Quote className="h-3.5 w-3.5" />
@@ -615,9 +615,9 @@ export default function SermonPrep() {
                           </div>
                           {sermon.tags && sermon.tags.length > 0 && (
                             <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              <ListChecks className="h-3.5 w-3.5 text-sage-600" />
+                              <ListChecks className="h-3.5 w-3.5 text-spirit-600" />
                               {sermon.tags.map((tag, i) => (
-                                <Badge key={i} variant="secondary" className="bg-sage-50 text-sage-700 border-sage-200 text-xs">
+                                <Badge key={i} variant="secondary" className="bg-spirit-50 text-spirit-700 border-spirit-200 text-xs">
                                   {tag}
                                 </Badge>
                               ))}
@@ -627,7 +627,7 @@ export default function SermonPrep() {
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-walnut-500 hover:text-walnut-700">
+                          <Button variant="ghost" size="icon" className="text-vesper-500 hover:text-vesper-700">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -673,12 +673,12 @@ export default function SermonPrep() {
 
         <TabsContent value="series" className="space-y-4">
           <div className="flex justify-between items-center">
-            <p className="text-sm text-walnut-600">
+            <p className="text-sm text-vesper-600">
               Organize your sermons into themed series
             </p>
             <Dialog open={isNewSeriesOpen} onOpenChange={setIsNewSeriesOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="border-burgundy-200 text-burgundy-700 hover:bg-burgundy-50">
+                <Button variant="outline" className="border-sanctuary-200 text-sanctuary-700 hover:bg-sanctuary-50">
                   <Plus className="mr-2 h-4 w-4" />
                   Create Series
                 </Button>
@@ -721,7 +721,7 @@ export default function SermonPrep() {
                     </Button>
                     <Button
                       onClick={handleCreateSeries}
-                      className="bg-burgundy-700 hover:bg-burgundy-800"
+                      className="bg-sanctuary-700 hover:bg-sanctuary-800"
                       disabled={createSeriesMutation.isPending || !newSeriesTitle.trim()}
                     >
                       {createSeriesMutation.isPending ? (
@@ -744,23 +744,23 @@ export default function SermonPrep() {
               </>
             ) : series.length === 0 ? (
               <Card className="col-span-2">
-                <CardContent className="p-8 text-center text-walnut-500">
+                <CardContent className="p-8 text-center text-vesper-500">
                   No series found. Create your first series to organize your sermons.
                 </CardContent>
               </Card>
             ) : (
               series.map((s) => (
-                <Card key={s.id} className="hover:shadow-warm transition-shadow border-ivory-200">
+                <Card key={s.id} className="hover:shadow-warm transition-shadow border-grace-200">
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <Badge
                         variant="outline"
-                        className={s.status === 'active' ? 'bg-sage-50 text-sage-700 border-sage-200' : 'bg-ivory-100 text-walnut-600'}
+                        className={s.status === 'active' ? 'bg-spirit-50 text-spirit-700 border-spirit-200' : 'bg-grace-100 text-vesper-600'}
                       >
                         {s.status === 'active' ? 'Active' : s.status === 'completed' ? 'Completed' : s.status}
                       </Badge>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-walnut-500">{s.sermonCount} sermons</span>
+                        <span className="text-sm text-vesper-500">{s.sermonCount} sermons</span>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -784,11 +784,11 @@ export default function SermonPrep() {
                         </DropdownMenu>
                       </div>
                     </div>
-                    <CardTitle className="font-serif text-lg text-walnut-900 mt-2">{s.title}</CardTitle>
-                    <CardDescription className="text-walnut-600">{s.description || 'No description'}</CardDescription>
+                    <CardTitle className="font-serif text-lg text-vesper-900 mt-2">{s.title}</CardTitle>
+                    <CardDescription className="text-vesper-600">{s.description || 'No description'}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center gap-2 text-sm text-walnut-500">
+                    <div className="flex items-center gap-2 text-sm text-vesper-500">
                       <Calendar className="h-4 w-4" />
                       <span>
                         {s.startDate ? new Date(s.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'No start date'}
@@ -807,7 +807,7 @@ export default function SermonPrep() {
 
         <TabsContent value="resources" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Card className="hover:shadow-warm transition-shadow border-ivory-200">
+            <Card className="hover:shadow-warm transition-shadow border-grace-200">
               <CardHeader>
                 <div className="p-3 bg-sidebar-primary/10 rounded-xl w-fit">
                   <Sparkles className="h-6 w-6 text-sidebar-primary" />
@@ -818,15 +818,15 @@ export default function SermonPrep() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full bg-burgundy-700 hover:bg-burgundy-800">
+                <Button className="w-full bg-sanctuary-700 hover:bg-sanctuary-800">
                   Start Writing
                 </Button>
               </CardContent>
             </Card>
-            <Card className="hover:shadow-warm transition-shadow border-ivory-200">
+            <Card className="hover:shadow-warm transition-shadow border-grace-200">
               <CardHeader>
-                <div className="p-3 bg-sage-100 rounded-xl w-fit">
-                  <Quote className="h-6 w-6 text-sage-600" />
+                <div className="p-3 bg-spirit-100 rounded-xl w-fit">
+                  <Quote className="h-6 w-6 text-spirit-600" />
                 </div>
                 <CardTitle className="font-serif text-lg mt-3">Scripture Library</CardTitle>
                 <CardDescription>
@@ -839,10 +839,10 @@ export default function SermonPrep() {
                 </Button>
               </CardContent>
             </Card>
-            <Card className="hover:shadow-warm transition-shadow border-ivory-200">
+            <Card className="hover:shadow-warm transition-shadow border-grace-200">
               <CardHeader>
-                <div className="p-3 bg-burgundy-50 rounded-xl w-fit">
-                  <MessageCircle className="h-6 w-6 text-burgundy-600" />
+                <div className="p-3 bg-sanctuary-50 rounded-xl w-fit">
+                  <MessageCircle className="h-6 w-6 text-sanctuary-600" />
                 </div>
                 <CardTitle className="font-serif text-lg mt-3">Illustration Bank</CardTitle>
                 <CardDescription>

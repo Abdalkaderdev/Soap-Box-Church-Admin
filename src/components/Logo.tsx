@@ -41,7 +41,7 @@ export function Logo({ size = "md", className }: LogoProps) {
 
       {/* Logo Text */}
       <div className="flex flex-col leading-tight">
-        <span className={cn("font-serif font-bold tracking-tight text-ivory-100", sizes.text)}>
+        <span className={cn("font-serif font-bold tracking-tight text-grace-100", sizes.text)}>
           SoapBox
         </span>
         <span className={cn("font-medium text-sidebar-primary tracking-wide", sizes.tagline)}>

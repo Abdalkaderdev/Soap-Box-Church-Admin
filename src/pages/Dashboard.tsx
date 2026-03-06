@@ -68,51 +68,51 @@ const quickActions = [
     label: "Add Member",
     href: routes.members.new,
     icon: UserPlus,
-    bgColor: "bg-burgundy-100",
-    iconColor: "text-burgundy-700",
-    hoverBg: "hover:bg-burgundy-200",
+    bgColor: "bg-sanctuary-100",
+    iconColor: "text-sanctuary-700",
+    hoverBg: "hover:bg-sanctuary-200",
   },
   {
     label: "Record Donation",
     href: routes.donations.new,
     icon: PlusCircle,
-    bgColor: "bg-sage-100",
-    iconColor: "text-sage-700",
-    hoverBg: "hover:bg-sage-200",
+    bgColor: "bg-spirit-100",
+    iconColor: "text-spirit-700",
+    hoverBg: "hover:bg-spirit-200",
   },
   {
     label: "Schedule Event",
     href: routes.events,
     icon: CalendarPlus,
-    bgColor: "bg-ivory-200",
-    iconColor: "text-walnut-700",
-    hoverBg: "hover:bg-ivory-300",
+    bgColor: "bg-grace-200",
+    iconColor: "text-vesper-700",
+    hoverBg: "hover:bg-grace-300",
   },
 ];
 
 const statConfig = [
   {
     icon: Users,
-    color: "text-burgundy-700",
-    bgColor: "bg-burgundy-100",
+    color: "text-sanctuary-700",
+    bgColor: "bg-sanctuary-100",
     label: "Total Members",
   },
   {
     icon: UserPlus,
-    color: "text-sage-600",
-    bgColor: "bg-sage-100",
+    color: "text-spirit-600",
+    bgColor: "bg-spirit-100",
     label: "New This Month",
   },
   {
     icon: Percent,
-    color: "text-walnut-700",
-    bgColor: "bg-ivory-200",
+    color: "text-vesper-700",
+    bgColor: "bg-grace-200",
     label: "Attendance %",
   },
   {
     icon: DollarSign,
-    color: "text-sage-700",
-    bgColor: "bg-sage-100",
+    color: "text-spirit-700",
+    bgColor: "bg-spirit-100",
     label: "Giving This Month",
   },
 ];
@@ -218,14 +218,14 @@ function transformToDashboardStats(data: DashboardStats): DashboardStat[] {
 
 function StatCardSkeleton() {
   return (
-    <Card className="border-ivory-300 bg-ivory-50">
+    <Card className="border-grace-300 bg-grace-50">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <Skeleton className="h-4 w-24 bg-ivory-200" />
-        <Skeleton className="h-10 w-10 rounded-xl bg-ivory-200" />
+        <Skeleton className="h-4 w-24 bg-grace-200" />
+        <Skeleton className="h-10 w-10 rounded-xl bg-grace-200" />
       </CardHeader>
       <CardContent>
-        <Skeleton className="h-8 w-20 mb-2 bg-ivory-200" />
-        <Skeleton className="h-4 w-32 bg-ivory-200" />
+        <Skeleton className="h-8 w-20 mb-2 bg-grace-200" />
+        <Skeleton className="h-4 w-32 bg-grace-200" />
       </CardContent>
     </Card>
   );
@@ -235,27 +235,27 @@ function DonationItemSkeleton() {
   return (
     <div className="flex items-center justify-between py-3">
       <div className="flex items-center gap-3">
-        <Skeleton className="h-10 w-10 rounded-full bg-ivory-200" />
+        <Skeleton className="h-10 w-10 rounded-full bg-grace-200" />
         <div>
-          <Skeleton className="h-4 w-32 mb-1 bg-ivory-200" />
-          <Skeleton className="h-3 w-24 bg-ivory-200" />
+          <Skeleton className="h-4 w-32 mb-1 bg-grace-200" />
+          <Skeleton className="h-3 w-24 bg-grace-200" />
         </div>
       </div>
-      <Skeleton className="h-5 w-16 bg-ivory-200" />
+      <Skeleton className="h-5 w-16 bg-grace-200" />
     </div>
   );
 }
 
 function EventItemSkeleton() {
   return (
-    <div className="flex items-start gap-4 py-3 border-b border-ivory-200 last:border-0">
-      <Skeleton className="h-14 w-14 rounded-xl bg-ivory-200" />
+    <div className="flex items-start gap-4 py-3 border-b border-grace-200 last:border-0">
+      <Skeleton className="h-14 w-14 rounded-xl bg-grace-200" />
       <div className="flex-1">
-        <Skeleton className="h-4 w-40 mb-2 bg-ivory-200" />
-        <Skeleton className="h-3 w-32 mb-2 bg-ivory-200" />
+        <Skeleton className="h-4 w-40 mb-2 bg-grace-200" />
+        <Skeleton className="h-3 w-32 mb-2 bg-grace-200" />
         <div className="flex gap-2">
-          <Skeleton className="h-5 w-16 rounded-full bg-ivory-200" />
-          <Skeleton className="h-5 w-20 bg-ivory-200" />
+          <Skeleton className="h-5 w-16 rounded-full bg-grace-200" />
+          <Skeleton className="h-5 w-20 bg-grace-200" />
         </div>
       </div>
     </div>
@@ -265,10 +265,10 @@ function EventItemSkeleton() {
 function ActivityItemSkeleton() {
   return (
     <div className="flex items-start gap-3 py-3">
-      <Skeleton className="h-8 w-8 rounded-full bg-ivory-200" />
+      <Skeleton className="h-8 w-8 rounded-full bg-grace-200" />
       <div className="flex-1">
-        <Skeleton className="h-4 w-32 mb-1 bg-ivory-200" />
-        <Skeleton className="h-3 w-48 bg-ivory-200" />
+        <Skeleton className="h-4 w-32 mb-1 bg-grace-200" />
+        <Skeleton className="h-3 w-48 bg-grace-200" />
       </div>
     </div>
   );
@@ -335,11 +335,11 @@ export default function Dashboard() {
 
   if (hasError) {
     return (
-      <div className="space-y-6 p-6 bg-ivory-50 min-h-screen">
-        <Alert variant="destructive" className="border-burgundy-300 bg-burgundy-50">
-          <AlertCircle className="h-4 w-4 text-burgundy-700" />
-          <AlertTitle className="text-burgundy-900 font-serif">Error</AlertTitle>
-          <AlertDescription className="text-burgundy-700">
+      <div className="space-y-6 p-6 bg-grace-50 min-h-screen">
+        <Alert variant="destructive" className="border-sanctuary-300 bg-sanctuary-50">
+          <AlertCircle className="h-4 w-4 text-sanctuary-700" />
+          <AlertTitle className="text-sanctuary-900 font-serif">Error</AlertTitle>
+          <AlertDescription className="text-sanctuary-700">
             Failed to load dashboard data. Please try again later.
           </AlertDescription>
         </Alert>
@@ -348,23 +348,23 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6 bg-ivory-50 min-h-screen">
+    <div className="space-y-6 bg-grace-50 min-h-screen">
       {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-burgundy-800 via-burgundy-700 to-burgundy-900 p-8 text-white shadow-warm-lg">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-sanctuary-800 via-sanctuary-700 to-sanctuary-900 p-8 text-white shadow-warm-lg">
         {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-ivory-100/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/4 w-48 h-48 bg-sage-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-ivory-200/5 rounded-full" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-grace-100/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 w-48 h-48 bg-spirit-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-grace-200/5 rounded-full" />
 
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-ivory-200 text-sm font-medium">{getGreeting()}</span>
+            <span className="text-grace-200 text-sm font-medium">{getGreeting()}</span>
           </div>
           <h1 className="text-3xl font-bold mb-2 font-serif">{churchName}</h1>
-          <p className="text-ivory-200 max-w-xl mb-4">
+          <p className="text-grace-200 max-w-xl mb-4">
             {getFormattedDate()}
           </p>
-          <p className="text-ivory-300/80 text-sm max-w-xl">
+          <p className="text-grace-300/80 text-sm max-w-xl">
             Serving our community with love and grace. May this day bring blessings to all who enter.
           </p>
         </div>
@@ -386,10 +386,10 @@ export default function Dashboard() {
             return (
               <Card
                 key={config.label}
-                className="border-ivory-300 bg-white hover:shadow-warm transition-shadow"
+                className="border-grace-300 bg-white hover:shadow-warm transition-shadow"
               >
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-walnut-600">
+                  <CardTitle className="text-sm font-medium text-vesper-600">
                     {config.label}
                   </CardTitle>
                   <div className={`p-2.5 rounded-xl ${config.bgColor}`}>
@@ -397,10 +397,10 @@ export default function Dashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-walnut-900 font-serif">
+                  <div className="text-3xl font-bold text-vesper-900 font-serif">
                     --
                   </div>
-                  <p className="text-xs text-walnut-500 mt-1">
+                  <p className="text-xs text-vesper-500 mt-1">
                     No data available
                   </p>
                 </CardContent>
@@ -414,10 +414,10 @@ export default function Dashboard() {
             return (
               <Card
                 key={stat.title}
-                className="border-ivory-300 bg-white hover:shadow-warm transition-shadow"
+                className="border-grace-300 bg-white hover:shadow-warm transition-shadow"
               >
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-walnut-600">
+                  <CardTitle className="text-sm font-medium text-vesper-600">
                     {stat.title}
                   </CardTitle>
                   <div className={`p-2.5 rounded-xl ${config.bgColor}`}>
@@ -425,23 +425,23 @@ export default function Dashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-walnut-900 font-serif">
+                  <div className="text-3xl font-bold text-vesper-900 font-serif">
                     {stat.value}
                   </div>
                   <div className="flex items-center gap-1.5 mt-1">
                     {stat.changeType === "positive" ? (
-                      <TrendingUp className="h-3.5 w-3.5 text-sage-600" />
+                      <TrendingUp className="h-3.5 w-3.5 text-spirit-600" />
                     ) : stat.changeType === "negative" ? (
-                      <TrendingDown className="h-3.5 w-3.5 text-burgundy-600" />
+                      <TrendingDown className="h-3.5 w-3.5 text-sanctuary-600" />
                     ) : null}
-                    <p className="text-xs text-walnut-600">
+                    <p className="text-xs text-vesper-600">
                       <span
                         className={
                           stat.changeType === "positive"
-                            ? "text-sage-600 font-medium"
+                            ? "text-spirit-600 font-medium"
                             : stat.changeType === "neutral"
-                            ? "text-walnut-500"
-                            : "text-burgundy-600 font-medium"
+                            ? "text-vesper-500"
+                            : "text-sanctuary-600 font-medium"
                         }
                       >
                         {stat.change}
@@ -457,12 +457,12 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Actions */}
-      <Card className="border-ivory-300 bg-white">
+      <Card className="border-grace-300 bg-white">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold text-walnut-900 font-serif">
+          <CardTitle className="text-lg font-semibold text-vesper-900 font-serif">
             Quick Actions
           </CardTitle>
-          <CardDescription className="text-walnut-600">
+          <CardDescription className="text-vesper-600">
             Common tasks at your fingertips
           </CardDescription>
         </CardHeader>
@@ -472,7 +472,7 @@ export default function Dashboard() {
               <Link key={action.label} href={action.href}>
                 <Button
                   variant="outline"
-                  className={`${action.bgColor} ${action.hoverBg} border-ivory-300 text-walnut-800 gap-2`}
+                  className={`${action.bgColor} ${action.hoverBg} border-grace-300 text-vesper-800 gap-2`}
                 >
                   <action.icon className={`h-4 w-4 ${action.iconColor}`} />
                   {action.label}
@@ -486,13 +486,13 @@ export default function Dashboard() {
       {/* Main Content Grid - Three Column */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Upcoming Events - Takes 1 column */}
-        <Card className="border-ivory-300 bg-white">
+        <Card className="border-grace-300 bg-white">
           <CardHeader className="flex flex-row items-center justify-between pb-4">
             <div>
-              <CardTitle className="text-lg font-semibold text-walnut-900 font-serif">
+              <CardTitle className="text-lg font-semibold text-vesper-900 font-serif">
                 Upcoming Events
               </CardTitle>
-              <CardDescription className="text-walnut-600">
+              <CardDescription className="text-vesper-600">
                 Next 3 events
               </CardDescription>
             </div>
@@ -500,7 +500,7 @@ export default function Dashboard() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-burgundy-700 hover:text-burgundy-800 hover:bg-burgundy-50"
+                className="text-sanctuary-700 hover:text-sanctuary-800 hover:bg-sanctuary-50"
               >
                 View All
                 <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
@@ -517,13 +517,13 @@ export default function Dashboard() {
                 </>
               ) : !upcomingEvents || upcomingEvents.length === 0 ? (
                 <div className="text-center py-8">
-                  <CalendarPlus className="h-10 w-10 text-walnut-300 mx-auto mb-3" />
-                  <p className="text-sm text-walnut-600">No upcoming events</p>
+                  <CalendarPlus className="h-10 w-10 text-vesper-300 mx-auto mb-3" />
+                  <p className="text-sm text-vesper-600">No upcoming events</p>
                   <Link href={routes.events}>
                     <Button
                       variant="link"
                       size="sm"
-                      className="text-burgundy-700 mt-2"
+                      className="text-sanctuary-700 mt-2"
                     >
                       Schedule an event
                     </Button>
@@ -535,26 +535,26 @@ export default function Dashboard() {
                   return (
                     <div
                       key={event.id}
-                      className="flex items-start gap-3 py-3 border-b border-ivory-200 last:border-0"
+                      className="flex items-start gap-3 py-3 border-b border-grace-200 last:border-0"
                     >
-                      <div className="flex flex-col items-center justify-center rounded-xl bg-burgundy-100 border border-burgundy-200 px-3 py-2 min-w-[56px]">
-                        <span className="text-[10px] font-semibold text-burgundy-700 uppercase">
+                      <div className="flex flex-col items-center justify-center rounded-xl bg-sanctuary-100 border border-sanctuary-200 px-3 py-2 min-w-[56px]">
+                        <span className="text-[10px] font-semibold text-sanctuary-700 uppercase">
                           {day}
                         </span>
-                        <span className="text-lg font-bold text-walnut-900">
+                        <span className="text-lg font-bold text-vesper-900">
                           {date}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-walnut-900 truncate">
+                        <p className="text-sm font-semibold text-vesper-900 truncate">
                           {event.title}
                         </p>
-                        <div className="flex items-center gap-1 text-xs text-walnut-600 mt-1">
+                        <div className="flex items-center gap-1 text-xs text-vesper-600 mt-1">
                           <Clock className="h-3 w-3" />
                           <span>{formatEventTime(event.startDate)}</span>
                         </div>
                         {event.location && (
-                          <div className="flex items-center gap-1 text-xs text-walnut-600 mt-0.5">
+                          <div className="flex items-center gap-1 text-xs text-vesper-600 mt-0.5">
                             <MapPin className="h-3 w-3" />
                             <span className="truncate">{event.location}</span>
                           </div>
@@ -563,8 +563,8 @@ export default function Dashboard() {
                           <Badge
                             className={
                               event.status === "published"
-                                ? "bg-sage-100 text-sage-700 border-sage-200 hover:bg-sage-100"
-                                : "bg-ivory-200 text-walnut-700 border-ivory-300 hover:bg-ivory-200"
+                                ? "bg-spirit-100 text-spirit-700 border-spirit-200 hover:bg-spirit-100"
+                                : "bg-grace-200 text-vesper-700 border-grace-300 hover:bg-grace-200"
                             }
                           >
                             {event.status}
@@ -580,12 +580,12 @@ export default function Dashboard() {
         </Card>
 
         {/* Recent Donations Summary - Takes 1 column */}
-        <Card className="border-ivory-300 bg-white">
+        <Card className="border-grace-300 bg-white">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-walnut-900 font-serif">
+            <CardTitle className="text-lg font-semibold text-vesper-900 font-serif">
               Recent Activity
             </CardTitle>
-            <CardDescription className="text-walnut-600">
+            <CardDescription className="text-vesper-600">
               Latest donations received
             </CardDescription>
           </CardHeader>
@@ -600,13 +600,13 @@ export default function Dashboard() {
                 </>
               ) : recentDonations.length === 0 ? (
                 <div className="text-center py-8">
-                  <DollarSign className="h-10 w-10 text-walnut-300 mx-auto mb-3" />
-                  <p className="text-sm text-walnut-600">No recent donations</p>
+                  <DollarSign className="h-10 w-10 text-vesper-300 mx-auto mb-3" />
+                  <p className="text-sm text-vesper-600">No recent donations</p>
                   <Link href={routes.donations.new}>
                     <Button
                       variant="link"
                       size="sm"
-                      className="text-burgundy-700 mt-2"
+                      className="text-sanctuary-700 mt-2"
                     >
                       Record a donation
                     </Button>
@@ -616,19 +616,19 @@ export default function Dashboard() {
                 recentDonations.slice(0, 4).map((donation: Donation) => (
                   <div
                     key={donation.id}
-                    className="flex items-start gap-3 py-3 border-b border-ivory-200 last:border-0"
+                    className="flex items-start gap-3 py-3 border-b border-grace-200 last:border-0"
                   >
-                    <div className="p-2 rounded-full bg-sage-100">
-                      <DollarSign className="h-4 w-4 text-sage-700" />
+                    <div className="p-2 rounded-full bg-spirit-100">
+                      <DollarSign className="h-4 w-4 text-spirit-700" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-walnut-900">
+                      <p className="text-sm font-medium text-vesper-900">
                         {getDonorName(donation)}
                       </p>
-                      <p className="text-xs text-walnut-600 truncate">
+                      <p className="text-xs text-vesper-600 truncate">
                         {donation.fund} - {formatCurrency(donation.amount)}
                       </p>
-                      <p className="text-xs text-walnut-500 mt-1">
+                      <p className="text-xs text-vesper-500 mt-1">
                         {formatRelativeTime(donation.date)}
                       </p>
                     </div>
@@ -640,14 +640,14 @@ export default function Dashboard() {
         </Card>
 
         {/* Prayer Requests Summary - Takes 1 column */}
-        <Card className="border-ivory-300 bg-white">
+        <Card className="border-grace-300 bg-white">
           <CardHeader className="flex flex-row items-center justify-between pb-4">
             <div>
-              <CardTitle className="text-lg font-semibold text-walnut-900 font-serif flex items-center gap-2">
-                <HandHeart className="h-5 w-5 text-burgundy-700" />
+              <CardTitle className="text-lg font-semibold text-vesper-900 font-serif flex items-center gap-2">
+                <HandHeart className="h-5 w-5 text-sanctuary-700" />
                 Prayer Requests
               </CardTitle>
-              <CardDescription className="text-walnut-600">
+              <CardDescription className="text-vesper-600">
                 Lift these up in prayer
               </CardDescription>
             </div>
@@ -662,9 +662,9 @@ export default function Dashboard() {
                 </>
               ) : !urgentPrayers || urgentPrayers.length === 0 ? (
                 <div className="text-center py-8">
-                  <Heart className="h-10 w-10 text-walnut-300 mx-auto mb-3" />
-                  <p className="text-sm text-walnut-600">No urgent prayer requests</p>
-                  <p className="text-xs text-walnut-500 mt-1">
+                  <Heart className="h-10 w-10 text-vesper-300 mx-auto mb-3" />
+                  <p className="text-sm text-vesper-600">No urgent prayer requests</p>
+                  <p className="text-xs text-vesper-500 mt-1">
                     Check back later for prayer needs
                   </p>
                 </div>
@@ -672,22 +672,22 @@ export default function Dashboard() {
                 urgentPrayers.slice(0, 3).map((prayer: PrayerRequest) => (
                   <div
                     key={prayer.id}
-                    className="p-3 rounded-lg bg-ivory-100 border border-ivory-200"
+                    className="p-3 rounded-lg bg-grace-100 border border-grace-200"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-medium text-walnut-900">
+                      <p className="text-sm font-medium text-vesper-900">
                         {prayer.title}
                       </p>
                       {prayer.isUrgent && (
-                        <Badge className="bg-burgundy-100 text-burgundy-700 border-burgundy-200 text-xs">
+                        <Badge className="bg-sanctuary-100 text-sanctuary-700 border-sanctuary-200 text-xs">
                           Urgent
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-walnut-600 mt-1">
+                    <p className="text-xs text-vesper-600 mt-1">
                       Requested by {prayer.isAnonymous ? "Anonymous" : prayer.submitterName || prayer.member?.firstName || "Unknown"}
                     </p>
-                    <p className="text-xs text-walnut-500 mt-0.5">
+                    <p className="text-xs text-vesper-500 mt-0.5">
                       {formatRelativeTime(prayer.createdAt)}
                     </p>
                   </div>
@@ -697,7 +697,7 @@ export default function Dashboard() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full border-burgundy-200 text-burgundy-700 hover:bg-burgundy-50"
+                  className="w-full border-sanctuary-200 text-sanctuary-700 hover:bg-sanctuary-50"
                 >
                   <Heart className="h-4 w-4 mr-2" />
                   View All Prayer Requests
@@ -709,13 +709,13 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Donations */}
-      <Card className="border-ivory-300 bg-white">
+      <Card className="border-grace-300 bg-white">
         <CardHeader className="flex flex-row items-center justify-between pb-4">
           <div>
-            <CardTitle className="text-lg font-semibold text-walnut-900 font-serif">
+            <CardTitle className="text-lg font-semibold text-vesper-900 font-serif">
               Recent Giving
             </CardTitle>
-            <CardDescription className="text-walnut-600">
+            <CardDescription className="text-vesper-600">
               Thank you for your generous contributions
             </CardDescription>
           </div>
@@ -723,7 +723,7 @@ export default function Dashboard() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-burgundy-700 hover:text-burgundy-800 hover:bg-burgundy-50"
+              className="text-sanctuary-700 hover:text-sanctuary-800 hover:bg-sanctuary-50"
             >
               View All
               <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
@@ -741,13 +741,13 @@ export default function Dashboard() {
               </>
             ) : recentDonations.length === 0 ? (
               <div className="col-span-full text-center py-8">
-                <DollarSign className="h-10 w-10 text-walnut-300 mx-auto mb-3" />
-                <p className="text-sm text-walnut-600">No recent donations to display</p>
+                <DollarSign className="h-10 w-10 text-vesper-300 mx-auto mb-3" />
+                <p className="text-sm text-vesper-600">No recent donations to display</p>
                 <Link href={routes.donations.new}>
                   <Button
                     variant="link"
                     size="sm"
-                    className="text-burgundy-700 mt-2"
+                    className="text-sanctuary-700 mt-2"
                   >
                     Record a donation
                   </Button>
@@ -757,20 +757,20 @@ export default function Dashboard() {
               recentDonations.slice(0, 4).map((donation: Donation) => (
                 <div
                   key={donation.id}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-ivory-100 border border-ivory-200"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-grace-100 border border-grace-200"
                 >
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-burgundy-600 to-burgundy-800 flex items-center justify-center text-sm font-semibold text-white shadow-sm">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-sanctuary-600 to-sanctuary-800 flex items-center justify-center text-sm font-semibold text-white shadow-sm">
                     {getDonorInitials(donation)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-walnut-900 truncate">
+                    <p className="text-sm font-medium text-vesper-900 truncate">
                       {getDonorName(donation)}
                     </p>
-                    <p className="text-xs text-walnut-600">
+                    <p className="text-xs text-vesper-600">
                       {donation.fund} &middot; {formatRelativeTime(donation.date)}
                     </p>
                   </div>
-                  <span className="text-sm font-bold text-sage-700">
+                  <span className="text-sm font-bold text-spirit-700">
                     {formatCurrency(donation.amount)}
                   </span>
                 </div>

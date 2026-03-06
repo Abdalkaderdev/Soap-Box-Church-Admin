@@ -47,31 +47,31 @@ import type {
   Member,
 } from '@/types';
 
-// Warm church color palette
+// SoapBox brand color palette
 const colors = {
   burgundy: {
-    bg: 'bg-[#722F37]',
-    bgLight: 'bg-[#722F37]/10',
-    text: 'text-[#722F37]',
-    border: 'border-[#722F37]',
-    hover: 'hover:bg-[#722F37]/90',
+    bg: 'bg-[#1B3A4B]',
+    bgLight: 'bg-[#1B3A4B]/10',
+    text: 'text-[#1B3A4B]',
+    border: 'border-[#1B3A4B]',
+    hover: 'hover:bg-[#1B3A4B]/90',
   },
   sage: {
-    bg: 'bg-[#87AE73]',
-    bgLight: 'bg-[#87AE73]/10',
-    text: 'text-[#87AE73]',
-    border: 'border-[#87AE73]',
+    bg: 'bg-[#5B8C7E]',
+    bgLight: 'bg-[#5B8C7E]/10',
+    text: 'text-[#5B8C7E]',
+    border: 'border-[#5B8C7E]',
   },
   ivory: {
-    bg: 'bg-[#FFFFF0]',
-    bgLight: 'bg-[#FFFFF0]/50',
-    text: 'text-[#FFFFF0]',
+    bg: 'bg-[#F5F0E8]',
+    bgLight: 'bg-[#F5F0E8]/50',
+    text: 'text-[#F5F0E8]',
   },
   walnut: {
-    bg: 'bg-[#5D432C]',
-    bgLight: 'bg-[#5D432C]/10',
-    text: 'text-[#5D432C]',
-    border: 'border-[#5D432C]',
+    bg: 'bg-[#8B6E5A]',
+    bgLight: 'bg-[#8B6E5A]/10',
+    text: 'text-[#8B6E5A]',
+    border: 'border-[#8B6E5A]',
   },
 };
 

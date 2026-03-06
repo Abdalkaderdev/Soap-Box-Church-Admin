@@ -6,110 +6,111 @@
 
 @layer base {
   :root {
-    /* Sacred Warmth Theme - Authentic Church Aesthetic
-       Inspired by traditional church interiors:
-       warm woods, stained glass, ivory paper, burgundy vestments */
+    /* SoapBox Brand Identity
+       Primary: Sanctuary, Golden Hour, Grace
+       Secondary: Spirit, Vesper, Dawn, Hymnal
+       Accents: Coral, Haven, Ember */
 
-    /* Warm ivory/cream background */
-    --background: 40 33% 97%;
-    --foreground: 20 25% 15%;
+    /* Grace background - purity, peace, welcoming openness */
+    --background: 37 39% 93%;
+    --foreground: 201 47% 20%;
 
     /* Soft warm white cards */
-    --card: 40 40% 99%;
-    --card-foreground: 20 25% 15%;
+    --card: 37 45% 97%;
+    --card-foreground: 201 47% 20%;
 
-    --popover: 40 40% 99%;
-    --popover-foreground: 20 25% 15%;
+    --popover: 37 45% 97%;
+    --popover-foreground: 201 47% 20%;
 
-    /* Deep burgundy/wine primary - liturgical, dignified */
-    --primary: 345 45% 32%;
-    --primary-foreground: 40 40% 98%;
+    /* Sanctuary primary - deep trust, stability, sacred space */
+    --primary: 201 47% 20%;
+    --primary-foreground: 37 39% 93%;
 
-    /* Warm stone secondary */
-    --secondary: 35 20% 93%;
-    --secondary-foreground: 20 25% 20%;
+    /* Dawn secondary - warm, inviting */
+    --secondary: 33 61% 77%;
+    --secondary-foreground: 201 47% 20%;
 
-    --muted: 35 15% 92%;
-    --muted-foreground: 20 10% 45%;
+    --muted: 214 32% 91%;
+    --muted-foreground: 218 17% 35%;
 
-    /* Sage green accent - growth, peace, hope */
-    --accent: 150 25% 40%;
-    --accent-foreground: 40 40% 98%;
+    /* Golden Hour accent - warmth, divine light, generosity */
+    --accent: 40 60% 58%;
+    --accent-foreground: 201 47% 20%;
 
     --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 35 20% 88%;
-    --input: 35 20% 88%;
-    --ring: 345 45% 32%;
+    --border: 214 20% 84%;
+    --input: 214 20% 84%;
+    --ring: 194 42% 30%;
     --radius: 0.625rem;
 
-    /* Chart colors - stained glass inspired */
-    --chart-1: 345 45% 35%;
-    --chart-2: 150 30% 42%;
-    --chart-3: 35 60% 50%;
-    --chart-4: 220 45% 45%;
-    --chart-5: 280 35% 45%;
+    /* Chart colors - brand palette inspired */
+    --chart-1: 201 47% 20%;
+    --chart-2: 40 60% 58%;
+    --chart-3: 163 21% 45%;
+    --chart-4: 13 68% 63%;
+    --chart-5: 194 42% 30%;
 
-    /* Sidebar - rich walnut wood tone */
-    --sidebar-background: 20 35% 12%;
-    --sidebar-foreground: 35 30% 90%;
-    --sidebar-primary: 35 55% 55%;
-    --sidebar-primary-foreground: 20 35% 10%;
-    --sidebar-accent: 20 30% 18%;
-    --sidebar-accent-foreground: 35 30% 95%;
-    --sidebar-border: 20 25% 18%;
-    --sidebar-ring: 35 55% 55%;
+    /* Sidebar - Sanctuary deep tones */
+    --sidebar-background: 201 47% 15%;
+    --sidebar-foreground: 37 39% 93%;
+    --sidebar-primary: 40 60% 58%;
+    --sidebar-primary-foreground: 201 47% 15%;
+    --sidebar-accent: 201 42% 22%;
+    --sidebar-accent-foreground: 37 39% 95%;
+    --sidebar-border: 201 40% 22%;
+    --sidebar-ring: 40 60% 58%;
   }
 
   .dark {
-    /* Dark mode - Evening chapel ambiance */
-    --background: 20 25% 8%;
-    --foreground: 35 25% 92%;
+    /* Dark mode - Evening sanctuary ambiance */
+    --background: 201 40% 8%;
+    --foreground: 37 39% 93%;
 
-    --card: 20 25% 11%;
-    --card-foreground: 35 25% 92%;
+    --card: 201 35% 12%;
+    --card-foreground: 37 39% 93%;
 
-    --popover: 20 25% 11%;
-    --popover-foreground: 35 25% 92%;
+    --popover: 201 35% 12%;
+    --popover-foreground: 37 39% 93%;
 
-    /* Lighter burgundy for dark mode */
-    --primary: 345 50% 55%;
-    --primary-foreground: 20 25% 8%;
+    /* Lighter Sanctuary for dark mode */
+    --primary: 194 42% 45%;
+    --primary-foreground: 201 40% 8%;
 
-    --secondary: 20 20% 16%;
-    --secondary-foreground: 35 25% 90%;
+    --secondary: 201 30% 18%;
+    --secondary-foreground: 37 39% 90%;
 
-    --muted: 20 20% 16%;
-    --muted-foreground: 35 15% 55%;
+    --muted: 201 25% 16%;
+    --muted-foreground: 214 18% 60%;
 
-    /* Brighter sage for dark mode */
-    --accent: 150 35% 50%;
-    --accent-foreground: 20 25% 8%;
+    /* Brighter Golden Hour for dark mode */
+    --accent: 40 65% 62%;
+    --accent-foreground: 201 40% 8%;
 
     --destructive: 0 60% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 20 20% 18%;
-    --input: 20 20% 18%;
-    --ring: 345 50% 55%;
+    --border: 201 25% 20%;
+    --input: 201 25% 20%;
+    --ring: 194 42% 45%;
 
     /* Chart colors for dark mode */
-    --chart-1: 345 50% 55%;
-    --chart-2: 150 40% 52%;
-    --chart-3: 35 65% 58%;
-    --chart-4: 220 50% 58%;
-    --chart-5: 280 40% 58%;
+    --chart-1: 194 42% 45%;
+    --chart-2: 40 65% 62%;
+    --chart-3: 163 28% 55%;
+    --chart-4: 13 70% 68%;
+    --chart-5: 201 47% 40%;
 
     /* Sidebar dark mode */
-    --sidebar-background: 20 30% 7%;
-    --sidebar-foreground: 35 25% 88%;
-    --sidebar-primary: 35 60% 58%;
-    --sidebar-primary-foreground: 20 30% 8%;
-    --sidebar-accent: 20 25% 12%;
-    --sidebar-accent-foreground: 35 25% 95%;
-    --sidebar-border: 20 25% 12%;
-    --sidebar-ring: 345 50% 55%;
+    --sidebar-background: 201 45% 6%;
+    --sidebar-foreground: 37 39% 90%;
+    --sidebar-primary: 40 65% 62%;
+    --sidebar-primary-foreground: 201 45% 6%;
+    --sidebar-accent: 201 35% 14%;
+    --sidebar-accent-foreground: 37 39% 95%;
+    --sidebar-border: 201 30% 14%;
+    --sidebar-ring: 194 42% 45%;
   }
 }
 
@@ -161,26 +162,26 @@
 @layer utilities {
   .church-glow {
     box-shadow:
-      0 4px 6px -1px hsl(345 45% 32% / 0.08),
-      0 2px 4px -2px hsl(345 45% 32% / 0.06);
+      0 4px 6px -1px hsl(201 47% 20% / 0.08),
+      0 2px 4px -2px hsl(201 47% 20% / 0.06);
   }
 
   .church-glow-lg {
     box-shadow:
-      0 10px 15px -3px hsl(345 45% 32% / 0.1),
-      0 4px 6px -4px hsl(345 45% 32% / 0.08);
+      0 10px 15px -3px hsl(201 47% 20% / 0.1),
+      0 4px 6px -4px hsl(201 47% 20% / 0.08);
   }
 
   .warm-gradient {
-    background: linear-gradient(135deg, hsl(35 40% 96%) 0%, hsl(40 35% 94%) 100%);
+    background: linear-gradient(135deg, hsl(37 39% 95%) 0%, hsl(37 39% 93%) 100%);
   }
 
-  .burgundy-gradient {
-    background: linear-gradient(135deg, hsl(345 45% 35%) 0%, hsl(345 50% 28%) 100%);
+  .sanctuary-gradient {
+    background: linear-gradient(135deg, hsl(201 47% 22%) 0%, hsl(201 50% 16%) 100%);
   }
 
-  .wood-gradient {
-    background: linear-gradient(180deg, hsl(20 35% 14%) 0%, hsl(20 30% 10%) 100%);
+  .sanctuary-deep-gradient {
+    background: linear-gradient(180deg, hsl(201 47% 18%) 0%, hsl(201 50% 12%) 100%);
   }
 }
 

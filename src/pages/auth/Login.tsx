@@ -153,7 +153,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex">
       {/* Left side - Hero section with warm church aesthetic */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-burgundy-900 via-burgundy-800 to-walnut-900">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-sanctuary-900 via-sanctuary-800 to-vesper-900">
         {/* Decorative cross pattern overlay */}
         <div className="absolute inset-0 opacity-[0.03]">
           <div className="absolute inset-0" style={{
@@ -165,8 +165,8 @@ export default function Login() {
         {/* Warm glow effects */}
         <div className="absolute top-0 left-0 w-full h-full">
           <div className="absolute top-1/4 -left-20 w-96 h-96 bg-sidebar-primary/10 rounded-full blur-[100px]" />
-          <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-burgundy-600/20 rounded-full blur-[80px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-ivory-200/5 rounded-full blur-[60px]" />
+          <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-sanctuary-600/20 rounded-full blur-[80px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-grace-200/5 rounded-full blur-[60px]" />
         </div>
 
         {/* Content */}
@@ -183,7 +183,7 @@ export default function Login() {
             </span>
           </h1>
 
-          <p className="text-lg text-ivory-300/80 mb-12 max-w-md leading-relaxed">
+          <p className="text-lg text-grace-300/80 mb-12 max-w-md leading-relaxed">
             A thoughtful solution for member care, stewardship, event planning, and spiritual growth in your congregation.
           </p>
 
@@ -199,8 +199,8 @@ export default function Login() {
                   <feature.icon className="h-5 w-5 text-sidebar-primary" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm text-ivory-100">{feature.label}</p>
-                  <p className="text-xs text-ivory-400/70">{feature.desc}</p>
+                  <p className="font-semibold text-sm text-grace-100">{feature.label}</p>
+                  <p className="text-xs text-grace-400/70">{feature.desc}</p>
                 </div>
               </div>
             ))}
@@ -208,12 +208,12 @@ export default function Login() {
 
           {/* Trust badges */}
           <div className="mt-12 flex items-center gap-8">
-            <div className="flex items-center gap-2 text-ivory-400/70 text-sm">
+            <div className="flex items-center gap-2 text-grace-400/70 text-sm">
               <Sparkles className="h-4 w-4 text-sidebar-primary" />
               <span>Trusted by churches</span>
             </div>
-            <div className="flex items-center gap-2 text-ivory-400/70 text-sm">
-              <Shield className="h-4 w-4 text-sage-400" />
+            <div className="flex items-center gap-2 text-grace-400/70 text-sm">
+              <Shield className="h-4 w-4 text-spirit-400" />
               <span>Secure & reliable</span>
             </div>
           </div>
@@ -221,7 +221,7 @@ export default function Login() {
       </div>
 
       {/* Right side - Login form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-ivory-50 via-ivory-100 to-ivory-50 paper-texture">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-grace-50 via-grace-100 to-grace-50 paper-texture">
         <div className="w-full max-w-md space-y-8">
           {/* Mobile logo */}
           <div className="lg:hidden flex flex-col items-center space-y-4 text-center mb-8">
@@ -229,28 +229,28 @@ export default function Login() {
           </div>
 
           {/* Login Card */}
-          <Card className="border-ivory-200/80 bg-white/80 backdrop-blur-xl shadow-warm-lg">
+          <Card className="border-grace-200/80 bg-white/80 backdrop-blur-xl shadow-warm-lg">
             <CardHeader className="space-y-1 text-center pb-4">
               <div className="flex justify-center mb-4">
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-burgundy-50 to-burgundy-100 border border-burgundy-200/50 shadow-warm">
-                  <Church className="h-8 w-8 text-burgundy-700" />
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-sanctuary-50 to-sanctuary-100 border border-sanctuary-200/50 shadow-warm">
+                  <Church className="h-8 w-8 text-sanctuary-700" />
                 </div>
               </div>
-              <CardTitle className="font-serif text-2xl text-walnut-900">Welcome Back</CardTitle>
-              <CardDescription className="text-walnut-600">
+              <CardTitle className="font-serif text-2xl text-vesper-900">Welcome Back</CardTitle>
+              <CardDescription className="text-vesper-600">
                 Sign in to access your church dashboard
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
               {/* Login Method Toggle */}
-              <div className="flex rounded-xl bg-ivory-100 p-1">
+              <div className="flex rounded-xl bg-grace-100 p-1">
                 <button
                   type="button"
                   onClick={() => setLoginMethod('credentials')}
                   className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
                     loginMethod === 'credentials'
-                      ? 'bg-white text-burgundy-700 shadow-sm'
-                      : 'text-walnut-500 hover:text-walnut-700'
+                      ? 'bg-white text-sanctuary-700 shadow-sm'
+                      : 'text-vesper-500 hover:text-vesper-700'
                   }`}
                 >
                   Email & Password
@@ -260,8 +260,8 @@ export default function Login() {
                   onClick={() => setLoginMethod('sso')}
                   className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
                     loginMethod === 'sso'
-                      ? 'bg-white text-burgundy-700 shadow-sm'
-                      : 'text-walnut-500 hover:text-walnut-700'
+                      ? 'bg-white text-sanctuary-700 shadow-sm'
+                      : 'text-vesper-500 hover:text-vesper-700'
                   }`}
                 >
                   SoapBox SSO
@@ -270,8 +270,8 @@ export default function Login() {
 
               {/* Error Message */}
               {error && (
-                <div className="bg-burgundy-50 border border-burgundy-200 rounded-lg p-3 text-center">
-                  <p className="text-sm text-burgundy-700">{error}</p>
+                <div className="bg-sanctuary-50 border border-sanctuary-200 rounded-lg p-3 text-center">
+                  <p className="text-sm text-sanctuary-700">{error}</p>
                 </div>
               )}
 
@@ -279,42 +279,42 @@ export default function Login() {
                 /* Email/Password Login Form */
                 <form onSubmit={handleCredentialsLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-walnut-700 font-medium">
+                    <Label htmlFor="email" className="text-vesper-700 font-medium">
                       Email
                     </Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-walnut-400" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-vesper-400" />
                       <Input
                         id="email"
                         type="email"
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10 h-11 bg-white border-ivory-200 focus:border-burgundy-300 focus:ring-burgundy-200"
+                        className="pl-10 h-11 bg-white border-grace-200 focus:border-sanctuary-300 focus:ring-sanctuary-200"
                         disabled={isLoading}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-walnut-700 font-medium">
+                    <Label htmlFor="password" className="text-vesper-700 font-medium">
                       Password
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-walnut-400" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-vesper-400" />
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 pr-10 h-11 bg-white border-ivory-200 focus:border-burgundy-300 focus:ring-burgundy-200"
+                        className="pl-10 pr-10 h-11 bg-white border-grace-200 focus:border-sanctuary-300 focus:ring-sanctuary-200"
                         disabled={isLoading}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-walnut-400 hover:text-walnut-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-vesper-400 hover:text-vesper-600"
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -328,7 +328,7 @@ export default function Login() {
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full h-11 bg-gradient-to-r from-burgundy-700 to-burgundy-800 hover:from-burgundy-800 hover:to-burgundy-900 text-ivory-50 font-semibold shadow-warm transition-all duration-300 hover:shadow-warm-lg rounded-xl"
+                    className="w-full h-11 bg-gradient-to-r from-sanctuary-700 to-sanctuary-800 hover:from-sanctuary-800 hover:to-sanctuary-900 text-grace-50 font-semibold shadow-warm transition-all duration-300 hover:shadow-warm-lg rounded-xl"
                   >
                     {isLoading ? (
                       <div className="flex items-center gap-2">
@@ -343,13 +343,13 @@ export default function Login() {
               ) : (
                 /* SSO Login */
                 <div className="space-y-4">
-                  <p className="text-sm text-walnut-500 text-center">
+                  <p className="text-sm text-vesper-500 text-center">
                     Sign in using your existing SoapBox account
                   </p>
                   <Button
                     onClick={handleSSOLogin}
                     disabled={isLoading}
-                    className="w-full h-11 bg-gradient-to-r from-burgundy-700 to-burgundy-800 hover:from-burgundy-800 hover:to-burgundy-900 text-ivory-50 font-semibold shadow-warm transition-all duration-300 hover:shadow-warm-lg rounded-xl"
+                    className="w-full h-11 bg-gradient-to-r from-sanctuary-700 to-sanctuary-800 hover:from-sanctuary-800 hover:to-sanctuary-900 text-grace-50 font-semibold shadow-warm transition-all duration-300 hover:shadow-warm-lg rounded-xl"
                   >
                     {isLoading ? (
                       <div className="flex items-center gap-2">
@@ -370,10 +370,10 @@ export default function Login() {
               {/* Divider */}
               <div className="relative pt-2">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-ivory-200" />
+                  <span className="w-full border-t border-grace-200" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="bg-white px-3 text-walnut-400">
+                  <span className="bg-white px-3 text-vesper-400">
                     Secured connection
                   </span>
                 </div>
@@ -381,17 +381,17 @@ export default function Login() {
 
               {/* Security Features */}
               <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="space-y-1 p-2.5 rounded-lg bg-ivory-50/50">
-                  <div className="text-sm text-burgundy-700 font-bold font-serif">256-bit</div>
-                  <div className="text-xs text-walnut-500">Encryption</div>
+                <div className="space-y-1 p-2.5 rounded-lg bg-grace-50/50">
+                  <div className="text-sm text-sanctuary-700 font-bold font-serif">256-bit</div>
+                  <div className="text-xs text-vesper-500">Encryption</div>
                 </div>
-                <div className="space-y-1 p-2.5 rounded-lg bg-ivory-50/50">
-                  <div className="text-sm text-burgundy-700 font-bold font-serif">SSO</div>
-                  <div className="text-xs text-walnut-500">Supported</div>
+                <div className="space-y-1 p-2.5 rounded-lg bg-grace-50/50">
+                  <div className="text-sm text-sanctuary-700 font-bold font-serif">SSO</div>
+                  <div className="text-xs text-vesper-500">Supported</div>
                 </div>
-                <div className="space-y-1 p-2.5 rounded-lg bg-ivory-50/50">
-                  <div className="text-sm text-burgundy-700 font-bold font-serif">2FA</div>
-                  <div className="text-xs text-walnut-500">Available</div>
+                <div className="space-y-1 p-2.5 rounded-lg bg-grace-50/50">
+                  <div className="text-sm text-sanctuary-700 font-bold font-serif">2FA</div>
+                  <div className="text-xs text-vesper-500">Available</div>
                 </div>
               </div>
             </CardContent>
@@ -399,22 +399,22 @@ export default function Login() {
 
           {/* Footer */}
           <div className="text-center space-y-3">
-            <p className="text-sm text-walnut-500">
+            <p className="text-sm text-vesper-500">
               Don't have an account?{" "}
               <a
                 href="https://soapboxsuperapp.com/quick-signup"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-burgundy-700 hover:text-burgundy-800 font-medium underline-offset-4 hover:underline"
+                className="text-sanctuary-700 hover:text-sanctuary-800 font-medium underline-offset-4 hover:underline"
               >
                 Sign up on SoapBox
               </a>
             </p>
             <div className="flex items-center justify-center gap-2">
               <LogoIcon size="sm" className="h-4 w-4 opacity-50" />
-              <p className="text-xs text-walnut-400">
+              <p className="text-xs text-vesper-400">
                 Powered by{" "}
-                <span className="font-semibold text-burgundy-700">
+                <span className="font-semibold text-sanctuary-700">
                   SoapBox
                 </span>
               </p>

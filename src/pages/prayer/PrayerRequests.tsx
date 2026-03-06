@@ -322,7 +322,7 @@ export default function PrayerRequests() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-serif font-bold tracking-tight text-burgundy-900">
+          <h1 className="text-3xl font-serif font-bold tracking-tight text-sanctuary-900">
             Prayer Requests
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -340,14 +340,14 @@ export default function PrayerRequests() {
           </Button>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-burgundy-700 hover:bg-burgundy-800 shadow-warm">
+              <Button className="bg-sanctuary-700 hover:bg-sanctuary-800 shadow-warm">
                 <Plus className="h-4 w-4 mr-2" />
                 New Prayer Request
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg bg-ivory-50">
+            <DialogContent className="max-w-lg bg-grace-50">
               <DialogHeader>
-                <DialogTitle className="font-serif text-burgundy-900">
+                <DialogTitle className="font-serif text-sanctuary-900">
                   Submit a Prayer Request
                 </DialogTitle>
                 <DialogDescription>
@@ -401,7 +401,7 @@ export default function PrayerRequests() {
                   />
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between rounded-lg border border-walnut-200 p-4 bg-white">
+                  <div className="flex items-center justify-between rounded-lg border border-vesper-200 p-4 bg-white">
                     <div className="space-y-0.5">
                       <Label htmlFor="private-toggle" className="text-base">
                         Private Request
@@ -418,7 +418,7 @@ export default function PrayerRequests() {
                       }
                     />
                   </div>
-                  <div className="flex items-center justify-between rounded-lg border border-walnut-200 p-4 bg-white">
+                  <div className="flex items-center justify-between rounded-lg border border-vesper-200 p-4 bg-white">
                     <div className="space-y-0.5">
                       <Label htmlFor="anonymous-toggle" className="text-base">
                         Submit Anonymously
@@ -465,7 +465,7 @@ export default function PrayerRequests() {
                 <Button
                   onClick={handleAddRequest}
                   disabled={!newRequest.title || !newRequest.description || createMutation.isPending}
-                  className="bg-burgundy-700 hover:bg-burgundy-800"
+                  className="bg-sanctuary-700 hover:bg-sanctuary-800"
                 >
                   {createMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                   Submit Request
@@ -478,61 +478,61 @@ export default function PrayerRequests() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-ivory-50 border-walnut-200 shadow-warm">
+        <Card className="bg-grace-50 border-vesper-200 shadow-warm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
-            <HandHeart className="h-4 w-4 text-burgundy-600" />
+            <HandHeart className="h-4 w-4 text-sanctuary-600" />
           </CardHeader>
           <CardContent>
             {loadingStats ? (
               <Skeleton className="h-8 w-16" />
             ) : (
-              <div className="text-2xl font-bold text-burgundy-900">
+              <div className="text-2xl font-bold text-sanctuary-900">
                 {stats?.totalRequests ?? 0}
               </div>
             )}
           </CardContent>
         </Card>
-        <Card className="bg-ivory-50 border-walnut-200 shadow-warm">
+        <Card className="bg-grace-50 border-vesper-200 shadow-warm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Requests</CardTitle>
-            <Heart className="h-4 w-4 text-burgundy-600" />
+            <Heart className="h-4 w-4 text-sanctuary-600" />
           </CardHeader>
           <CardContent>
             {loadingStats ? (
               <Skeleton className="h-8 w-16" />
             ) : (
-              <div className="text-2xl font-bold text-burgundy-900">
+              <div className="text-2xl font-bold text-sanctuary-900">
                 {stats?.activeRequests ?? 0}
               </div>
             )}
           </CardContent>
         </Card>
-        <Card className="bg-sage-50 border-sage-200 shadow-warm">
+        <Card className="bg-spirit-50 border-spirit-200 shadow-warm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Answered Prayers</CardTitle>
-            <Sparkles className="h-4 w-4 text-sage-600" />
+            <Sparkles className="h-4 w-4 text-spirit-600" />
           </CardHeader>
           <CardContent>
             {loadingStats ? (
               <Skeleton className="h-8 w-16" />
             ) : (
-              <div className="text-2xl font-bold text-sage-800">
+              <div className="text-2xl font-bold text-spirit-800">
                 {stats?.answeredRequests ?? 0}
               </div>
             )}
           </CardContent>
         </Card>
-        <Card className="bg-ivory-50 border-walnut-200 shadow-warm">
+        <Card className="bg-grace-50 border-vesper-200 shadow-warm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Times Prayed</CardTitle>
-            <Users className="h-4 w-4 text-burgundy-600" />
+            <Users className="h-4 w-4 text-sanctuary-600" />
           </CardHeader>
           <CardContent>
             {loadingStats ? (
               <Skeleton className="h-8 w-16" />
             ) : (
-              <div className="text-2xl font-bold text-burgundy-900">
+              <div className="text-2xl font-bold text-sanctuary-900">
                 {stats?.totalPrayers ?? 0}
               </div>
             )}
@@ -541,7 +541,7 @@ export default function PrayerRequests() {
       </div>
 
       {/* Filters */}
-      <Card className="bg-ivory-50 border-walnut-200">
+      <Card className="bg-grace-50 border-vesper-200">
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
@@ -591,22 +591,22 @@ export default function PrayerRequests() {
               }}
               className="w-full sm:w-auto"
             >
-              <TabsList className="bg-walnut-100">
+              <TabsList className="bg-vesper-100">
                 <TabsTrigger
                   value="all"
-                  className="data-[state=active]:bg-burgundy-700 data-[state=active]:text-white"
+                  className="data-[state=active]:bg-sanctuary-700 data-[state=active]:text-white"
                 >
                   All
                 </TabsTrigger>
                 <TabsTrigger
                   value="active"
-                  className="data-[state=active]:bg-burgundy-700 data-[state=active]:text-white"
+                  className="data-[state=active]:bg-sanctuary-700 data-[state=active]:text-white"
                 >
                   Active
                 </TabsTrigger>
                 <TabsTrigger
                   value="answered"
-                  className="data-[state=active]:bg-sage-600 data-[state=active]:text-white"
+                  className="data-[state=active]:bg-spirit-600 data-[state=active]:text-white"
                 >
                   Answered
                 </TabsTrigger>
@@ -643,7 +643,7 @@ export default function PrayerRequests() {
       {loadingRequests && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="bg-ivory-50 border-walnut-200 shadow-warm">
+            <Card key={i} className="bg-grace-50 border-vesper-200 shadow-warm">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <Skeleton className="h-5 w-32" />
@@ -677,20 +677,20 @@ export default function PrayerRequests() {
                 key={request.id}
                 className={`flex flex-col shadow-warm transition-all hover:shadow-warm-lg ${
                   request.status === "answered"
-                    ? "bg-sage-50 border-sage-200"
+                    ? "bg-spirit-50 border-spirit-200"
                     : request.isUrgent
                     ? "bg-orange-50 border-orange-200"
-                    : "bg-ivory-50 border-walnut-200"
+                    : "bg-grace-50 border-vesper-200"
                 }`}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <h3 className="font-serif font-semibold text-burgundy-900 truncate">
+                      <h3 className="font-serif font-semibold text-sanctuary-900 truncate">
                         {getDisplayName(request)}
                       </h3>
                       {request.isPrivate && (
-                        <Lock className="h-3.5 w-3.5 text-walnut-500 flex-shrink-0" />
+                        <Lock className="h-3.5 w-3.5 text-vesper-500 flex-shrink-0" />
                       )}
                       {request.isUrgent && request.status === "active" && (
                         <AlertTriangle className="h-3.5 w-3.5 text-orange-500 flex-shrink-0" />
@@ -698,7 +698,7 @@ export default function PrayerRequests() {
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       {request.status === "answered" ? (
-                        <Badge className="bg-sage-100 text-sage-800 hover:bg-sage-100">
+                        <Badge className="bg-spirit-100 text-spirit-800 hover:bg-spirit-100">
                           <Check className="h-3 w-3 mr-1" />
                           Answered
                         </Badge>
@@ -707,7 +707,7 @@ export default function PrayerRequests() {
                           Urgent
                         </Badge>
                       ) : (
-                        <Badge className="bg-burgundy-100 text-burgundy-800 hover:bg-burgundy-100">
+                        <Badge className="bg-sanctuary-100 text-sanctuary-800 hover:bg-sanctuary-100">
                           Active
                         </Badge>
                       )}
@@ -720,7 +720,7 @@ export default function PrayerRequests() {
                       </Badge>
                     )}
                     {request.title && (
-                      <span className="text-sm font-medium text-burgundy-700 truncate">
+                      <span className="text-sm font-medium text-sanctuary-700 truncate">
                         {request.title}
                       </span>
                     )}
@@ -731,8 +731,8 @@ export default function PrayerRequests() {
                     {request.description}
                   </p>
                   {request.answeredNote && request.status === "answered" && (
-                    <div className="mt-3 p-2 bg-sage-100 rounded-md">
-                      <p className="text-xs text-sage-800 italic">
+                    <div className="mt-3 p-2 bg-spirit-100 rounded-md">
+                      <p className="text-xs text-spirit-800 italic">
                         "{request.answeredNote}"
                       </p>
                     </div>
@@ -743,7 +743,7 @@ export default function PrayerRequests() {
                       {formatDate(request.createdAt)}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Heart className="h-3 w-3 fill-burgundy-300 text-burgundy-500" />
+                      <Heart className="h-3 w-3 fill-sanctuary-300 text-sanctuary-500" />
                       {request.prayerCount} prayers
                     </span>
                   </div>
@@ -754,7 +754,7 @@ export default function PrayerRequests() {
                     variant="outline"
                     onClick={() => handlePrayed(request.id)}
                     disabled={prayedMutation.isPending}
-                    className="flex-1 border-burgundy-200 text-burgundy-700 hover:bg-burgundy-50 hover:text-burgundy-800"
+                    className="flex-1 border-sanctuary-200 text-sanctuary-700 hover:bg-sanctuary-50 hover:text-sanctuary-800"
                   >
                     {prayedMutation.isPending && prayedMutation.variables === request.id ? (
                       <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -777,15 +777,15 @@ export default function PrayerRequests() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="flex-1 border-sage-300 text-sage-700 hover:bg-sage-50 hover:text-sage-800"
+                            className="flex-1 border-spirit-300 text-spirit-700 hover:bg-spirit-50 hover:text-spirit-800"
                           >
                             <Check className="h-4 w-4 mr-1" />
                             Answered
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-sm bg-ivory-50">
+                        <DialogContent className="max-w-sm bg-grace-50">
                           <DialogHeader>
-                            <DialogTitle className="font-serif text-burgundy-900">
+                            <DialogTitle className="font-serif text-sanctuary-900">
                               Mark as Answered
                             </DialogTitle>
                             <DialogDescription>
@@ -816,7 +816,7 @@ export default function PrayerRequests() {
                             <Button
                               onClick={() => handleMarkAnswered(request.id)}
                               disabled={answeredMutation.isPending}
-                              className="bg-sage-600 hover:bg-sage-700"
+                              className="bg-spirit-600 hover:bg-spirit-700"
                             >
                               {answeredMutation.isPending && (
                                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -840,14 +840,14 @@ export default function PrayerRequests() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="text-walnut-600 hover:text-walnut-800"
+                              className="text-vesper-600 hover:text-vesper-800"
                             >
                               <Share2 className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-sm bg-ivory-50">
+                          <DialogContent className="max-w-sm bg-grace-50">
                             <DialogHeader>
-                              <DialogTitle className="font-serif text-burgundy-900">
+                              <DialogTitle className="font-serif text-sanctuary-900">
                                 Share with Community
                               </DialogTitle>
                               <DialogDescription>
@@ -865,7 +865,7 @@ export default function PrayerRequests() {
                               <Button
                                 onClick={() => handleShareWithTeam(request.id)}
                                 disabled={updateMutation.isPending}
-                                className="bg-burgundy-700 hover:bg-burgundy-800"
+                                className="bg-sanctuary-700 hover:bg-sanctuary-800"
                               >
                                 {updateMutation.isPending && (
                                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -920,10 +920,10 @@ export default function PrayerRequests() {
 
       {/* Empty State */}
       {!loadingRequests && !requestsError && prayerRequests.length === 0 && (
-        <Card className="bg-ivory-50 border-walnut-200">
+        <Card className="bg-grace-50 border-vesper-200">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <HandHeart className="h-12 w-12 text-burgundy-300 mb-4" />
-            <h3 className="text-lg font-serif font-medium text-burgundy-900">
+            <HandHeart className="h-12 w-12 text-sanctuary-300 mb-4" />
+            <h3 className="text-lg font-serif font-medium text-sanctuary-900">
               No prayer requests found
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
@@ -933,7 +933,7 @@ export default function PrayerRequests() {
             </p>
             {!searchQuery && statusFilter === "all" && categoryFilter === "all" && (
               <Button
-                className="mt-4 bg-burgundy-700 hover:bg-burgundy-800"
+                className="mt-4 bg-sanctuary-700 hover:bg-sanctuary-800"
                 onClick={() => setIsAddDialogOpen(true)}
               >
                 <Plus className="h-4 w-4 mr-2" />

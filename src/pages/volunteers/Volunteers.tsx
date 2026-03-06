@@ -269,7 +269,7 @@ function StatsCardSkeleton() {
 
 function SpotlightSkeleton() {
   return (
-    <Card className="burgundy-gradient text-white overflow-hidden">
+    <Card className="sanctuary-gradient text-white overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <Skeleton className="h-5 w-5 rounded bg-white/20" />
@@ -460,7 +460,7 @@ function VolunteerSpotlight({ volunteer, isLoading }: { volunteer: VolunteerUI |
 
   if (!volunteer) {
     return (
-      <Card className="burgundy-gradient text-white overflow-hidden">
+      <Card className="sanctuary-gradient text-white overflow-hidden">
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-amber-300" />
@@ -482,7 +482,7 @@ function VolunteerSpotlight({ volunteer, isLoading }: { volunteer: VolunteerUI |
   }
 
   return (
-    <Card className="burgundy-gradient text-white overflow-hidden">
+    <Card className="sanctuary-gradient text-white overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-amber-300" />
