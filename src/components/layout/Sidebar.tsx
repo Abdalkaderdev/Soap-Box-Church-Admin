@@ -152,11 +152,6 @@ const navigationItems = [
 // Spiritual growth admin section
 const spiritualAdminItems = [
   {
-    title: "Spiritual Dashboard",
-    href: routes.spiritualDashboard,
-    icon: Heart,
-  },
-  {
     title: "Reading Plans",
     href: routes.readingPlansAdmin,
     icon: BookHeart,
@@ -281,11 +276,6 @@ const managementItems = [
     title: "Members",
     href: routes.management.members,
     icon: UserCog,
-  },
-  {
-    title: "Volunteers",
-    href: routes.management.volunteers,
-    icon: Heart,
   },
   {
     title: "Staff",

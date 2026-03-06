@@ -10,7 +10,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import {
@@ -775,15 +774,13 @@ export default function EquipmentManagement() {
             Track, manage, and maintain your church's equipment and assets.
           </p>
         </div>
-        <DialogTrigger asChild>
-          <Button
-            onClick={handleAddEquipment}
-            className="bg-sanctuary-700 hover:bg-sanctuary-800 text-white shadow-warm"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Equipment
-          </Button>
-        </DialogTrigger>
+        <Button
+          onClick={handleAddEquipment}
+          className="bg-sanctuary-700 hover:bg-sanctuary-800 text-white shadow-warm"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Equipment
+        </Button>
       </div>
 
       {/* ================================================================ */}

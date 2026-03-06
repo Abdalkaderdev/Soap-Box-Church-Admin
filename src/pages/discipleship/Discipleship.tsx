@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import {
@@ -22,14 +21,27 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Book,
   Plus,
   Search,
-  Users,
-  Target,
-  Calendar,
-  Clock,
   Award,
   MoreHorizontal,
   Edit,
@@ -37,149 +49,208 @@ import {
   Eye,
   CheckCircle,
   BookOpen,
-  Heart,
-  Flame,
   AlertCircle,
-  Sparkles,
-  ChevronRight,
-  UserPlus,
-  Crown,
-  Compass,
+  Link as LinkIcon,
+  Video,
+  FileText,
+  Globe,
+  ClipboardCheck,
+  GraduationCap,
+  Trophy,
+  Download,
+  ChevronDown,
+  ChevronUp,
+  X,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
-import {
-  discipleshipApi,
-  type DiscipleshipPlan,
-  type DiscipleProgress,
-  type DiscipleshipSmallGroup,
-  type DiscipleshipFilters,
-} from '@/lib/api';
+import { api } from '@/lib/api';
 
 // ===================================================================
 // TYPES
 // ===================================================================
 
-interface DiscipleshipStats {
-  totalPlans: number;
-  activeParticipants: number;
-  completedJourneys: number;
-  smallGroups: number;
-  weeklyEngagement: number;
+interface DiscipleshipClass {
+  id: string;
+  title: string;
+  mainScripture: { reference: string; text: string };
+  teachingContent: string;
+  supportingScriptures: { reference: string; text: string }[];
+  resources: { title: string; url: string; type: 'video' | 'article' | 'document' | 'other' }[];
+  order: number;
+  status: 'draft' | 'published';
+  quizId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Quiz {
+  id: string;
+  classId: string;
+  className: string;
+  passMark: number;
+  timeLimit?: number;
+  availableFrom?: string;
+  availableUntil?: string;
+  questions: QuizQuestion[];
+  status: 'draft' | 'published';
+  createdAt: string;
+}
+
+interface QuizQuestion {
+  id: string;
+  questionText: string;
+  options: { label: string; text: string }[];
+  correctAnswer: string;
+  points: number;
+}
+
+interface MemberProgress {
+  memberId: string;
+  memberName: string;
+  memberAvatar?: string;
+  classesCompleted: number;
+  totalClasses: number;
+  overallProgress: number;
+  quizResults: {
+    classId: string;
+    className: string;
+    score: number;
+    passMark: number;
+    passed: boolean;
+    completedAt: string;
+  }[];
+  status: 'in_progress' | 'completed' | 'failed';
+  enrolledAt: string;
+  completedAt?: string;
+}
+
+interface Certificate {
+  id: string;
+  memberId: string;
+  memberName: string;
+  courseName: string;
+  completionDate: string;
+  status: 'pending' | 'issued';
+  issuedAt?: string;
+  certificateUrl?: string;
 }
 
 // ===================================================================
-// CATEGORY STYLING
+// API FUNCTIONS
 // ===================================================================
 
-const categoryIcons: Record<DiscipleshipPlan['category'], React.ReactNode> = {
-  doctrine: <Book className="h-4 w-4" />,
-  conduct: <Heart className="h-4 w-4" />,
-  character: <Flame className="h-4 w-4" />,
-  service: <Users className="h-4 w-4" />,
-};
+function classesApi(churchId: string | number) {
+  const base = `/church/${churchId}/discipleship/classes`;
+  return {
+    list: () => api.get<DiscipleshipClass[]>(base),
+    create: (data: Omit<DiscipleshipClass, 'id' | 'createdAt' | 'updatedAt'>) =>
+      api.post<DiscipleshipClass>(base, data),
+    update: (id: string, data: Partial<DiscipleshipClass>) =>
+      api.patch<DiscipleshipClass>(`${base}/${id}`, data),
+    remove: (id: string) => api.delete(`${base}/${id}`),
+  };
+}
 
-const categoryColors: Record<DiscipleshipPlan['category'], string> = {
-  doctrine: 'bg-primary/10 text-primary border-primary/20',
-  conduct: 'bg-accent/10 text-accent border-accent/20',
-  character: 'bg-amber-100 text-amber-700 border-amber-200',
-  service: 'bg-blue-100 text-blue-700 border-blue-200',
-};
+function quizzesApi(churchId: string | number) {
+  const base = `/church/${churchId}/discipleship/quizzes`;
+  return {
+    list: () => api.get<Quiz[]>(base),
+    create: (data: Omit<Quiz, 'id' | 'createdAt'>) => api.post<Quiz>(base, data),
+    update: (id: string, data: Partial<Quiz>) => api.patch<Quiz>(`${base}/${id}`, data),
+    remove: (id: string) => api.delete(`${base}/${id}`),
+  };
+}
 
-const statusColors: Record<DiscipleProgress['status'], string> = {
-  active: 'bg-accent/10 text-accent border-accent/20',
-  completed: 'bg-primary/10 text-primary border-primary/20',
-  paused: 'bg-muted text-muted-foreground border-border',
-  dropped: 'bg-destructive/10 text-destructive border-destructive/20',
-};
+function progressApi(churchId: string | number) {
+  const base = `/church/${churchId}/discipleship/member-progress`;
+  return {
+    list: (filters?: { classId?: string; status?: string }) =>
+      api.get<MemberProgress[]>(base, filters as Record<string, string>),
+  };
+}
 
-const categoryPathwayConfig: Record<DiscipleshipPlan['category'], { icon: React.ReactNode; color: string; bgColor: string; borderColor: string; name: string; description: string }> = {
-  doctrine: {
-    icon: <Sparkles className="h-6 w-6" />,
-    color: 'text-amber-700',
-    bgColor: 'bg-amber-50',
-    borderColor: 'border-amber-200',
-    name: 'Foundational Beliefs',
-    description: 'Understand the core doctrines of the Christian faith',
-  },
-  character: {
-    icon: <Flame className="h-6 w-6" />,
-    color: 'text-primary',
-    bgColor: 'bg-primary/5',
-    borderColor: 'border-primary/20',
-    name: 'Spiritual Growth',
-    description: 'Develop Christ-like character and spiritual disciplines',
-  },
-  conduct: {
-    icon: <Heart className="h-6 w-6" />,
-    color: 'text-accent',
-    bgColor: 'bg-accent/5',
-    borderColor: 'border-accent/20',
-    name: 'Christian Living',
-    description: 'Apply faith to everyday life and relationships',
-  },
-  service: {
-    icon: <Crown className="h-6 w-6" />,
-    color: 'text-blue-700',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
-    name: 'Leadership & Service',
-    description: 'Prepare to serve and lead in ministry',
-  },
+function certificatesApi(churchId: string | number) {
+  const base = `/church/${churchId}/discipleship/certificates`;
+  return {
+    list: () => api.get<Certificate[]>(base),
+    issue: (memberId: string) => api.post<Certificate>(`${base}/issue`, { memberId }),
+    download: (id: string) => api.get<{ url: string }>(`${base}/${id}/download`),
+  };
+}
+
+// ===================================================================
+// QUERY KEYS
+// ===================================================================
+
+const dKeys = {
+  classes: (cid: string | number | null) => ['discipleship', cid, 'classes'] as const,
+  quizzes: (cid: string | number | null) => ['discipleship', cid, 'quizzes'] as const,
+  progress: (cid: string | number | null) => ['discipleship', cid, 'member-progress'] as const,
+  certificates: (cid: string | number | null) => ['discipleship', cid, 'certificates'] as const,
 };
 
 // ===================================================================
-// SKELETON COMPONENTS
+// HELPERS
 // ===================================================================
 
-function PlanCardSkeleton() {
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E'];
+
+function emptyQuestion(): QuizQuestion {
+  return {
+    id: generateId(),
+    questionText: '',
+    options: OPTION_LABELS.map((l) => ({ label: l, text: '' })),
+    correctAnswer: 'A',
+    points: 1,
+  };
+}
+
+function emptyClassForm(): Omit<DiscipleshipClass, 'id' | 'createdAt' | 'updatedAt'> {
+  return {
+    title: '',
+    mainScripture: { reference: '', text: '' },
+    teachingContent: '',
+    supportingScriptures: [],
+    resources: [],
+    order: 1,
+    status: 'draft',
+  };
+}
+
+const resourceTypeIcon: Record<string, React.ReactNode> = {
+  video: <Video className="h-4 w-4" />,
+  article: <Globe className="h-4 w-4" />,
+  document: <FileText className="h-4 w-4" />,
+  other: <LinkIcon className="h-4 w-4" />,
+};
+
+// ===================================================================
+// SKELETON LOADERS
+// ===================================================================
+
+function TableSkeleton({ rows = 5, cols = 5 }: { rows?: number; cols?: number }) {
   return (
-    <Card className="border-border/60">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-5 w-20 rounded-full" />
-          <Skeleton className="h-5 w-16 rounded-full" />
+    <div className="space-y-3">
+      {Array.from({ length: rows }).map((_, r) => (
+        <div key={r} className="flex gap-4">
+          {Array.from({ length: cols }).map((_, c) => (
+            <Skeleton key={c} className="h-6 flex-1" />
+          ))}
         </div>
-        <Skeleton className="h-5 w-40 mt-2" />
-        <Skeleton className="h-4 w-full mt-1" />
-      </CardHeader>
-      <CardContent>
-        <Skeleton className="h-4 w-32 mb-2" />
-        <Skeleton className="h-2 w-full mb-4" />
-        <Skeleton className="h-9 w-full" />
-      </CardContent>
-    </Card>
+      ))}
+    </div>
   );
 }
 
-function ProgressCardSkeleton() {
+function StatCardSkeleton() {
   return (
-    <Card className="border-border/60">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-5 w-32" />
-            <Skeleton className="h-4 w-48" />
-            <Skeleton className="h-2 w-full" />
-          </div>
-          <Skeleton className="h-8 w-8 rounded" />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function StatsCardSkeleton() {
-  return (
-    <Card className="border-border/60">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-4 w-4" />
@@ -192,959 +263,1623 @@ function StatsCardSkeleton() {
   );
 }
 
-function PathwayCardSkeleton() {
-  return (
-    <Card className="border-2 border-border/60">
-      <div className="px-6 py-4 border-b border-border/60">
-        <div className="flex items-center gap-3">
-          <Skeleton className="h-12 w-12 rounded-xl" />
-          <div className="flex-1">
-            <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-4 w-48 mt-1" />
-          </div>
-        </div>
-      </div>
-      <CardContent className="p-6">
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-lg" />
-          ))}
-        </div>
-        <div className="mt-6 pt-4 border-t border-border/60">
-          <Skeleton className="h-3 w-full" />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+// ===================================================================
+// COLLAPSIBLE SECTION
+// ===================================================================
 
-function GroupCardSkeleton() {
+function CollapsibleSection({
+  title,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <Card className="border-border/60">
-      <CardHeader className="pb-2">
-        <Skeleton className="h-5 w-32" />
-        <Skeleton className="h-4 w-48 mt-1" />
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
-        </div>
-        <Skeleton className="h-9 w-full mt-4" />
-      </CardContent>
-    </Card>
+    <div className="border border-border rounded-lg">
+      <button
+        type="button"
+        className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-left hover:bg-muted/50 transition-colors"
+        onClick={() => setOpen(!open)}
+      >
+        {title}
+        {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+      </button>
+      {open && <div className="px-4 pb-4">{children}</div>}
+    </div>
   );
 }
 
 // ===================================================================
-// SUB-COMPONENTS
+// TAB 1: CLASSES
 // ===================================================================
 
-interface PathwayCardProps {
-  category: DiscipleshipPlan['category'];
-  plans: DiscipleshipPlan[];
-  progressData: DiscipleProgress[];
-}
-
-function PathwayCard({ category, plans, progressData }: PathwayCardProps) {
-  const config = categoryPathwayConfig[category];
-
-  // Calculate total enrolled and completed for this category
-  const categoryPlanIds = new Set(plans.map(p => String(p.id)));
-  const categoryProgress = progressData.filter(p => categoryPlanIds.has(String(p.planId)));
-  const completedCount = categoryProgress.filter(p => p.status === 'completed').length;
-  const totalCount = categoryProgress.length || 1; // Avoid division by zero
-  const completionPercent = Math.round((completedCount / totalCount) * 100) || 0;
-
-  return (
-    <Card className={`border-2 ${config.borderColor} hover:shadow-lg transition-all duration-300 overflow-hidden`}>
-      <div className={`${config.bgColor} px-6 py-4 border-b ${config.borderColor}`}>
-        <div className="flex items-center gap-3">
-          <div className={`p-3 rounded-xl bg-white/80 ${config.color}`}>
-            {config.icon}
-          </div>
-          <div>
-            <h3 className={`font-serif text-xl font-semibold ${config.color}`}>{config.name}</h3>
-            <p className="text-sm text-muted-foreground">{config.description}</p>
-          </div>
-        </div>
-      </div>
-      <CardContent className="p-6">
-        <div className="space-y-4">
-          {plans.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">No courses in this pathway yet</p>
-          ) : (
-            plans.slice(0, 4).map((plan) => {
-              const planProgress = progressData.find(p => String(p.planId) === String(plan.id));
-              const lessonProgress = planProgress
-                ? (planProgress.currentLesson / planProgress.totalLessons) * 100
-                : 0;
-              const status = planProgress?.status || 'not_started';
-
-              return (
-                <div key={plan.id} className="flex items-center gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    status === 'completed' ? 'bg-accent text-white' :
-                    status === 'active' ? 'bg-primary/20 text-primary' :
-                    'bg-muted text-muted-foreground'
-                  }`}>
-                    {status === 'completed' ? (
-                      <CheckCircle className="h-4 w-4" />
-                    ) : (
-                      <span className="text-xs font-semibold">{planProgress?.currentLesson || 0}</span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{plan.name}</p>
-                    <p className="text-xs text-muted-foreground">{plan.estimatedDuration || 'Self-paced'}</p>
-                  </div>
-                  <div className="text-right">
-                    <Progress
-                      value={lessonProgress}
-                      className="w-20 h-2"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {planProgress?.currentLesson || 0}/{plan.totalLessons}
-                    </p>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-        <div className="mt-6 pt-4 border-t border-border/60">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Pathway Progress</span>
-            <span className={`text-sm font-semibold ${config.color}`}>{completionPercent}%</span>
-          </div>
-          <Progress value={completionPercent} className="h-3" />
-          <p className="text-xs text-muted-foreground mt-2">
-            {completedCount} of {totalCount} journeys completed
-          </p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-interface NextStepsCardProps {
-  progressData: DiscipleProgress[];
-  plans: DiscipleshipPlan[];
-}
-
-function NextStepsCard({ progressData, plans }: NextStepsCardProps) {
-  // Generate next steps from real data
-  const activeProgress = progressData.filter(p => p.status === 'active');
-  const notStartedPlans = plans.filter(
-    p => p.status === 'active' && !progressData.some(prog => String(prog.planId) === String(p.id))
-  );
-
-  const steps = [
-    ...activeProgress.slice(0, 2).map(prog => ({
-      id: String(prog.id),
-      title: `Continue ${prog.planName}`,
-      description: `Lesson ${prog.currentLesson} of ${prog.totalLessons} - ${Math.round(prog.progress)}% complete`,
-      icon: <BookOpen className="h-5 w-5" />,
-      priority: 'high' as const,
-      actionLabel: 'Continue',
-    })),
-    ...notStartedPlans.slice(0, 2).map(plan => ({
-      id: String(plan.id),
-      title: `Start ${plan.name}`,
-      description: plan.description,
-      icon: <Sparkles className="h-5 w-5" />,
-      priority: 'medium' as const,
-      actionLabel: 'Begin',
-    })),
-  ];
-
-  const getPriorityColor = (priority: 'high' | 'medium' | 'low') => {
-    switch (priority) {
-      case 'high': return 'bg-primary/10 text-primary border-l-primary';
-      case 'medium': return 'bg-amber-50 text-amber-700 border-l-amber-500';
-      case 'low': return 'bg-muted text-muted-foreground border-l-muted-foreground';
-    }
-  };
-
-  if (steps.length === 0) {
-    return null;
-  }
-
-  return (
-    <Card className="border-border/60">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <Compass className="h-5 w-5 text-primary" />
-          <CardTitle className="font-serif text-lg">Your Next Steps</CardTitle>
-        </div>
-        <CardDescription>Personalized recommendations for your spiritual journey</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {steps.map(step => (
-            <div key={step.id} className={`p-4 rounded-lg border-l-4 ${getPriorityColor(step.priority)}`}>
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-white shadow-sm">
-                  {step.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm">{step.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{step.description}</p>
-                </div>
-                <Button size="sm" variant="outline" className="shrink-0">
-                  {step.actionLabel}
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-interface BadgesDisplayProps {
-  progressData: DiscipleProgress[];
-}
-
-function BadgesDisplay({ progressData }: BadgesDisplayProps) {
-  // Generate badges from completed journeys
-  const completedProgress = progressData.filter(p => p.status === 'completed' && p.completedAt);
-
-  if (completedProgress.length === 0) {
-    return null;
-  }
-
-  const badges = completedProgress.slice(0, 6).map(prog => ({
-    id: String(prog.id),
-    name: `${prog.planName} Graduate`,
-    description: `Completed the ${prog.planName} course`,
-    icon: <Award className="h-5 w-5" />,
-    earnedDate: prog.completedAt!,
-    color: 'bg-amber-100 text-amber-700 border-amber-200',
-  }));
-
-  return (
-    <Card className="border-border/60">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <Award className="h-5 w-5 text-amber-600" />
-          <CardTitle className="font-serif text-lg">Earned Certificates</CardTitle>
-        </div>
-        <CardDescription>Celebrate your achievements in faith</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {badges.map(badge => (
-            <div key={badge.id} className={`p-4 rounded-xl border-2 text-center ${badge.color} hover:shadow-md transition-all duration-200`}>
-              <div className="w-12 h-12 rounded-full bg-white/80 flex items-center justify-center mx-auto mb-2 shadow-sm">
-                {badge.icon}
-              </div>
-              <p className="font-semibold text-sm">{badge.name}</p>
-              <p className="text-xs opacity-80 mt-1">{badge.description}</p>
-              <p className="text-xs mt-2 opacity-70">
-                Earned {new Date(badge.earnedDate).toLocaleDateString()}
-              </p>
-            </div>
-          ))}
-        </div>
-        {completedProgress.length > 6 && (
-          <Button variant="outline" className="w-full mt-4">
-            View All Certificates ({completedProgress.length})
-          </Button>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-// ===================================================================
-// MAIN COMPONENT
-// ===================================================================
-
-export default function Discipleship() {
+function ClassesTab() {
   const { churchId } = useAuth();
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingClass, setEditingClass] = useState<DiscipleshipClass | null>(null);
+  const [form, setForm] = useState(emptyClassForm());
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [isCreatePlanOpen, setIsCreatePlanOpen] = useState(false);
-  const [newPlanData, setNewPlanData] = useState({
-    name: '',
-    description: '',
-    category: '' as DiscipleshipPlan['category'] | '',
-    estimatedDuration: '',
-  });
 
-  // Fetch discipleship plans
-  const plansQuery = useQuery({
-    queryKey: ['discipleship', churchId, 'plans', { search: searchQuery, category: categoryFilter }],
-    queryFn: async () => {
-      const filters: DiscipleshipFilters = {};
-      if (searchQuery) filters.search = searchQuery;
-      if (categoryFilter && categoryFilter !== 'all') filters.category = categoryFilter;
-      const response = await discipleshipApi.listPlans(churchId!, filters);
-      return response.data;
-    },
+  const { data: classes = [], isLoading } = useQuery<DiscipleshipClass[]>({
+    queryKey: dKeys.classes(churchId),
+    queryFn: () => classesApi(churchId!).list(),
     enabled: !!churchId,
   });
 
-  // Fetch progress data
-  const progressQuery = useQuery({
-    queryKey: ['discipleship', churchId, 'progress'],
-    queryFn: async () => {
-      const response = await discipleshipApi.listProgress(churchId!);
-      return response.data;
-    },
-    enabled: !!churchId,
-  });
-
-  // Fetch groups
-  const groupsQuery = useQuery({
-    queryKey: ['discipleship', churchId, 'groups'],
-    queryFn: async () => {
-      const response = await discipleshipApi.listGroups(churchId!);
-      return response.data;
-    },
-    enabled: !!churchId,
-  });
-
-  // Fetch stats
-  const statsQuery = useQuery({
-    queryKey: ['discipleship', churchId, 'stats'],
-    queryFn: () => discipleshipApi.getStats(churchId!),
-    enabled: !!churchId,
-  });
-
-  // Create plan mutation
-  const createPlanMutation = useMutation({
-    mutationFn: (data: { name: string; description?: string; category: DiscipleshipPlan['category']; estimatedDuration?: string }) =>
-      discipleshipApi.createPlan(churchId!, data),
+  const createMutation = useMutation({
+    mutationFn: (data: Omit<DiscipleshipClass, 'id' | 'createdAt' | 'updatedAt'>) =>
+      classesApi(churchId!).create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['discipleship', churchId, 'plans'] });
-      queryClient.invalidateQueries({ queryKey: ['discipleship', churchId, 'stats'] });
-      setIsCreatePlanOpen(false);
-      setNewPlanData({ name: '', description: '', category: '', estimatedDuration: '' });
+      qc.invalidateQueries({ queryKey: dKeys.classes(churchId) });
+      closeDialog();
     },
   });
 
-  // Enroll in plan mutation
-  const enrollMutation = useMutation({
-    mutationFn: (planId: number) => discipleshipApi.enrollInPlan(churchId!, planId),
+  const updateMutation = useMutation({
+    mutationFn: ({ id, ...data }: Partial<DiscipleshipClass> & { id: string }) =>
+      classesApi(churchId!).update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['discipleship', churchId, 'progress'] });
-      queryClient.invalidateQueries({ queryKey: ['discipleship', churchId, 'plans'] });
-      queryClient.invalidateQueries({ queryKey: ['discipleship', churchId, 'stats'] });
+      qc.invalidateQueries({ queryKey: dKeys.classes(churchId) });
+      closeDialog();
     },
   });
 
-  const plans = plansQuery.data ?? [];
-  const progress = progressQuery.data ?? [];
-  const groups = groupsQuery.data ?? [];
-  const stats = statsQuery.data as DiscipleshipStats | undefined;
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => classesApi(churchId!).remove(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: dKeys.classes(churchId) }),
+  });
 
-  const isLoading = plansQuery.isLoading || progressQuery.isLoading || groupsQuery.isLoading || statsQuery.isLoading;
-  const error = plansQuery.error || progressQuery.error || groupsQuery.error || statsQuery.error;
+  const closeDialog = useCallback(() => {
+    setDialogOpen(false);
+    setEditingClass(null);
+    setForm(emptyClassForm());
+  }, []);
 
-  const activeProgress = progress.filter((p) => p.status === 'active');
-  const recentCompletions = progress.filter((p) => p.status === 'completed').slice(0, 5);
+  const openCreate = useCallback(() => {
+    setEditingClass(null);
+    setForm({ ...emptyClassForm(), order: classes.length + 1 });
+    setDialogOpen(true);
+  }, [classes.length]);
 
-  // Group plans by category for pathways
-  const plansByCategory = plans.reduce((acc, plan) => {
-    if (!acc[plan.category]) {
-      acc[plan.category] = [];
-    }
-    acc[plan.category].push(plan);
-    return acc;
-  }, {} as Record<DiscipleshipPlan['category'], DiscipleshipPlan[]>);
-
-  const handleCreatePlan = () => {
-    if (!newPlanData.name || !newPlanData.category) return;
-    createPlanMutation.mutate({
-      name: newPlanData.name,
-      description: newPlanData.description || undefined,
-      category: newPlanData.category as DiscipleshipPlan['category'],
-      estimatedDuration: newPlanData.estimatedDuration || undefined,
+  const openEdit = useCallback((cls: DiscipleshipClass) => {
+    setEditingClass(cls);
+    setForm({
+      title: cls.title,
+      mainScripture: { ...cls.mainScripture },
+      teachingContent: cls.teachingContent,
+      supportingScriptures: cls.supportingScriptures.map((s) => ({ ...s })),
+      resources: cls.resources.map((r) => ({ ...r })),
+      order: cls.order,
+      status: cls.status,
     });
-  };
+    setDialogOpen(true);
+  }, []);
 
-  if (error) {
+  const handleSave = useCallback(() => {
+    if (!form.title.trim()) return;
+    if (editingClass) {
+      updateMutation.mutate({ id: editingClass.id, ...form });
+    } else {
+      createMutation.mutate(form);
+    }
+  }, [form, editingClass, updateMutation, createMutation]);
+
+  const addSupportingScripture = useCallback(() => {
+    setForm((f) => ({
+      ...f,
+      supportingScriptures: [...f.supportingScriptures, { reference: '', text: '' }],
+    }));
+  }, []);
+
+  const removeSupportingScripture = useCallback((idx: number) => {
+    setForm((f) => ({
+      ...f,
+      supportingScriptures: f.supportingScriptures.filter((_, i) => i !== idx),
+    }));
+  }, []);
+
+  const updateSupportingScripture = useCallback(
+    (idx: number, field: 'reference' | 'text', value: string) => {
+      setForm((f) => ({
+        ...f,
+        supportingScriptures: f.supportingScriptures.map((s, i) =>
+          i === idx ? { ...s, [field]: value } : s
+        ),
+      }));
+    },
+    []
+  );
+
+  const addResource = useCallback(() => {
+    setForm((f) => ({
+      ...f,
+      resources: [...f.resources, { title: '', url: '', type: 'article' as const }],
+    }));
+  }, []);
+
+  const removeResource = useCallback((idx: number) => {
+    setForm((f) => ({
+      ...f,
+      resources: f.resources.filter((_, i) => i !== idx),
+    }));
+  }, []);
+
+  const updateResource = useCallback(
+    (idx: number, field: string, value: string) => {
+      setForm((f) => ({
+        ...f,
+        resources: f.resources.map((r, i) =>
+          i === idx ? { ...r, [field]: value } : r
+        ),
+      }));
+    },
+    []
+  );
+
+  const sortedClasses = useMemo(() => {
+    let filtered = [...classes].sort((a, b) => a.order - b.order);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (c) =>
+          c.title.toLowerCase().includes(q) ||
+          c.mainScripture.reference.toLowerCase().includes(q)
+      );
+    }
+    return filtered;
+  }, [classes, searchQuery]);
+
+  const isSaving = createMutation.isPending || updateMutation.isPending;
+
+  if (isLoading) {
     return (
-      <div className="p-6">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            Failed to load discipleship data. Please try again later.
-          </AlertDescription>
-        </Alert>
+      <div className="space-y-4">
+        <div className="flex justify-between">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((n) => (
+            <Card key={n}>
+              <CardContent className="p-6 space-y-3">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-60" />
+                <Skeleton className="h-20 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-8">
-      {/* Header Section with Warm Welcome */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/90 via-primary to-primary/80 p-8 text-white">
-        {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/4 w-48 h-48 bg-accent/10 rounded-full blur-3xl" />
-
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-2">
-            <Flame className="h-5 w-5 text-amber-300" />
-            <span className="text-amber-200 text-sm font-medium">Growing Together in Faith</span>
-          </div>
-          <h1 className="font-serif text-4xl font-bold mb-2">Discipleship Journey</h1>
-          <p className="text-white/80 max-w-2xl mb-6">
-            "Therefore go and make disciples of all nations, baptizing them in the name of the Father
-            and of the Son and of the Holy Spirit" - Matthew 28:19
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Dialog open={isCreatePlanOpen} onOpenChange={setIsCreatePlanOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-white text-primary hover:bg-white/90">
-                  <Plus className="mr-2 h-4 w-4" />
-                  New Discipleship Plan
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle className="font-serif text-xl">Create Discipleship Plan</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="planName">Plan Name</Label>
-                    <Input
-                      id="planName"
-                      placeholder="Enter plan name"
-                      value={newPlanData.name}
-                      onChange={(e) => setNewPlanData(prev => ({ ...prev, name: e.target.value }))}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Input
-                      id="description"
-                      placeholder="Brief description of the plan"
-                      value={newPlanData.description}
-                      onChange={(e) => setNewPlanData(prev => ({ ...prev, description: e.target.value }))}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="category">Category</Label>
-                      <Select
-                        value={newPlanData.category}
-                        onValueChange={(value) => setNewPlanData(prev => ({ ...prev, category: value as DiscipleshipPlan['category'] }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="doctrine">Doctrine</SelectItem>
-                          <SelectItem value="conduct">Conduct</SelectItem>
-                          <SelectItem value="character">Character</SelectItem>
-                          <SelectItem value="service">Service</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="duration">Duration</Label>
-                      <Select
-                        value={newPlanData.estimatedDuration}
-                        onValueChange={(value) => setNewPlanData(prev => ({ ...prev, estimatedDuration: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select duration" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="4 weeks">4 Weeks</SelectItem>
-                          <SelectItem value="8 weeks">8 Weeks</SelectItem>
-                          <SelectItem value="12 weeks">12 Weeks</SelectItem>
-                          <SelectItem value="6 months">6 Months</SelectItem>
-                          <SelectItem value="1 year">1 Year</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="flex justify-end gap-2 mt-4">
-                    <Button variant="outline" onClick={() => setIsCreatePlanOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleCreatePlan}
-                      disabled={!newPlanData.name || !newPlanData.category || createPlanMutation.isPending}
-                    >
-                      {createPlanMutation.isPending ? 'Creating...' : 'Create Plan'}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-            <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20">
-              <UserPlus className="mr-2 h-4 w-4" />
-              Enroll Member
-            </Button>
-          </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search classes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
         </div>
+        <Button onClick={openCreate} className="bg-sanctuary-700 hover:bg-sanctuary-800 text-white">
+          <Plus className="h-4 w-4 mr-2" />
+          New Class
+        </Button>
+      </div>
+
+      {/* Classes List */}
+      {sortedClasses.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-lg font-medium text-muted-foreground">No classes yet</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Create your first discipleship class to get started.
+            </p>
+            <Button onClick={openCreate} variant="outline" className="mt-4">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Class
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {sortedClasses.map((cls) => (
+            <Card key={cls.id} className="group hover:shadow-warm transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center h-7 w-7 rounded-full bg-sanctuary-100 text-sanctuary-700 text-xs font-bold">
+                      {cls.order}
+                    </span>
+                    <Badge
+                      variant={cls.status === 'published' ? 'default' : 'secondary'}
+                      className={
+                        cls.status === 'published'
+                          ? 'bg-spirit-100 text-spirit-700 border-spirit-200'
+                          : ''
+                      }
+                    >
+                      {cls.status}
+                    </Badge>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => openEdit(cls)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => deleteMutation.mutate(cls.id)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <CardTitle className="text-base mt-2">{cls.title}</CardTitle>
+                {cls.mainScripture.reference && (
+                  <CardDescription className="flex items-center gap-1">
+                    <Book className="h-3 w-3" />
+                    {cls.mainScripture.reference}
+                  </CardDescription>
+                )}
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {cls.teachingContent && (
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {cls.teachingContent}
+                  </p>
+                )}
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  {cls.supportingScriptures.length > 0 && (
+                    <span>{cls.supportingScriptures.length} supporting scriptures</span>
+                  )}
+                  {cls.resources.length > 0 && (
+                    <span>{cls.resources.length} resources</span>
+                  )}
+                </div>
+                {cls.quizId && (
+                  <Badge variant="outline" className="text-xs border-golden-300 text-golden-700">
+                    <ClipboardCheck className="h-3 w-3 mr-1" />
+                    Quiz attached
+                  </Badge>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Create / Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={(o) => !o && closeDialog()}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingClass ? 'Edit Class' : 'Create New Class'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5 pt-2">
+            {/* Title & Order */}
+            <div className="grid gap-4 sm:grid-cols-[1fr_100px]">
+              <div className="space-y-2">
+                <Label htmlFor="cls-title">
+                  Class Title <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="cls-title"
+                  placeholder="e.g. Foundations of Faith"
+                  value={form.title}
+                  onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cls-order">Order</Label>
+                <Input
+                  id="cls-order"
+                  type="number"
+                  min={1}
+                  value={form.order}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, order: parseInt(e.target.value) || 1 }))
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Status */}
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select
+                value={form.status}
+                onValueChange={(v) =>
+                  setForm((f) => ({ ...f, status: v as 'draft' | 'published' }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Main Scripture */}
+            <CollapsibleSection title="Main Scripture" defaultOpen>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">Reference</Label>
+                  <Input
+                    placeholder="e.g. John 3:16"
+                    value={form.mainScripture.reference}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        mainScripture: { ...f.mainScripture, reference: e.target.value },
+                      }))
+                    }
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Text</Label>
+                  <Input
+                    placeholder="Scripture text..."
+                    value={form.mainScripture.text}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        mainScripture: { ...f.mainScripture, text: e.target.value },
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+            </CollapsibleSection>
+
+            {/* Teaching Content */}
+            <div className="space-y-2">
+              <Label>Teaching Content</Label>
+              <Textarea
+                rows={6}
+                placeholder="Enter the teaching content for this class..."
+                value={form.teachingContent}
+                onChange={(e) => setForm((f) => ({ ...f, teachingContent: e.target.value }))}
+              />
+            </div>
+
+            {/* Supporting Scriptures */}
+            <CollapsibleSection title={`Supporting Scriptures (${form.supportingScriptures.length})`}>
+              <div className="space-y-3">
+                {form.supportingScriptures.map((s, idx) => (
+                  <div key={idx} className="flex gap-2 items-start">
+                    <div className="grid gap-2 sm:grid-cols-2 flex-1">
+                      <Input
+                        placeholder="Reference"
+                        value={s.reference}
+                        onChange={(e) =>
+                          updateSupportingScripture(idx, 'reference', e.target.value)
+                        }
+                      />
+                      <Input
+                        placeholder="Text"
+                        value={s.text}
+                        onChange={(e) =>
+                          updateSupportingScripture(idx, 'text', e.target.value)
+                        }
+                      />
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive"
+                      onClick={() => removeSupportingScripture(idx)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button variant="outline" size="sm" onClick={addSupportingScripture}>
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add Scripture
+                </Button>
+              </div>
+            </CollapsibleSection>
+
+            {/* Study Resources */}
+            <CollapsibleSection title={`Study Resources (${form.resources.length})`}>
+              <div className="space-y-3">
+                {form.resources.map((r, idx) => (
+                  <div key={idx} className="border border-border rounded-md p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                        {resourceTypeIcon[r.type]}
+                        Resource {idx + 1}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                        onClick={() => removeResource(idx)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                      <Input
+                        placeholder="Title"
+                        value={r.title}
+                        onChange={(e) => updateResource(idx, 'title', e.target.value)}
+                      />
+                      <Input
+                        placeholder="URL"
+                        value={r.url}
+                        onChange={(e) => updateResource(idx, 'url', e.target.value)}
+                      />
+                      <Select
+                        value={r.type}
+                        onValueChange={(v) => updateResource(idx, 'type', v)}
+                      >
+                        <SelectTrigger className="w-[120px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="video">Video</SelectItem>
+                          <SelectItem value="article">Article</SelectItem>
+                          <SelectItem value="document">Document</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                ))}
+                <Button variant="outline" size="sm" onClick={addResource}>
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add Resource
+                </Button>
+              </div>
+            </CollapsibleSection>
+
+            <Separator />
+
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={closeDialog}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={!form.title.trim() || isSaving}
+                className="bg-sanctuary-700 hover:bg-sanctuary-800 text-white"
+              >
+                {isSaving ? 'Saving...' : editingClass ? 'Update Class' : 'Create Class'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ===================================================================
+// TAB 2: QUIZZES
+// ===================================================================
+
+function QuizzesTab() {
+  const { churchId } = useAuth();
+  const qc = useQueryClient();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Quiz form state
+  const [quizClassId, setQuizClassId] = useState('');
+  const [quizPassMark, setQuizPassMark] = useState(70);
+  const [quizTimeLimit, setQuizTimeLimit] = useState('');
+  const [quizAvailableFrom, setQuizAvailableFrom] = useState('');
+  const [quizAvailableUntil, setQuizAvailableUntil] = useState('');
+  const [quizStatus, setQuizStatus] = useState<'draft' | 'published'>('draft');
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([emptyQuestion()]);
+
+  const { data: classes = [] } = useQuery<DiscipleshipClass[]>({
+    queryKey: dKeys.classes(churchId),
+    queryFn: () => classesApi(churchId!).list(),
+    enabled: !!churchId,
+  });
+
+  const { data: quizzes = [], isLoading } = useQuery<Quiz[]>({
+    queryKey: dKeys.quizzes(churchId),
+    queryFn: () => quizzesApi(churchId!).list(),
+    enabled: !!churchId,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data: Omit<Quiz, 'id' | 'createdAt'>) => quizzesApi(churchId!).create(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: dKeys.quizzes(churchId) });
+      qc.invalidateQueries({ queryKey: dKeys.classes(churchId) });
+      closeDialog();
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, ...data }: Partial<Quiz> & { id: string }) =>
+      quizzesApi(churchId!).update(id, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: dKeys.quizzes(churchId) });
+      closeDialog();
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => quizzesApi(churchId!).remove(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: dKeys.quizzes(churchId) });
+      qc.invalidateQueries({ queryKey: dKeys.classes(churchId) });
+    },
+  });
+
+  const resetForm = useCallback(() => {
+    setQuizClassId('');
+    setQuizPassMark(70);
+    setQuizTimeLimit('');
+    setQuizAvailableFrom('');
+    setQuizAvailableUntil('');
+    setQuizStatus('draft');
+    setQuizQuestions([emptyQuestion()]);
+  }, []);
+
+  const closeDialog = useCallback(() => {
+    setDialogOpen(false);
+    setEditingQuiz(null);
+    resetForm();
+  }, [resetForm]);
+
+  const openCreate = useCallback(() => {
+    setEditingQuiz(null);
+    resetForm();
+    setDialogOpen(true);
+  }, [resetForm]);
+
+  const openEdit = useCallback((quiz: Quiz) => {
+    setEditingQuiz(quiz);
+    setQuizClassId(quiz.classId);
+    setQuizPassMark(quiz.passMark);
+    setQuizTimeLimit(quiz.timeLimit ? String(quiz.timeLimit) : '');
+    setQuizAvailableFrom(quiz.availableFrom || '');
+    setQuizAvailableUntil(quiz.availableUntil || '');
+    setQuizStatus(quiz.status);
+    setQuizQuestions(quiz.questions.length > 0 ? quiz.questions.map((q) => ({ ...q, options: q.options.map((o) => ({ ...o })) })) : [emptyQuestion()]);
+    setDialogOpen(true);
+  }, []);
+
+  const handleSave = useCallback(() => {
+    if (!quizClassId) return;
+    const validQuestions = quizQuestions.filter((q) => q.questionText.trim());
+    if (validQuestions.length === 0) return;
+
+    const selectedClass = classes.find((c) => c.id === quizClassId);
+    const payload = {
+      classId: quizClassId,
+      className: selectedClass?.title || '',
+      passMark: quizPassMark,
+      timeLimit: quizTimeLimit ? parseInt(quizTimeLimit) : undefined,
+      availableFrom: quizAvailableFrom || undefined,
+      availableUntil: quizAvailableUntil || undefined,
+      questions: validQuestions,
+      status: quizStatus,
+    };
+
+    if (editingQuiz) {
+      updateMutation.mutate({ id: editingQuiz.id, ...payload });
+    } else {
+      createMutation.mutate(payload);
+    }
+  }, [
+    quizClassId,
+    quizPassMark,
+    quizTimeLimit,
+    quizAvailableFrom,
+    quizAvailableUntil,
+    quizQuestions,
+    quizStatus,
+    classes,
+    editingQuiz,
+    updateMutation,
+    createMutation,
+  ]);
+
+  const updateQuestion = useCallback(
+    (qIdx: number, field: keyof QuizQuestion, value: unknown) => {
+      setQuizQuestions((qs) =>
+        qs.map((q, i) => (i === qIdx ? { ...q, [field]: value } : q))
+      );
+    },
+    []
+  );
+
+  const updateOption = useCallback(
+    (qIdx: number, oIdx: number, text: string) => {
+      setQuizQuestions((qs) =>
+        qs.map((q, i) =>
+          i === qIdx
+            ? { ...q, options: q.options.map((o, oi) => (oi === oIdx ? { ...o, text } : o)) }
+            : q
+        )
+      );
+    },
+    []
+  );
+
+  const addQuestion = useCallback(() => {
+    setQuizQuestions((qs) => [...qs, emptyQuestion()]);
+  }, []);
+
+  const removeQuestion = useCallback((idx: number) => {
+    setQuizQuestions((qs) => (qs.length > 1 ? qs.filter((_, i) => i !== idx) : qs));
+  }, []);
+
+  const moveQuestion = useCallback((idx: number, direction: 'up' | 'down') => {
+    setQuizQuestions((qs) => {
+      const newQs = [...qs];
+      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (swapIdx < 0 || swapIdx >= newQs.length) return qs;
+      [newQs[idx], newQs[swapIdx]] = [newQs[swapIdx], newQs[idx]];
+      return newQs;
+    });
+  }, []);
+
+  const filteredQuizzes = useMemo(() => {
+    if (!searchQuery.trim()) return quizzes;
+    const q = searchQuery.toLowerCase();
+    return quizzes.filter((quiz) => quiz.className.toLowerCase().includes(q));
+  }, [quizzes, searchQuery]);
+
+  const isSaving = createMutation.isPending || updateMutation.isPending;
+
+  if (isLoading) {
+    return <TableSkeleton rows={4} cols={6} />;
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search quizzes by class..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Button onClick={openCreate} className="bg-golden-500 hover:bg-golden-600 text-white">
+          <Plus className="h-4 w-4 mr-2" />
+          New Quiz
+        </Button>
+      </div>
+
+      {/* Quiz Table */}
+      {filteredQuizzes.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <ClipboardCheck className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-lg font-medium text-muted-foreground">No quizzes yet</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Create a quiz to assess members on class material.
+            </p>
+            <Button onClick={openCreate} variant="outline" className="mt-4">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Quiz
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Class</TableHead>
+                <TableHead className="text-center">Questions</TableHead>
+                <TableHead className="text-center">Pass Mark</TableHead>
+                <TableHead className="text-center">Time Limit</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredQuizzes.map((quiz) => (
+                <TableRow key={quiz.id}>
+                  <TableCell className="font-medium">{quiz.className}</TableCell>
+                  <TableCell className="text-center">{quiz.questions.length}</TableCell>
+                  <TableCell className="text-center">{quiz.passMark}%</TableCell>
+                  <TableCell className="text-center">
+                    {quiz.timeLimit ? `${quiz.timeLimit} min` : '--'}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge
+                      variant={quiz.status === 'published' ? 'default' : 'secondary'}
+                      className={
+                        quiz.status === 'published'
+                          ? 'bg-spirit-100 text-spirit-700 border-spirit-200'
+                          : ''
+                      }
+                    >
+                      {quiz.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => openEdit(quiz)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => deleteMutation.mutate(quiz.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
+
+      {/* Create / Edit Quiz Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={(o) => !o && closeDialog()}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingQuiz ? 'Edit Quiz' : 'Create New Quiz'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5 pt-2">
+            {/* Quiz Settings */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>
+                  Linked Class <span className="text-destructive">*</span>
+                </Label>
+                <Select value={quizClassId} onValueChange={setQuizClassId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a class" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {classes.map((cls) => (
+                      <SelectItem key={cls.id} value={cls.id}>
+                        {cls.order}. {cls.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Pass Mark (%)</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={quizPassMark}
+                  onChange={(e) => setQuizPassMark(parseInt(e.target.value) || 70)}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-2">
+                <Label>Time Limit (minutes)</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="No limit"
+                  value={quizTimeLimit}
+                  onChange={(e) => setQuizTimeLimit(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Available From</Label>
+                <Input
+                  type="date"
+                  value={quizAvailableFrom}
+                  onChange={(e) => setQuizAvailableFrom(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Available Until</Label>
+                <Input
+                  type="date"
+                  value={quizAvailableUntil}
+                  onChange={(e) => setQuizAvailableUntil(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select
+                value={quizStatus}
+                onValueChange={(v) => setQuizStatus(v as 'draft' | 'published')}
+              >
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Separator />
+
+            {/* Questions */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold">
+                  Questions ({quizQuestions.length})
+                </h4>
+                <Button variant="outline" size="sm" onClick={addQuestion}>
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add Question
+                </Button>
+              </div>
+
+              {quizQuestions.map((q, qIdx) => (
+                <Card key={q.id} className="border-border/60">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-muted-foreground">
+                        Question {qIdx + 1}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          disabled={qIdx === 0}
+                          onClick={() => moveQuestion(qIdx, 'up')}
+                        >
+                          <ArrowUp className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          disabled={qIdx === quizQuestions.length - 1}
+                          onClick={() => moveQuestion(qIdx, 'down')}
+                        >
+                          <ArrowDown className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                          onClick={() => removeQuestion(qIdx)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <Textarea
+                      placeholder="Enter your question..."
+                      rows={2}
+                      value={q.questionText}
+                      onChange={(e) =>
+                        updateQuestion(qIdx, 'questionText', e.target.value)
+                      }
+                    />
+
+                    <div className="grid gap-2">
+                      {q.options.map((opt, oIdx) => (
+                        <div key={opt.label} className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            className={`flex items-center justify-center h-7 w-7 rounded-full text-xs font-bold transition-colors ${
+                              q.correctAnswer === opt.label
+                                ? 'bg-spirit-400 text-white'
+                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                            }`}
+                            onClick={() =>
+                              updateQuestion(qIdx, 'correctAnswer', opt.label)
+                            }
+                            title={`Mark ${opt.label} as correct answer`}
+                          >
+                            {opt.label}
+                          </button>
+                          <Input
+                            placeholder={`Option ${opt.label}`}
+                            value={opt.text}
+                            onChange={(e) => updateOption(qIdx, oIdx, e.target.value)}
+                            className="flex-1"
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs">Points:</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        className="w-20 h-8"
+                        value={q.points}
+                        onChange={(e) =>
+                          updateQuestion(qIdx, 'points', parseInt(e.target.value) || 1)
+                        }
+                      />
+                      <span className="text-xs text-muted-foreground ml-2">
+                        Correct answer:{' '}
+                        <span className="font-semibold text-spirit-600">{q.correctAnswer}</span>
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Separator />
+
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={closeDialog}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={
+                  !quizClassId ||
+                  quizQuestions.filter((q) => q.questionText.trim()).length === 0 ||
+                  isSaving
+                }
+                className="bg-golden-500 hover:bg-golden-600 text-white"
+              >
+                {isSaving ? 'Saving...' : editingQuiz ? 'Update Quiz' : 'Create Quiz'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ===================================================================
+// TAB 3: PROGRESS & RESULTS
+// ===================================================================
+
+function ProgressTab() {
+  const { churchId } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [classFilter, setClassFilter] = useState('all');
+  const [viewingMember, setViewingMember] = useState<MemberProgress | null>(null);
+
+  const { data: classes = [] } = useQuery<DiscipleshipClass[]>({
+    queryKey: dKeys.classes(churchId),
+    queryFn: () => classesApi(churchId!).list(),
+    enabled: !!churchId,
+  });
+
+  const { data: members = [], isLoading } = useQuery<MemberProgress[]>({
+    queryKey: [...dKeys.progress(churchId), statusFilter, classFilter],
+    queryFn: () => {
+      const filters: Record<string, string> = {};
+      if (statusFilter !== 'all') filters.status = statusFilter;
+      if (classFilter !== 'all') filters.classId = classFilter;
+      return progressApi(churchId!).list(filters);
+    },
+    enabled: !!churchId,
+  });
+
+  const filtered = useMemo(() => {
+    if (!searchQuery.trim()) return members;
+    const q = searchQuery.toLowerCase();
+    return members.filter((m) => m.memberName.toLowerCase().includes(q));
+  }, [members, searchQuery]);
+
+  const statusBadge = (status: MemberProgress['status']) => {
+    const config: Record<
+      MemberProgress['status'],
+      { label: string; className: string }
+    > = {
+      in_progress: {
+        label: 'In Progress',
+        className: 'bg-golden-100 text-golden-700 border-golden-200',
+      },
+      completed: {
+        label: 'Completed',
+        className: 'bg-spirit-100 text-spirit-700 border-spirit-200',
+      },
+      failed: {
+        label: 'Failed',
+        className: 'bg-destructive/10 text-destructive border-destructive/20',
+      },
+    };
+    const c = config[status];
+    return (
+      <Badge variant="outline" className={c.className}>
+        {c.label}
+      </Badge>
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex gap-4">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-40" />
+          <Skeleton className="h-10 w-40" />
+        </div>
+        <TableSkeleton rows={5} cols={6} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search members..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="in_progress">In Progress</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="failed">Failed</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={classFilter} onValueChange={setClassFilter}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Class" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Classes</SelectItem>
+            {classes.map((cls) => (
+              <SelectItem key={cls.id} value={cls.id}>
+                {cls.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Members Table */}
+      {filtered.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <GraduationCap className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-lg font-medium text-muted-foreground">No progress data</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Member progress will appear here once they begin classes.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Member</TableHead>
+                <TableHead className="text-center">Classes</TableHead>
+                <TableHead className="text-center">Progress</TableHead>
+                <TableHead className="text-center">Avg Quiz Score</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((member) => {
+                const avgScore =
+                  member.quizResults.length > 0
+                    ? Math.round(
+                        member.quizResults.reduce((acc, r) => acc + r.score, 0) /
+                          member.quizResults.length
+                      )
+                    : null;
+
+                return (
+                  <TableRow key={member.memberId}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-sanctuary-100 text-sanctuary-700 text-xs">
+                            {member.memberName
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')
+                              .slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{member.memberName}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {member.classesCompleted}/{member.totalClasses}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 justify-center">
+                        <Progress value={member.overallProgress} className="w-20 h-2" />
+                        <span className="text-xs text-muted-foreground w-10 text-right">
+                          {member.overallProgress}%
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {avgScore !== null ? (
+                        <span
+                          className={
+                            avgScore >= 70
+                              ? 'text-spirit-600 font-medium'
+                              : 'text-destructive font-medium'
+                          }
+                        >
+                          {avgScore}%
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">--</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">{statusBadge(member.status)}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setViewingMember(member)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
+
+      {/* Member Detail Dialog */}
+      <Dialog
+        open={viewingMember !== null}
+        onOpenChange={(o) => !o && setViewingMember(null)}
+      >
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          {viewingMember && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="bg-sanctuary-100 text-sanctuary-700">
+                      {viewingMember.memberName
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p>{viewingMember.memberName}</p>
+                    <p className="text-sm font-normal text-muted-foreground">
+                      Enrolled {new Date(viewingMember.enrolledAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-4 pt-2">
+                {/* Overall Progress */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Overall Progress</span>
+                  {statusBadge(viewingMember.status)}
+                </div>
+                <Progress value={viewingMember.overallProgress} className="h-3" />
+                <p className="text-xs text-muted-foreground text-center">
+                  {viewingMember.classesCompleted} of {viewingMember.totalClasses} classes
+                  completed ({viewingMember.overallProgress}%)
+                </p>
+
+                <Separator />
+
+                {/* Quiz Results */}
+                <h4 className="text-sm font-semibold">Quiz Results</h4>
+                {viewingMember.quizResults.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No quiz results yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {viewingMember.quizResults.map((result) => (
+                      <div
+                        key={result.classId}
+                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{result.className}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(result.completedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-sm font-semibold ${
+                              result.passed ? 'text-spirit-600' : 'text-destructive'
+                            }`}
+                          >
+                            {result.score}%
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            / {result.passMark}%
+                          </span>
+                          {result.passed ? (
+                            <CheckCircle className="h-4 w-4 text-spirit-500" />
+                          ) : (
+                            <AlertCircle className="h-4 w-4 text-destructive" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ===================================================================
+// TAB 4: CERTIFICATES
+// ===================================================================
+
+function CertificatesTab() {
+  const { churchId } = useAuth();
+  const qc = useQueryClient();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const { data: certificates = [], isLoading } = useQuery<Certificate[]>({
+    queryKey: dKeys.certificates(churchId),
+    queryFn: () => certificatesApi(churchId!).list(),
+    enabled: !!churchId,
+  });
+
+  const issueMutation = useMutation({
+    mutationFn: (memberId: string) => certificatesApi(churchId!).issue(memberId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: dKeys.certificates(churchId) }),
+  });
+
+  const filtered = useMemo(() => {
+    let list = certificates;
+    if (statusFilter !== 'all') {
+      list = list.filter((c) => c.status === statusFilter);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter((c) => c.memberName.toLowerCase().includes(q));
+    }
+    return list;
+  }, [certificates, statusFilter, searchQuery]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex gap-4">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-40" />
+        </div>
+        <TableSkeleton rows={4} cols={5} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search members..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="issued">Issued</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Certificates Table */}
+      {filtered.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Trophy className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-lg font-medium text-muted-foreground">No certificates</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Certificates appear here when members complete all classes and pass all quizzes.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Member</TableHead>
+                <TableHead>Course</TableHead>
+                <TableHead className="text-center">Completion Date</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((cert) => (
+                <TableRow key={cert.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-golden-100 text-golden-700 text-xs">
+                          {cert.memberName
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')
+                            .slice(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium">{cert.memberName}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{cert.courseName}</TableCell>
+                  <TableCell className="text-center">
+                    {new Date(cert.completionDate).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge
+                      variant="outline"
+                      className={
+                        cert.status === 'issued'
+                          ? 'bg-spirit-100 text-spirit-700 border-spirit-200'
+                          : 'bg-golden-100 text-golden-700 border-golden-200'
+                      }
+                    >
+                      {cert.status === 'issued' ? 'Issued' : 'Pending'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      {cert.status === 'pending' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => issueMutation.mutate(cert.memberId)}
+                          disabled={issueMutation.isPending}
+                          className="text-spirit-700 border-spirit-300 hover:bg-spirit-50"
+                        >
+                          <Award className="h-4 w-4 mr-1" />
+                          Issue
+                        </Button>
+                      )}
+                      {cert.status === 'issued' && cert.certificateUrl && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                        >
+                          <a href={cert.certificateUrl} target="_blank" rel="noopener noreferrer">
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </a>
+                        </Button>
+                      )}
+                      {cert.status === 'issued' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={async () => {
+                            const res = await certificatesApi(churchId!).download(cert.id);
+                            if (res?.url) window.open(res.url, '_blank');
+                          }}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// ===================================================================
+// MAIN PAGE COMPONENT
+// ===================================================================
+
+export default function Discipleship() {
+  const { churchId } = useAuth();
+  const [activeTab, setActiveTab] = useState('classes');
+
+  // Stats queries
+  const { data: classes = [] } = useQuery<DiscipleshipClass[]>({
+    queryKey: dKeys.classes(churchId),
+    queryFn: () => classesApi(churchId!).list(),
+    enabled: !!churchId,
+  });
+
+  const { data: quizzes = [] } = useQuery<Quiz[]>({
+    queryKey: dKeys.quizzes(churchId),
+    queryFn: () => quizzesApi(churchId!).list(),
+    enabled: !!churchId,
+  });
+
+  const { data: members = [] } = useQuery<MemberProgress[]>({
+    queryKey: dKeys.progress(churchId),
+    queryFn: () => progressApi(churchId!).list(),
+    enabled: !!churchId,
+  });
+
+  const { data: certificates = [] } = useQuery<Certificate[]>({
+    queryKey: dKeys.certificates(churchId),
+    queryFn: () => certificatesApi(churchId!).list(),
+    enabled: !!churchId,
+  });
+
+  const statsLoading = !classes && !quizzes && !members && !certificates;
+
+  const publishedClasses = classes.filter((c) => c.status === 'published').length;
+  const activeMembers = members.filter((m) => m.status === 'in_progress').length;
+  const completedMembers = members.filter((m) => m.status === 'completed').length;
+  const issuedCerts = certificates.filter((c) => c.status === 'issued').length;
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-2xl font-bold font-serif text-sanctuary-800">
+          Discipleship
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          Manage discipleship classes, quizzes, track progress, and issue certificates.
+        </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {isLoading ? (
-          <>
-            <StatsCardSkeleton />
-            <StatsCardSkeleton />
-            <StatsCardSkeleton />
-            <StatsCardSkeleton />
-            <StatsCardSkeleton />
-          </>
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+        {statsLoading ? (
+          Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           <>
-            <Card className="border-border/60 hover:shadow-md transition-shadow">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-medium text-muted-foreground">Active Plans</CardTitle>
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <BookOpen className="h-4 w-4 text-primary" />
-                </div>
+                <CardDescription>Published Classes</CardDescription>
+                <BookOpen className="h-4 w-4 text-sanctuary-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-serif">{stats?.totalPlans ?? plans.filter(p => p.status === 'active').length}</div>
-                <p className="text-xs text-muted-foreground">Available courses</p>
+                <div className="text-2xl font-bold text-sanctuary-800">{publishedClasses}</div>
+                <p className="text-xs text-muted-foreground">{classes.length} total</p>
               </CardContent>
             </Card>
-            <Card className="border-border/60 hover:shadow-md transition-shadow">
+
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-medium text-muted-foreground">Active Learners</CardTitle>
-                <div className="p-2 rounded-lg bg-accent/10">
-                  <Users className="h-4 w-4 text-accent" />
-                </div>
+                <CardDescription>Active Members</CardDescription>
+                <GraduationCap className="h-4 w-4 text-golden-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-serif">{stats?.activeParticipants ?? activeProgress.length}</div>
-                <p className="text-xs text-muted-foreground">Currently enrolled</p>
+                <div className="text-2xl font-bold text-golden-700">{activeMembers}</div>
+                <p className="text-xs text-muted-foreground">{members.length} enrolled</p>
               </CardContent>
             </Card>
-            <Card className="border-border/60 hover:shadow-md transition-shadow">
+
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-medium text-muted-foreground">Completions</CardTitle>
-                <div className="p-2 rounded-lg bg-amber-100">
-                  <Award className="h-4 w-4 text-amber-700" />
-                </div>
+                <CardDescription>Completed</CardDescription>
+                <CheckCircle className="h-4 w-4 text-spirit-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-serif">{stats?.completedJourneys ?? recentCompletions.length}</div>
-                <p className="text-xs text-muted-foreground">Journeys finished</p>
+                <div className="text-2xl font-bold text-spirit-700">{completedMembers}</div>
+                <p className="text-xs text-muted-foreground">all classes passed</p>
               </CardContent>
             </Card>
-            <Card className="border-border/60 hover:shadow-md transition-shadow">
+
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-medium text-muted-foreground">Small Groups</CardTitle>
-                <div className="p-2 rounded-lg bg-blue-100">
-                  <Heart className="h-4 w-4 text-blue-700" />
-                </div>
+                <CardDescription>Certificates Issued</CardDescription>
+                <Award className="h-4 w-4 text-vesper-400" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-serif">{stats?.smallGroups ?? groups.length}</div>
-                <p className="text-xs text-muted-foreground">Active groups</p>
-              </CardContent>
-            </Card>
-            <Card className="border-border/60 hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-medium text-muted-foreground">Engagement</CardTitle>
-                <div className="p-2 rounded-lg bg-accent/10">
-                  <Target className="h-4 w-4 text-accent" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold font-serif">{stats?.weeklyEngagement ?? 0}%</div>
-                <p className="text-xs text-muted-foreground">Weekly rate</p>
+                <div className="text-2xl font-bold text-vesper-600">{issuedCerts}</div>
+                <p className="text-xs text-muted-foreground">{certificates.length} total</p>
               </CardContent>
             </Card>
           </>
         )}
       </div>
 
-      {/* Next Steps Recommendations */}
-      {!isLoading && <NextStepsCard progressData={progress} plans={plans} />}
-
-      {/* Main Tabs */}
-      <Tabs defaultValue="pathways" className="space-y-6">
-        <TabsList className="bg-muted/50 p-1 h-auto flex-wrap">
-          <TabsTrigger value="pathways" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <Compass className="h-4 w-4 mr-2" />
-            Growth Pathways
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="classes" className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            <span className="hidden sm:inline">Classes</span>
           </TabsTrigger>
-          <TabsTrigger value="courses" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <BookOpen className="h-4 w-4 mr-2" />
-            Courses
+          <TabsTrigger value="quizzes" className="flex items-center gap-2">
+            <ClipboardCheck className="h-4 w-4" />
+            <span className="hidden sm:inline">Quizzes</span>
           </TabsTrigger>
-          <TabsTrigger value="progress" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <Users className="h-4 w-4 mr-2" />
-            Progress
+          <TabsTrigger value="progress" className="flex items-center gap-2">
+            <GraduationCap className="h-4 w-4" />
+            <span className="hidden sm:inline">Progress</span>
           </TabsTrigger>
-          <TabsTrigger value="groups" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <Heart className="h-4 w-4 mr-2" />
-            Small Groups
+          <TabsTrigger value="certificates" className="flex items-center gap-2">
+            <Award className="h-4 w-4" />
+            <span className="hidden sm:inline">Certificates</span>
           </TabsTrigger>
         </TabsList>
 
-        {/* Pathways Tab */}
-        <TabsContent value="pathways" className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="font-serif text-2xl font-semibold">Discipleship Pathways</h2>
-              <p className="text-muted-foreground">Choose your path for spiritual growth</p>
-            </div>
-          </div>
-
-          {isLoading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <PathwayCardSkeleton />
-              <PathwayCardSkeleton />
-              <PathwayCardSkeleton />
-              <PathwayCardSkeleton />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {(['doctrine', 'character', 'conduct', 'service'] as const).map(category => (
-                <PathwayCard
-                  key={category}
-                  category={category}
-                  plans={plansByCategory[category] || []}
-                  progressData={progress}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Badges Section */}
-          {!isLoading && <BadgesDisplay progressData={progress} />}
+        <TabsContent value="classes" className="mt-6">
+          <ClassesTab />
         </TabsContent>
 
-        {/* Courses Tab */}
-        <TabsContent value="courses" className="space-y-6">
-          <div className="flex flex-col sm:flex-row gap-4 justify-between">
-            <div>
-              <h2 className="font-serif text-2xl font-semibold">Available Courses</h2>
-              <p className="text-muted-foreground">Browse and enroll in discipleship courses</p>
-            </div>
-            <div className="flex gap-2">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search courses..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter by category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="doctrine">Doctrine</SelectItem>
-                  <SelectItem value="conduct">Conduct</SelectItem>
-                  <SelectItem value="character">Character</SelectItem>
-                  <SelectItem value="service">Service</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {plansQuery.isLoading ? (
-              <>
-                <PlanCardSkeleton />
-                <PlanCardSkeleton />
-                <PlanCardSkeleton />
-                <PlanCardSkeleton />
-                <PlanCardSkeleton />
-                <PlanCardSkeleton />
-              </>
-            ) : plans.length === 0 ? (
-              <Card className="col-span-full border-border/60">
-                <CardContent className="p-8 text-center text-muted-foreground">
-                  <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                  <p className="font-medium">No courses found</p>
-                  <p className="text-sm">Try adjusting your search or filter criteria.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              plans.map((plan) => {
-                const isEnrolled = progress.some(p => String(p.planId) === String(plan.id));
-                return (
-                  <Card key={plan.id} className="border-border/60 hover:shadow-md transition-all duration-200">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <Badge className={`${categoryColors[plan.category]} border`}>
-                          {categoryIcons[plan.category]}
-                          <span className="ml-1 capitalize">{plan.category}</span>
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">{plan.estimatedDuration || 'Self-paced'}</Badge>
-                      </div>
-                      <CardTitle className="font-serif text-lg mt-2">{plan.name}</CardTitle>
-                      <CardDescription>{plan.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
-                        <span className="flex items-center gap-1">
-                          <BookOpen className="h-3 w-3" />
-                          {plan.totalLessons} lessons
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
-                          {plan.enrolledCount} enrolled
-                        </span>
-                      </div>
-                      <div className="space-y-1 mb-4">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-muted-foreground">Completion rate</span>
-                          <span className="font-medium">{plan.enrolledCount > 0 ? Math.round((plan.completedCount / plan.enrolledCount) * 100) : 0}%</span>
-                        </div>
-                        <Progress value={plan.enrolledCount > 0 ? (plan.completedCount / plan.enrolledCount) * 100 : 0} className="h-2" />
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1">
-                          <Eye className="h-4 w-4 mr-1" />
-                          Preview
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="flex-1"
-                          disabled={isEnrolled || enrollMutation.isPending}
-                          onClick={() => enrollMutation.mutate(Number(plan.id))}
-                        >
-                          {isEnrolled ? 'Enrolled' : 'Enroll'}
-                          {!isEnrolled && <ChevronRight className="h-4 w-4 ml-1" />}
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit Course
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Users className="mr-2 h-4 w-4" />
-                              Manage Participants
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })
-            )}
-          </div>
+        <TabsContent value="quizzes" className="mt-6">
+          <QuizzesTab />
         </TabsContent>
 
-        {/* Progress Tab */}
-        <TabsContent value="progress" className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="font-serif text-2xl font-semibold">Member Progress</h2>
-              <p className="text-muted-foreground">Track discipleship journeys across your congregation</p>
-            </div>
-          </div>
-
-          <Card className="border-border/60">
-            <CardHeader>
-              <CardTitle className="font-serif">Active Discipleship Journeys</CardTitle>
-              <CardDescription>Track member progress through discipleship plans</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {progressQuery.isLoading ? (
-                  <>
-                    <ProgressCardSkeleton />
-                    <ProgressCardSkeleton />
-                    <ProgressCardSkeleton />
-                  </>
-                ) : activeProgress.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">
-                    No active discipleship journeys.
-                  </p>
-                ) : (
-                  activeProgress.map((item) => (
-                    <div key={item.id} className="flex items-center gap-4 p-4 border rounded-lg border-border/60 hover:bg-muted/30 transition-colors">
-                      <Avatar className="h-12 w-12 border-2 border-primary/20">
-                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                          {item.memberName.split(' ').map((n) => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold">{item.memberName}</h4>
-                          <Badge className={`${statusColors[item.status]} border`}>{item.status}</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{item.planName}</p>
-                        <div className="flex items-center gap-4 mt-2">
-                          <Progress value={item.progress} className="flex-1 h-2" />
-                          <span className="text-sm font-medium text-muted-foreground">
-                            {item.currentLesson}/{item.totalLessons}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Last activity: {new Date(item.lastActivityAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Completions */}
-          {recentCompletions.length > 0 && (
-            <Card className="border-border/60">
-              <CardHeader>
-                <CardTitle className="font-serif">Recent Completions</CardTitle>
-                <CardDescription>Celebrate those who have completed their journeys</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentCompletions.map((item) => (
-                    <div key={item.id} className="flex items-center gap-4 p-4 border rounded-lg border-border/60 bg-accent/5">
-                      <Avatar className="h-12 w-12 border-2 border-accent/20">
-                        <AvatarFallback className="bg-accent/10 text-accent font-semibold">
-                          {item.memberName.split(' ').map((n) => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold">{item.memberName}</h4>
-                          <Badge className="bg-accent/10 text-accent border-accent/20 border">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Completed
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{item.planName}</p>
-                        {item.completedAt && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Completed: {new Date(item.completedAt).toLocaleDateString()}
-                          </p>
-                        )}
-                      </div>
-                      <Award className="h-6 w-6 text-amber-500" />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+        <TabsContent value="progress" className="mt-6">
+          <ProgressTab />
         </TabsContent>
 
-        {/* Small Groups Tab */}
-        <TabsContent value="groups" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="font-serif text-2xl font-semibold">Small Groups</h2>
-              <p className="text-muted-foreground">Connect and grow together in community</p>
-            </div>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Group
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {groupsQuery.isLoading ? (
-              <>
-                <GroupCardSkeleton />
-                <GroupCardSkeleton />
-                <GroupCardSkeleton />
-              </>
-            ) : groups.length === 0 ? (
-              <Card className="col-span-full border-border/60">
-                <CardContent className="p-8 text-center text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                  <p className="font-medium">No small groups found</p>
-                  <p className="text-sm">Create a group to start building community.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              groups.map((group: DiscipleshipSmallGroup) => (
-                <Card key={group.id} className="border-border/60 hover:shadow-md transition-all duration-200">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="font-serif text-lg">{group.name}</CardTitle>
-                      <Badge
-                        variant="outline"
-                        className={
-                          group.status === 'active' ? 'bg-accent/10 text-accent border-accent/20' :
-                          group.status === 'forming' ? 'bg-amber-100 text-amber-700 border-amber-200' :
-                          'bg-muted text-muted-foreground'
-                        }
-                      >
-                        {group.status}
-                      </Badge>
-                    </div>
-                    <CardDescription>{group.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 text-sm">
-                      {group.leaderName && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Users className="h-4 w-4" />
-                          <span>Led by {group.leaderName}</span>
-                        </div>
-                      )}
-                      {group.meetingDay && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Calendar className="h-4 w-4" />
-                          <span>{group.meetingDay}</span>
-                        </div>
-                      )}
-                      {group.meetingTime && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          <span>{group.meetingTime}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/60">
-                      <Badge variant="secondary" className="bg-muted">
-                        <Users className="h-3 w-3 mr-1" />
-                        {group.memberCount}{group.maxMembers ? `/${group.maxMembers}` : ''} members
-                      </Badge>
-                      {group.currentPlanName && (
-                        <Badge variant="outline" className="text-xs">
-                          {group.currentPlanName}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex gap-2 mt-4">
-                      <Button variant="outline" className="flex-1" size="sm">
-                        View Group
-                      </Button>
-                      {group.isAcceptingMembers && (
-                        <Button size="sm" className="flex-1">
-                          Join Group
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
+        <TabsContent value="certificates" className="mt-6">
+          <CertificatesTab />
         </TabsContent>
       </Tabs>
     </div>
