@@ -63,6 +63,7 @@ import {
   useEvents,
   useCalendarEvents,
   useCreateEvent,
+  useUpdateEvent,
   useCancelEvent,
   useDuplicateEvent,
   useRegisterAttendee,
@@ -674,6 +675,8 @@ export default function EventsList() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedEventForRSVP, setSelectedEventForRSVP] = useState<ApiEvent | null>(null);
   const [isRSVPDialogOpen, setIsRSVPDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<ApiEvent | null>(null);
 
   // Create event form state
   const [newEventTitle, setNewEventTitle] = useState('');
@@ -704,6 +707,7 @@ export default function EventsList() {
 
   // Mutation hooks
   const createEventMutation = useCreateEvent();
+  const updateEventMutation = useUpdateEvent();
   const cancelEventMutation = useCancelEvent();
   const duplicateEventMutation = useDuplicateEvent();
   const registerAttendeeMutation = useRegisterAttendee();
@@ -828,12 +832,74 @@ export default function EventsList() {
   };
 
   const handleEditEvent = (eventId: string) => {
-    // Navigate to edit page or open edit modal
-    // For now, show a toast indicating this would navigate to edit
-    toast({
-      title: 'Edit Event',
-      description: `Navigating to edit event ${eventId}...`,
-    });
+    const event = events.find((e) => e.id === eventId);
+    if (event) {
+      setEditingEvent(event);
+      // Populate form fields with event data
+      setNewEventTitle(event.title || '');
+      setNewEventDescription(event.description || '');
+      // Parse date and time from event
+      const eventDate = event.startDate ? new Date(event.startDate) : new Date();
+      setNewEventDate(eventDate.toISOString().split('T')[0]);
+      setNewEventStartTime(eventDate.toTimeString().slice(0, 5));
+      const endDate = event.endDate ? new Date(event.endDate) : eventDate;
+      setNewEventEndTime(endDate.toTimeString().slice(0, 5));
+      setNewEventCategory((event.category as EventCategory) || 'other');
+      setNewEventLocation(event.location || '');
+      setNewEventCapacity(event.maxAttendees?.toString() || '');
+      setNewEventRequiresRegistration(event.requiresRegistration || false);
+      setNewEventIsPublic(event.isPublic ?? true);
+      setIsEditDialogOpen(true);
+    }
+  };
+
+  const handleUpdateEvent = () => {
+    if (!editingEvent || !newEventTitle || !newEventDate || !newEventStartTime || !newEventEndTime) {
+      toast({
+        title: 'Missing required fields',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const startDateTime = new Date(`${newEventDate}T${newEventStartTime}`);
+    const endDateTime = new Date(`${newEventDate}T${newEventEndTime}`);
+
+    updateEventMutation.mutate(
+      {
+        eventId: editingEvent.id,
+        data: {
+          title: newEventTitle,
+          description: newEventDescription || undefined,
+          startDate: startDateTime.toISOString(),
+          endDate: endDateTime.toISOString(),
+          category: newEventCategory,
+          location: newEventLocation || undefined,
+          maxAttendees: newEventCapacity ? parseInt(newEventCapacity, 10) : undefined,
+          requiresRegistration: newEventRequiresRegistration,
+          isPublic: newEventIsPublic,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: 'Event updated',
+            description: 'Your event has been updated successfully.',
+          });
+          setIsEditDialogOpen(false);
+          setEditingEvent(null);
+          resetCreateForm();
+        },
+        onError: (error) => {
+          toast({
+            title: 'Failed to update event',
+            description: error.message || 'An error occurred while updating the event.',
+            variant: 'destructive',
+          });
+        },
+      }
+    );
   };
 
   const handleDuplicateEvent = (eventId: string) => {
@@ -1094,6 +1160,184 @@ export default function EventsList() {
                     </>
                   ) : (
                     'Create Event'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Event Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) {
+            setEditingEvent(null);
+            resetCreateForm();
+          }
+        }}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="font-serif text-xl">Edit Event</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-title">Event Title *</Label>
+                <Input
+                  id="edit-title"
+                  placeholder="Enter event title"
+                  className="border-[hsl(35,20%,85%)]"
+                  value={newEventTitle}
+                  onChange={(e) => setNewEventTitle(e.target.value)}
+                  disabled={updateEventMutation.isPending}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  placeholder="Enter event description"
+                  className="border-[hsl(35,20%,85%)]"
+                  value={newEventDescription}
+                  onChange={(e) => setNewEventDescription(e.target.value)}
+                  disabled={updateEventMutation.isPending}
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-date">Date *</Label>
+                  <Input
+                    id="edit-date"
+                    type="date"
+                    className="border-[hsl(35,20%,85%)]"
+                    value={newEventDate}
+                    onChange={(e) => setNewEventDate(e.target.value)}
+                    disabled={updateEventMutation.isPending}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-type">Event Category</Label>
+                  <Select
+                    value={newEventCategory}
+                    onValueChange={(value) => setNewEventCategory(value as EventCategory)}
+                    disabled={updateEventMutation.isPending}
+                  >
+                    <SelectTrigger className="border-[hsl(35,20%,85%)]">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="worship">Worship</SelectItem>
+                      <SelectItem value="youth">Youth</SelectItem>
+                      <SelectItem value="outreach">Outreach</SelectItem>
+                      <SelectItem value="fellowship">Fellowship</SelectItem>
+                      <SelectItem value="small_group">Small Group</SelectItem>
+                      <SelectItem value="training">Training</SelectItem>
+                      <SelectItem value="meeting">Meeting</SelectItem>
+                      <SelectItem value="children">Children</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-startTime">Start Time *</Label>
+                  <Input
+                    id="edit-startTime"
+                    type="time"
+                    className="border-[hsl(35,20%,85%)]"
+                    value={newEventStartTime}
+                    onChange={(e) => setNewEventStartTime(e.target.value)}
+                    disabled={updateEventMutation.isPending}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-endTime">End Time *</Label>
+                  <Input
+                    id="edit-endTime"
+                    type="time"
+                    className="border-[hsl(35,20%,85%)]"
+                    value={newEventEndTime}
+                    onChange={(e) => setNewEventEndTime(e.target.value)}
+                    disabled={updateEventMutation.isPending}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-location">Location</Label>
+                  <Input
+                    id="edit-location"
+                    placeholder="Enter location"
+                    className="border-[hsl(35,20%,85%)]"
+                    value={newEventLocation}
+                    onChange={(e) => setNewEventLocation(e.target.value)}
+                    disabled={updateEventMutation.isPending}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-capacity">Capacity</Label>
+                  <Input
+                    id="edit-capacity"
+                    type="number"
+                    placeholder="Max attendees"
+                    className="border-[hsl(35,20%,85%)]"
+                    value={newEventCapacity}
+                    onChange={(e) => setNewEventCapacity(e.target.value)}
+                    disabled={updateEventMutation.isPending}
+                    min="1"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-6">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="edit-requiresRegistration"
+                    checked={newEventRequiresRegistration}
+                    onCheckedChange={(checked) => setNewEventRequiresRegistration(checked as boolean)}
+                    disabled={updateEventMutation.isPending}
+                  />
+                  <Label htmlFor="edit-requiresRegistration" className="text-sm font-normal cursor-pointer">
+                    Requires Registration
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="edit-isPublic"
+                    checked={newEventIsPublic}
+                    onCheckedChange={(checked) => setNewEventIsPublic(checked as boolean)}
+                    disabled={updateEventMutation.isPending}
+                  />
+                  <Label htmlFor="edit-isPublic" className="text-sm font-normal cursor-pointer">
+                    Public Event
+                  </Label>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditDialogOpen(false);
+                    setEditingEvent(null);
+                    resetCreateForm();
+                  }}
+                  className="border-[hsl(35,20%,80%)]"
+                  disabled={updateEventMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleUpdateEvent}
+                  className="bg-[hsl(345,45%,32%)] hover:bg-[hsl(345,45%,28%)] text-white"
+                  disabled={updateEventMutation.isPending}
+                >
+                  {updateEventMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    'Update Event'
                   )}
                 </Button>
               </div>
