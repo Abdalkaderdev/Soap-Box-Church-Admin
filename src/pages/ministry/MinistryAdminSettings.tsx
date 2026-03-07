@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
@@ -153,13 +153,9 @@ export default function MinistryAdminSettings() {
     queryFn: () => api.get<MinistrySettings>('/api/ministry-admin/settings').catch(() => defaultMinistrySettings),
   });
 
-  const [ministrySettings, setMinistrySettings] = useState<MinistrySettings>(defaultMinistrySettings);
+  // Use lazy initialization with API data fallback
+  const [ministrySettings, setMinistrySettings] = useState<MinistrySettings>(() => settingsData || defaultMinistrySettings);
   const ministryStats = defaultMinistryStats;
-
-  // Sync state with API data
-  useEffect(() => {
-    if (settingsData) setMinistrySettings(settingsData);
-  }, [settingsData]);
 
   // Save mutation
   const saveMutation = useMutation({

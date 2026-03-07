@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
@@ -110,12 +110,8 @@ export default function GroupAdminSettings() {
     queryFn: () => api.get<GroupSettings>('/api/group-admin/settings').catch(() => defaultSettings),
   });
 
-  const [groupSettings, setGroupSettings] = useState<GroupSettings>(defaultSettings);
-
-  // Sync state with API data
-  useEffect(() => {
-    if (settingsData) setGroupSettings(settingsData);
-  }, [settingsData]);
+  // Use lazy initialization with API data fallback
+  const [groupSettings, setGroupSettings] = useState<GroupSettings>(() => settingsData || defaultSettings);
 
   // Save mutation
   const saveMutation = useMutation({

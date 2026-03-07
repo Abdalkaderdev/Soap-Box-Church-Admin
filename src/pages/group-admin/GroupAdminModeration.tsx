@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -125,7 +125,6 @@ const defaultFlaggedContent: FlaggedContent[] = [
 
 export default function GroupAdminModeration() {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   // Fetch posts from API
   const { data: postsData, isLoading: postsLoading } = useQuery<Post[]>({
@@ -151,17 +150,9 @@ export default function GroupAdminModeration() {
   const [postToModerate, setPostToModerate] = useState<Post | null>(null);
   const [violationType, setViolationType] = useState("");
   const [moderationMessage, setModerationMessage] = useState("");
-  const [postsState, setPostsState] = useState<Post[]>([]);
-  const [flaggedState, setFlaggedState] = useState<FlaggedContent[]>([]);
-
-  // Sync state with API data
-  useEffect(() => {
-    if (posts) setPostsState(posts);
-  }, [posts]);
-
-  useEffect(() => {
-    if (flaggedContent) setFlaggedState(flaggedContent);
-  }, [flaggedContent]);
+  // Use lazy initialization with API data fallback
+  const [postsState, setPostsState] = useState<Post[]>(() => posts);
+  const [flaggedState, setFlaggedState] = useState<FlaggedContent[]>(() => flaggedContent);
 
   // Show loading state
   if (postsLoading || flaggedLoading) {

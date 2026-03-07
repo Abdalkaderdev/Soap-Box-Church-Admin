@@ -117,25 +117,7 @@ export default function GroupAdminMembers() {
 
   const members = membersData || defaultMembers;
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
-      </div>
-    );
-  }
-
-  const filteredMembers = members.filter(member => {
-    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         member.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "all" || member.role === roleFilter;
-    const matchesStatus = statusFilter === "all" || member.status === statusFilter;
-
-    return matchesSearch && matchesRole && matchesStatus;
-  });
-
-  // Mutation for inviting members
+  // Mutation for inviting members - must be declared before any conditional returns
   const inviteMutation = useMutation({
     mutationFn: (data: { email: string; role: string; message?: string }) =>
       api.post('/api/group-admin/members/invite', data),
@@ -174,10 +156,26 @@ export default function GroupAdminMembers() {
     },
   });
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
+
+  const filteredMembers = members.filter(member => {
+    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         member.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = roleFilter === "all" || member.role === roleFilter;
+    const matchesStatus = statusFilter === "all" || member.status === statusFilter;
+
+    return matchesSearch && matchesRole && matchesStatus;
+  });
+
   const handleInviteMember = () => {
-    // Get form values and invoke mutation
-    setInviteDialogOpen(false);
-    toast({ title: "Invitation Sent", description: "Member invitation has been sent successfully." });
+    inviteMutation.mutate({ email: '', role: 'member' });
   };
 
   const handleRoleChange = (memberId: number, newRole: string) => {

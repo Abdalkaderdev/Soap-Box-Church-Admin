@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
@@ -156,13 +156,9 @@ export default function GroupAdminResources() {
   });
 
   const resources = resourcesData || defaultResources;
-  const [resourcesState, setResourcesState] = useState<Resource[]>([]);
+  // Use lazy initialization with API data fallback
+  const [resourcesState, setResourcesState] = useState<Resource[]>(() => resources);
   const folders = defaultFolders;
-
-  // Sync state with API data
-  useEffect(() => {
-    if (resources) setResourcesState(resources);
-  }, [resources]);
 
   // Show loading state
   if (isLoading) {
