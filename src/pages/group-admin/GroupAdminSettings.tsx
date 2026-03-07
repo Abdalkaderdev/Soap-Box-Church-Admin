@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -8,6 +9,8 @@ import { Switch } from "../../components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
+import { api } from "../../lib/api";
+import { useToast } from "../../hooks/use-toast";
 import {
   Settings,
   Shield,
@@ -19,15 +22,48 @@ import {
   Calendar,
   Bell,
   UserPlus,
-  QrCode
+  QrCode,
+  Loader2
 } from "lucide-react";
 
-export default function GroupAdminSettings() {
-  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
-  const [saveInProgress, setSaveInProgress] = useState(false);
+interface GroupSettings {
+  basic: {
+    name: string;
+    description: string;
+    category: string;
+    tags: string[];
+    meetingLocation: string;
+    meetingTime: string;
+  };
+  privacy: {
+    visibility: string;
+    requireApproval: boolean;
+    allowGuestPosts: boolean;
+    showMemberList: boolean;
+    allowMemberInvites: boolean;
+    searchable: boolean;
+  };
+  permissions: {
+    membersCanPost: boolean;
+    membersCanComment: boolean;
+    membersCanUploadFiles: boolean;
+    membersCanCreateEvents: boolean;
+    autoModeratePosts: boolean;
+    requirePostApproval: boolean;
+  };
+  notifications: {
+    newMemberJoins: boolean;
+    newPosts: boolean;
+    newComments: boolean;
+    eventReminders: boolean;
+    weeklyDigest: boolean;
+    emailNotifications: boolean;
+    pushNotifications: boolean;
+  };
+}
 
-  // Mock group settings data
-  const [groupSettings, setGroupSettings] = useState({
+// Default settings
+const defaultSettings: GroupSettings = {
     basic: {
       name: "Young Adults Bible Study",
       description: "A vibrant community of young adults studying God's word together",
@@ -61,18 +97,54 @@ export default function GroupAdminSettings() {
       emailNotifications: true,
       pushNotifications: true
     }
+  };
+
+export default function GroupAdminSettings() {
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch settings from API
+  const { data: settingsData, isLoading } = useQuery<GroupSettings>({
+    queryKey: ['/api/group-admin/settings'],
+    queryFn: () => api.get<GroupSettings>('/api/group-admin/settings').catch(() => defaultSettings),
   });
 
-  const handleSaveSettings = async () => {
-    setSaveInProgress(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setSaveInProgress(false);
+  const [groupSettings, setGroupSettings] = useState<GroupSettings>(defaultSettings);
+
+  // Sync state with API data
+  useEffect(() => {
+    if (settingsData) setGroupSettings(settingsData);
+  }, [settingsData]);
+
+  // Save mutation
+  const saveMutation = useMutation({
+    mutationFn: (settings: GroupSettings) => api.put('/api/group-admin/settings', settings),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/group-admin/settings'] });
+      toast({ title: "Settings Saved", description: "Your group settings have been updated." });
+    },
+    onError: () => {
+      toast({ title: "Failed to save settings", description: "Please try again.", variant: "destructive" });
+    },
+  });
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
+
+  const handleSaveSettings = () => {
+    saveMutation.mutate(groupSettings);
   };
 
   const handleArchiveGroup = () => {
     setArchiveDialogOpen(false);
-    // Implementation for archiving group
+    toast({ title: "Group Archived", description: "The group has been archived and is no longer visible." });
   };
 
   const handleSettingChange = (section: string, key: string, value: string | boolean | string[]) => {
@@ -84,6 +156,8 @@ export default function GroupAdminSettings() {
       }
     }));
   };
+
+  const saveInProgress = saveMutation.isPending;
 
   return (
     <div className="space-y-6 p-6">

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -10,6 +11,7 @@ import { Calendar } from "../../components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { api } from "../../lib/api";
 import {
   Calendar as CalendarIcon,
   Plus,
@@ -23,18 +25,31 @@ import {
   Filter,
   Search,
   CheckCircle,
-  BarChart3
+  BarChart3,
+  Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 
-export default function MinistryAdminEvents() {
-  const [activeTab, setActiveTab] = useState("calendar");
-  const [createEventOpen, setCreateEventOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [viewFilter, setViewFilter] = useState("all");
+interface MinistryEvent {
+  id: number;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  duration: string;
+  location: string;
+  organizer: string;
+  groups: string[];
+  attendees: number;
+  maxAttendees: number;
+  status: string;
+  type: string;
+  recurring: string;
+  category: string;
+}
 
-  // Mock events data
-  const events = [
+// Default events data
+const defaultEvents: MinistryEvent[] = [
     {
       id: 1,
       title: "Ministry Leadership Meeting",
@@ -88,12 +103,36 @@ export default function MinistryAdminEvents() {
     }
   ];
 
-  // Mock RSVP data
-  const rsvpData = [
+// Default RSVP data
+const defaultRsvpData = [
     { eventId: 1, attending: 12, maybe: 2, notAttending: 1 },
     { eventId: 2, attending: 25, maybe: 4, notAttending: 1 },
     { eventId: 3, attending: 68, maybe: 8, notAttending: 4 }
   ];
+
+export default function MinistryAdminEvents() {
+  const [activeTab, setActiveTab] = useState("calendar");
+  const [createEventOpen, setCreateEventOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [viewFilter, setViewFilter] = useState("all");
+
+  // Fetch events from API
+  const { data: eventsData, isLoading } = useQuery<MinistryEvent[]>({
+    queryKey: ['/api/ministry-admin/events'],
+    queryFn: () => api.get<MinistryEvent[]>('/api/ministry-admin/events').catch(() => defaultEvents),
+  });
+
+  const events = eventsData || defaultEvents;
+  const rsvpData = defaultRsvpData;
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
 
   const filteredEvents = events.filter(event => {
     if (viewFilter === "all") return true;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -9,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../components/ui/tooltip";
 import { useToast } from "../../hooks/use-toast";
+import { api } from "../../lib/api";
 import {
   Users,
   Plus,
@@ -24,7 +26,8 @@ import {
   MessageSquare,
   BarChart3,
   Search,
-  Filter
+  Filter,
+  Loader2
 } from "lucide-react";
 
 interface Group {
@@ -48,18 +51,8 @@ interface Group {
   founded: string;
 }
 
-export default function MinistryAdminGroups() {
-  const { toast } = useToast();
-  const [createGroupOpen, setCreateGroupOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [viewGroupOpen, setViewGroupOpen] = useState(false);
-  const [editGroupOpen, setEditGroupOpen] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
-
-  // Mock groups data
-  const groups: Group[] = [
+// Default groups data
+const defaultGroups: Group[] = [
     {
       id: 1,
       name: "Young Adults Bible Study",
@@ -141,6 +134,33 @@ export default function MinistryAdminGroups() {
       founded: "2024-08-01"
     }
   ];
+
+export default function MinistryAdminGroups() {
+  const { toast } = useToast();
+  const [createGroupOpen, setCreateGroupOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [viewGroupOpen, setViewGroupOpen] = useState(false);
+  const [editGroupOpen, setEditGroupOpen] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+
+  // Fetch groups from API
+  const { data: groupsData, isLoading } = useQuery<Group[]>({
+    queryKey: ['/api/ministry-admin/groups'],
+    queryFn: () => api.get<Group[]>('/api/ministry-admin/groups').catch(() => defaultGroups),
+  });
+
+  const groups = groupsData || defaultGroups;
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
 
   const categories = ["Bible Study", "Fellowship", "Prayer", "Service", "Youth", "Women's Ministry", "Men's Ministry"];
 

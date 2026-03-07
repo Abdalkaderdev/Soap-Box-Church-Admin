@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -9,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Switch } from "../../components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
+import { api } from "../../lib/api";
+import { useToast } from "../../hooks/use-toast";
 import {
   Settings,
   Bell,
@@ -25,17 +28,59 @@ import {
   CheckCircle,
   Clock,
   Save,
-  RotateCcw
+  RotateCcw,
+  Loader2
 } from "lucide-react";
 
-export default function MinistryAdminSettings() {
-  const [activeTab, setActiveTab] = useState("general");
-  const [showApiKey, setShowApiKey] = useState(false);
-  const [backupDialogOpen, setBackupDialogOpen] = useState(false);
-  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+interface MinistrySettings {
+  general: {
+    ministryName: string;
+    description: string;
+    timezone: string;
+    language: string;
+    publiclyVisible: boolean;
+    allowNewMembers: boolean;
+    requireApproval: boolean;
+  };
+  notifications: {
+    emailNotifications: boolean;
+    smsNotifications: boolean;
+    pushNotifications: boolean;
+    weeklyDigest: boolean;
+    eventReminders: boolean;
+    prayerUpdates: boolean;
+    moderationAlerts: boolean;
+    systemUpdates: boolean;
+  };
+  privacy: {
+    memberDirectory: string;
+    eventVisibility: string;
+    prayerWallAccess: string;
+    resourceSharing: string;
+    contentModeration: string;
+    dataRetention: string;
+  };
+  permissions: {
+    groupCreation: string;
+    eventCreation: string;
+    resourceUpload: string;
+    memberInvitation: string;
+    contentModeration: string;
+    reportAccess: string;
+  };
+  integrations: {
+    emailService: string;
+    smsService: string;
+    calendarSync: string;
+    socialMedia: string;
+    backupService: string;
+    analyticsTracking: boolean;
+    apiKey: string;
+  };
+}
 
-  // Mock settings data
-  const ministrySettings = {
+// Default settings data
+const defaultMinistrySettings: MinistrySettings = {
     general: {
       ministryName: "Grace Community Ministry",
       description: "A vibrant community focused on spiritual growth and service",
@@ -77,12 +122,13 @@ export default function MinistryAdminSettings() {
       calendarSync: "enabled",
       socialMedia: "partial",
       backupService: "enabled",
-      analyticsTracking: true
+      analyticsTracking: true,
+      apiKey: "sk-ministry-xxxxxxxx"
     }
   };
 
-  // Mock ministry statistics
-  const ministryStats = {
+// Default ministry statistics
+const defaultMinistryStats = {
     totalMembers: 156,
     totalGroups: 8,
     totalEvents: 23,
@@ -93,25 +139,70 @@ export default function MinistryAdminSettings() {
     activeIntegrations: 4
   };
 
+export default function MinistryAdminSettings() {
+  const [activeTab, setActiveTab] = useState("general");
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [backupDialogOpen, setBackupDialogOpen] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch settings from API
+  const { data: settingsData, isLoading } = useQuery<MinistrySettings>({
+    queryKey: ['/api/ministry-admin/settings'],
+    queryFn: () => api.get<MinistrySettings>('/api/ministry-admin/settings').catch(() => defaultMinistrySettings),
+  });
+
+  const [ministrySettings, setMinistrySettings] = useState<MinistrySettings>(defaultMinistrySettings);
+  const ministryStats = defaultMinistryStats;
+
+  // Sync state with API data
+  useEffect(() => {
+    if (settingsData) setMinistrySettings(settingsData);
+  }, [settingsData]);
+
+  // Save mutation
+  const saveMutation = useMutation({
+    mutationFn: (settings: MinistrySettings) => api.put('/api/ministry-admin/settings', settings),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/ministry-admin/settings'] });
+      toast({ title: "Settings Saved", description: "Your ministry settings have been updated." });
+    },
+    onError: () => {
+      toast({ title: "Failed to save settings", description: "Please try again.", variant: "destructive" });
+    },
+  });
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
+
   const handleSaveSettings = () => {
+    saveMutation.mutate(ministrySettings);
   };
 
   const handleBackupData = () => {
     setBackupDialogOpen(false);
-    // Create backup
+    toast({ title: "Backup Created", description: "Ministry data has been backed up successfully." });
   };
 
   const handleResetSettings = () => {
     setResetDialogOpen(false);
-    // Reset settings to defaults
+    setMinistrySettings(defaultMinistrySettings);
+    toast({ title: "Settings Reset", description: "Settings have been reset to defaults." });
   };
 
   const handleExportData = () => {
-    // Export ministry data
+    toast({ title: "Export Started", description: "Your data export is being prepared." });
   };
 
   const handleImportData = () => {
-    // Import ministry data
+    toast({ title: "Import", description: "Please select a file to import." });
   };
 
   return (

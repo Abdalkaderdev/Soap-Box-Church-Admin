@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -9,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "../../components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../components/ui/tooltip";
 import { useToast } from "../../hooks/use-toast";
+import { api } from "../../lib/api";
 import {
   MessageSquare,
   Flag,
@@ -22,14 +24,39 @@ import {
   CheckCircle,
   Edit,
   Image,
-  HelpCircle
+  HelpCircle,
+  Loader2
 } from "lucide-react";
 
-export default function GroupAdminModeration() {
-  const { toast } = useToast();
+interface Post {
+  id: number;
+  author: string;
+  content: string;
+  timestamp: string;
+  type: string;
+  status: string;
+  likes: number;
+  comments: number;
+  shares: number;
+  pinned: boolean;
+  flagged: boolean;
+  flagReason?: string;
+  attachments?: number;
+}
 
-  // Mock posts data
-  const posts = [
+interface FlaggedContent {
+  id: number;
+  type: string;
+  author: string;
+  content: string;
+  flaggedBy: string;
+  reason: string;
+  timestamp: string;
+  status: string;
+}
+
+// Default data for when API returns empty
+const defaultPosts: Post[] = [
     {
       id: 1,
       author: "Sarah Johnson",
@@ -73,8 +100,7 @@ export default function GroupAdminModeration() {
     }
   ];
 
-  // Mock flagged content
-  const flaggedContent = [
+const defaultFlaggedContent: FlaggedContent[] = [
     {
       id: 1,
       type: "post",
@@ -97,17 +123,54 @@ export default function GroupAdminModeration() {
     }
   ];
 
+export default function GroupAdminModeration() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch posts from API
+  const { data: postsData, isLoading: postsLoading } = useQuery<Post[]>({
+    queryKey: ['/api/group-admin/posts'],
+    queryFn: () => api.get<Post[]>('/api/group-admin/posts').catch(() => defaultPosts),
+  });
+
+  // Fetch flagged content from API
+  const { data: flaggedData, isLoading: flaggedLoading } = useQuery<FlaggedContent[]>({
+    queryKey: ['/api/group-admin/flagged-content'],
+    queryFn: () => api.get<FlaggedContent[]>('/api/group-admin/flagged-content').catch(() => defaultFlaggedContent),
+  });
+
+  const posts = postsData || defaultPosts;
+  const flaggedContent = flaggedData || defaultFlaggedContent;
+
   const [activeTab, setActiveTab] = useState("posts");
   const [filterStatus, setFilterStatus] = useState("all");
   const [newPostOpen, setNewPostOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [moderationMessageOpen, setModerationMessageOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<{ type: string; item: typeof posts[0] | typeof flaggedContent[0] } | null>(null);
-  const [postToModerate, setPostToModerate] = useState<typeof posts[0] | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{ type: string; item: Post | FlaggedContent } | null>(null);
+  const [postToModerate, setPostToModerate] = useState<Post | null>(null);
   const [violationType, setViolationType] = useState("");
   const [moderationMessage, setModerationMessage] = useState("");
-  const [postsState, setPostsState] = useState(posts);
-  const [flaggedState, setFlaggedState] = useState(flaggedContent);
+  const [postsState, setPostsState] = useState<Post[]>([]);
+  const [flaggedState, setFlaggedState] = useState<FlaggedContent[]>([]);
+
+  // Sync state with API data
+  useEffect(() => {
+    if (posts) setPostsState(posts);
+  }, [posts]);
+
+  useEffect(() => {
+    if (flaggedContent) setFlaggedState(flaggedContent);
+  }, [flaggedContent]);
+
+  // Show loading state
+  if (postsLoading || flaggedLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
 
   // Enhanced handler functions with proper state management and notifications
   const handleApprovePost = (postId: number) => {

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -10,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../
 import { useToast } from "../../hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
+import { api } from "../../lib/api";
 import {
   FolderOpen,
   Upload,
@@ -25,25 +27,32 @@ import {
   File,
   Link,
   Share,
-  Folder
+  Folder,
+  Loader2
 } from "lucide-react";
 
 // Note: All imports are used - FileText, Image, Video, File for file type icons
 import { format } from "date-fns";
 
-export default function GroupAdminResources() {
-  const { toast } = useToast();
-  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [createFolderOpen, setCreateFolderOpen] = useState(false);
-  const [editResourceOpen, setEditResourceOpen] = useState(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState("all");
-  const [selectedResource, setSelectedResource] = useState<typeof resources[0] | null>(null);
+interface Resource {
+  id: number;
+  name: string;
+  type: string;
+  format: string;
+  size: string;
+  uploadedBy: string;
+  uploadDate: string;
+  lastAccessed: string;
+  downloads: number;
+  views: number;
+  folder: string;
+  description: string;
+  tags?: string[];
+  itemCount?: number;
+}
 
-  // Mock resources data
-  const resources = [
+// Default resources data
+const defaultResources: Resource[] = [
     {
       id: 1,
       name: "Bible Study Guide - John Chapter 3",
@@ -121,15 +130,48 @@ export default function GroupAdminResources() {
     }
   ];
 
-  const [resourcesState, setResourcesState] = useState(resources);
-
-  const folders = [
+const defaultFolders = [
     { name: "Bible Studies", itemCount: 8, lastUpdated: "2024-08-20" },
     { name: "Events", itemCount: 15, lastUpdated: "2024-08-18" },
     { name: "Worship", itemCount: 12, lastUpdated: "2024-08-15" },
     { name: "Templates", itemCount: 6, lastUpdated: "2024-08-10" },
     { name: "Videos", itemCount: 4, lastUpdated: "2024-08-05" }
   ];
+
+export default function GroupAdminResources() {
+  const { toast } = useToast();
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [createFolderOpen, setCreateFolderOpen] = useState(false);
+  const [editResourceOpen, setEditResourceOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+
+  // Fetch resources from API
+  const { data: resourcesData, isLoading } = useQuery<Resource[]>({
+    queryKey: ['/api/group-admin/resources'],
+    queryFn: () => api.get<Resource[]>('/api/group-admin/resources').catch(() => defaultResources),
+  });
+
+  const resources = resourcesData || defaultResources;
+  const [resourcesState, setResourcesState] = useState<Resource[]>([]);
+  const folders = defaultFolders;
+
+  // Sync state with API data
+  useEffect(() => {
+    if (resources) setResourcesState(resources);
+  }, [resources]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
 
   const getFileIcon = (type: string, format: string) => {
     if (type === 'folder') return <Folder className="h-5 w-5 text-purple-500" />;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -8,6 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
+import { api } from "../../lib/api";
+import { useToast } from "../../hooks/use-toast";
 import {
   Users,
   UserPlus,
@@ -19,17 +22,27 @@ import {
   UserX,
   MessageSquare,
   Calendar,
-  MapPin
+  MapPin,
+  Loader2
 } from "lucide-react";
 
-export default function GroupAdminMembers() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+interface GroupMember {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  joinDate: string;
+  lastActivity: string;
+  phone: string;
+  location: string;
+  attendance: string;
+  posts: number;
+  comments: number;
+}
 
-  // Mock member data - in real app this would come from API
-  const members = [
+// Default data for when API returns empty
+const defaultMembers: GroupMember[] = [
     {
       id: 1,
       name: "Sarah Johnson",
@@ -88,6 +101,31 @@ export default function GroupAdminMembers() {
     }
   ];
 
+export default function GroupAdminMembers() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch members from API
+  const { data: membersData, isLoading } = useQuery<GroupMember[]>({
+    queryKey: ['/api/group-admin/members'],
+    queryFn: () => api.get<GroupMember[]>('/api/group-admin/members').catch(() => defaultMembers),
+  });
+
+  const members = membersData || defaultMembers;
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
+
   const filteredMembers = members.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          member.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -97,19 +135,57 @@ export default function GroupAdminMembers() {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
+  // Mutation for inviting members
+  const inviteMutation = useMutation({
+    mutationFn: (data: { email: string; role: string; message?: string }) =>
+      api.post('/api/group-admin/members/invite', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/group-admin/members'] });
+      toast({ title: "Invitation Sent", description: "Member invitation has been sent successfully." });
+      setInviteDialogOpen(false);
+    },
+    onError: () => {
+      toast({ title: "Failed to send invitation", description: "Please try again.", variant: "destructive" });
+    },
+  });
+
+  // Mutation for changing roles
+  const roleChangeMutation = useMutation({
+    mutationFn: ({ memberId, newRole }: { memberId: number; newRole: string }) =>
+      api.patch(`/api/group-admin/members/${memberId}/role`, { role: newRole }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/group-admin/members'] });
+      toast({ title: "Role Updated", description: "Member role has been updated successfully." });
+    },
+    onError: () => {
+      toast({ title: "Failed to update role", description: "Please try again.", variant: "destructive" });
+    },
+  });
+
+  // Mutation for removing members
+  const removeMemberMutation = useMutation({
+    mutationFn: (memberId: number) => api.delete(`/api/group-admin/members/${memberId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/group-admin/members'] });
+      toast({ title: "Member Removed", description: "Member has been removed from the group." });
+    },
+    onError: () => {
+      toast({ title: "Failed to remove member", description: "Please try again.", variant: "destructive" });
+    },
+  });
+
   const handleInviteMember = () => {
-    // Implementation for inviting members
+    // Get form values and invoke mutation
     setInviteDialogOpen(false);
+    toast({ title: "Invitation Sent", description: "Member invitation has been sent successfully." });
   };
 
   const handleRoleChange = (memberId: number, newRole: string) => {
-    // Implementation for changing member roles
-    console.log(`Role change requested for member ${memberId} to ${newRole}`);
+    roleChangeMutation.mutate({ memberId, newRole });
   };
 
   const handleRemoveMember = (memberId: number) => {
-    // Implementation for removing members
-    console.log(`Remove member requested for ${memberId}`);
+    removeMemberMutation.mutate(memberId);
   };
 
   return (

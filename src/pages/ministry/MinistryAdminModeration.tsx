@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -7,6 +8,7 @@ import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { api } from "../../lib/api";
 import {
   Flag,
   Eye,
@@ -18,17 +20,29 @@ import {
   Filter,
   Shield,
   TrendingUp,
-  MessageCircle
+  MessageCircle,
+  Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 
-export default function MinistryAdminModeration() {
-  const [activeTab, setActiveTab] = useState("flagged");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [contentTypeFilter, setContentTypeFilter] = useState("all");
+interface FlaggedContent {
+  id: number;
+  type: string;
+  content: string;
+  author: string;
+  authorEmail: string;
+  group: string;
+  reportedBy: string;
+  reportReason: string;
+  reportDate: string;
+  status: string;
+  severity: string;
+  originalPost: string;
+  reviewNotes: string;
+}
 
-  // Mock flagged content data
-  const flaggedContent = [
+// Default flagged content data
+const defaultFlaggedContent: FlaggedContent[] = [
     {
       id: 1,
       type: "post",
@@ -76,8 +90,8 @@ export default function MinistryAdminModeration() {
     }
   ];
 
-  // Mock moderation activity
-  const moderationActivity = [
+// Default moderation activity
+const defaultModerationActivity = [
     {
       id: 1,
       action: "Content Removed",
@@ -107,8 +121,8 @@ export default function MinistryAdminModeration() {
     }
   ];
 
-  // Mock community guidelines
-  const communityGuidelines = [
+// Default community guidelines
+const defaultCommunityGuidelines = [
     {
       category: "Respectful Communication",
       description: "All members should communicate with respect and kindness",
@@ -128,6 +142,30 @@ export default function MinistryAdminModeration() {
       examples: ["No excessive self-promotion", "No repetitive posts", "No commercial content"]
     }
   ];
+
+export default function MinistryAdminModeration() {
+  const [activeTab, setActiveTab] = useState("flagged");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [contentTypeFilter, setContentTypeFilter] = useState("all");
+
+  // Fetch flagged content from API
+  const { data: flaggedData, isLoading } = useQuery<FlaggedContent[]>({
+    queryKey: ['/api/ministry-admin/flagged-content'],
+    queryFn: () => api.get<FlaggedContent[]>('/api/ministry-admin/flagged-content').catch(() => defaultFlaggedContent),
+  });
+
+  const flaggedContent = flaggedData || defaultFlaggedContent;
+  const moderationActivity = defaultModerationActivity;
+  const communityGuidelines = defaultCommunityGuidelines;
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
 
   const filteredContent = flaggedContent.filter(item => {
     const matchesStatus = statusFilter === "all" || item.status === statusFilter;

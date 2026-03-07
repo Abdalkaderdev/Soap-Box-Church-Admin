@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -7,6 +8,7 @@ import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { api } from "../../lib/api";
 import {
   HandHeart,
   Plus,
@@ -21,18 +23,30 @@ import {
   Filter,
   Search,
   Download,
-  Settings
+  Settings,
+  Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 
-export default function MinistryAdminPrayer() {
-  const [activeTab, setActiveTab] = useState("prayers");
-  const [createPrayerOpen, setCreatePrayerOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+interface PrayerRequest {
+  id: number;
+  title: string;
+  description: string;
+  author: string;
+  authorGroup: string;
+  category: string;
+  status: string;
+  privacy: string;
+  hearts: number;
+  comments: number;
+  createdDate: string;
+  lastActivity: string;
+  answered: boolean;
+  urgent: boolean;
+}
 
-  // Mock prayer requests data
-  const prayerRequests = [
+// Default prayer requests data
+const defaultPrayerRequests: PrayerRequest[] = [
     {
       id: 1,
       title: "Healing for Community Member",
@@ -99,7 +113,30 @@ export default function MinistryAdminPrayer() {
     }
   ];
 
-  // Mock prayer analytics
+export default function MinistryAdminPrayer() {
+  const [activeTab, setActiveTab] = useState("prayers");
+  const [createPrayerOpen, setCreatePrayerOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+
+  // Fetch prayer requests from API
+  const { data: prayerData, isLoading } = useQuery<PrayerRequest[]>({
+    queryKey: ['/api/ministry-admin/prayer-requests'],
+    queryFn: () => api.get<PrayerRequest[]>('/api/ministry-admin/prayer-requests').catch(() => defaultPrayerRequests),
+  });
+
+  const prayerRequests = prayerData || defaultPrayerRequests;
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
+
+  // Prayer analytics
   const prayerAnalytics = {
     totalPrayers: 156,
     activePrayers: 89,
