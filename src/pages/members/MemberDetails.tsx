@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Edit,
@@ -14,7 +15,8 @@ import {
   X,
   UserPlus,
   MoreHorizontal,
-  Trash2
+  Trash2,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,40 +41,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-// Mock member data
-const mockMemberData: Record<string, MemberData> = {
-  "1": {
-    id: "1",
-    firstName: "John",
-    lastName: "Smith",
-    email: "john.smith@email.com",
-    phone: "(555) 123-4567",
-    status: "active",
-    joinDate: "2020-03-15",
-    birthDate: "1985-07-22",
-    address: {
-      street: "123 Oak Street",
-      city: "Springfield",
-      state: "IL",
-      zipCode: "62701",
-    },
-    groups: ["Worship Team", "Men's Bible Study"],
-    avatarUrl: null,
-    familyMembers: [
-      { id: "2", name: "Sarah Smith", relationship: "Spouse" },
-      { id: "10", name: "Emma Smith", relationship: "Daughter" },
-    ],
-    notes: "Long-time member, very active in the worship ministry.",
-    givingHistory: [
-      { date: "2024-01-15", amount: 500, type: "Tithe" },
-      { date: "2024-01-01", amount: 100, type: "Building Fund" },
-      { date: "2023-12-15", amount: 500, type: "Tithe" },
-      { date: "2023-12-01", amount: 250, type: "Missions" },
-    ],
-    attendanceRate: 92,
-  },
-};
+import { api } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface MemberData {
   id: string;
@@ -119,23 +89,93 @@ export default function MemberDetails() {
   const [, setLocation] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Get member data (using mock data, defaulting to member "1" for demo)
-  const member = mockMemberData[params.id ?? "1"] || mockMemberData["1"];
+  // Fetch member data from API
+  const { data: member, isLoading, error } = useQuery<MemberData>({
+    queryKey: ['/api/members', params.id],
+    queryFn: () => api.get<MemberData>(`/api/members/${params.id}`),
+    enabled: !!params.id,
+  });
 
   // Form state for editing
   const [formData, setFormData] = useState({
-    firstName: member.firstName,
-    lastName: member.lastName,
-    email: member.email,
-    phone: member.phone,
-    birthDate: member.birthDate,
-    street: member.address.street,
-    city: member.address.city,
-    state: member.address.state,
-    zipCode: member.address.zipCode,
-    status: member.status,
-    notes: member.notes,
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    birthDate: "",
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    status: "",
+    notes: "",
+  });
+
+  // Update form when member data loads
+  useEffect(() => {
+    if (member) {
+      setFormData({
+        firstName: member.firstName,
+        lastName: member.lastName,
+        email: member.email,
+        phone: member.phone,
+        birthDate: member.birthDate || "",
+        street: member.address?.street || "",
+        city: member.address?.city || "",
+        state: member.address?.state || "",
+        zipCode: member.address?.zipCode || "",
+        status: member.status,
+        notes: member.notes || "",
+      });
+    }
+  }, [member]);
+
+  // Update member mutation
+  const updateMemberMutation = useMutation({
+    mutationFn: async (data: Partial<MemberData>) => {
+      return api.patch(`/api/members/${params.id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/members', params.id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/members'] });
+      toast({
+        title: "Member updated",
+        description: "Member information has been saved successfully.",
+      });
+      setIsEditing(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to update member",
+        description: error.message || "Unable to save changes. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete member mutation
+  const deleteMemberMutation = useMutation({
+    mutationFn: async () => {
+      return api.delete(`/api/members/${params.id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/members'] });
+      toast({
+        title: "Member deleted",
+        description: "The member has been removed from the system.",
+      });
+      setLocation("/members");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to delete member",
+        description: error.message || "Unable to delete member. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -143,32 +183,74 @@ export default function MemberDetails() {
   };
 
   const handleSave = () => {
-    // In a real app, this would save to the backend
-    setIsEditing(false);
+    const updateData = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+      birthDate: formData.birthDate || undefined,
+      address: {
+        street: formData.street,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+      },
+      status: formData.status,
+      notes: formData.notes,
+    };
+    updateMemberMutation.mutate(updateData);
   };
 
   const handleCancel = () => {
-    setFormData({
-      firstName: member.firstName,
-      lastName: member.lastName,
-      email: member.email,
-      phone: member.phone,
-      birthDate: member.birthDate,
-      street: member.address.street,
-      city: member.address.city,
-      state: member.address.state,
-      zipCode: member.address.zipCode,
-      status: member.status,
-      notes: member.notes,
-    });
+    if (member) {
+      setFormData({
+        firstName: member.firstName,
+        lastName: member.lastName,
+        email: member.email,
+        phone: member.phone,
+        birthDate: member.birthDate || "",
+        street: member.address?.street || "",
+        city: member.address?.city || "",
+        state: member.address?.state || "",
+        zipCode: member.address?.zipCode || "",
+        status: member.status,
+        notes: member.notes || "",
+      });
+    }
     setIsEditing(false);
   };
 
   const handleDelete = () => {
-    // In a real app, this would delete from the backend
     setDeleteDialogOpen(false);
-    setLocation("/members");
+    deleteMemberMutation.mutate();
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !member) {
+    return (
+      <div className="p-6">
+        <Link href="/members">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Members
+          </Button>
+        </Link>
+        <div className="flex flex-col items-center justify-center min-h-[300px]">
+          <p className="text-lg text-gray-600">Member not found</p>
+          <p className="text-sm text-gray-500 mt-1">The requested member could not be loaded.</p>
+        </div>
+      </div>
+    );
+  }
 
   // Calculate total giving
   const totalGiving = member.givingHistory.reduce((sum, item) => sum + item.amount, 0);

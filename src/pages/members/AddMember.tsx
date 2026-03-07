@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Save,
@@ -26,7 +27,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-// Alert components removed - not currently used
+import { api } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 // Available groups for selection
 const availableGroups = [
@@ -60,9 +62,8 @@ interface FamilyMember {
 export default function AddMember() {
   const [, setLocation] = useLocation();
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_submitError, setSubmitError] = useState<string | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -143,6 +144,46 @@ export default function AddMember() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Create member mutation
+  const createMemberMutation = useMutation({
+    mutationFn: async (memberData: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone: string;
+      birthDate?: string;
+      address?: {
+        street?: string;
+        city?: string;
+        state?: string;
+        zipCode?: string;
+      };
+      status: string;
+      joinDate: string;
+      notes?: string;
+      groups: string[];
+      familyMembers: FamilyMember[];
+    }) => {
+      return api.post('/api/members', memberData);
+    },
+    onSuccess: () => {
+      // Invalidate members list cache
+      queryClient.invalidateQueries({ queryKey: ['/api/members'] });
+      toast({
+        title: "Member added",
+        description: "The new member has been added successfully.",
+      });
+      setLocation("/members");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to add member",
+        description: error.message || "Unable to create member. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -150,22 +191,29 @@ export default function AddMember() {
       return;
     }
 
-    setIsSubmitting(true);
-    setSubmitError(null);
+    const memberData = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+      birthDate: formData.birthDate || undefined,
+      address: {
+        street: formData.street || undefined,
+        city: formData.city || undefined,
+        state: formData.state || undefined,
+        zipCode: formData.zipCode || undefined,
+      },
+      status: formData.status,
+      joinDate: formData.joinDate,
+      notes: formData.notes || undefined,
+      groups: selectedGroups,
+      familyMembers,
+    };
 
-    try {
-      // TODO: Replace with actual API call
-      // Data to be sent: { ...formData, groups: selectedGroups, familyMembers }
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Redirect to members list on success
-      setLocation("/members");
-    } catch {
-      setSubmitError("Unable to create member. Please check your connection and try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    createMemberMutation.mutate(memberData);
   };
+
+  const isSubmitting = createMemberMutation.isPending;
 
   const handleDiscard = () => {
     setLocation("/members");

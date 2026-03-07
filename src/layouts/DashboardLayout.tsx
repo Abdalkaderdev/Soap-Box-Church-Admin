@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
+import { useAuth } from '../hooks/useAuth';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user: authUser } = useAuth();
 
   // Handle window resize to auto-collapse sidebar on smaller screens
   useEffect(() => {
@@ -59,11 +61,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  // Mock user data - in production, this would come from auth context
+  // Use auth context for user data
   const user = {
-    name: 'Pastor John',
-    email: 'pastor.john@church.org',
-    role: 'Administrator',
+    name: authUser?.firstName && authUser?.lastName
+      ? `${authUser.firstName} ${authUser.lastName}`
+      : authUser?.displayName || authUser?.email || 'User',
+    email: authUser?.email || '',
+    role: authUser?.role || 'member',
   };
 
   return (
