@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const user = {
     name: authUser?.firstName && authUser?.lastName
       ? `${authUser.firstName} ${authUser.lastName}`
-      : authUser?.displayName || authUser?.email || 'User',
+      : authUser?.email || 'User',
     email: authUser?.email || '',
     role: authUser?.role || 'member',
   };
