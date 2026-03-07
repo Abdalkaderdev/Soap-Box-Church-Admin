@@ -139,21 +139,19 @@ function CommunityBanner() {
     }
   };
 
-  const getIcon = () => {
+  const renderIcon = () => {
     switch (scope.type) {
-      case 'church': return Church;
-      case 'ministry': return Briefcase;
-      case 'group': return UsersRound;
-      default: return Building2;
+      case 'church': return <Church className="w-8 h-8" />;
+      case 'ministry': return <Briefcase className="w-8 h-8" />;
+      case 'group': return <UsersRound className="w-8 h-8" />;
+      default: return <Building2 className="w-8 h-8" />;
     }
   };
-
-  const Icon = getIcon();
 
   return (
     <div className={`${getBannerStyle()} text-white p-4 rounded-lg`}>
       <div className="flex items-center gap-3">
-        <Icon className="w-8 h-8" />
+        {renderIcon()}
         <div>
           <h2 className="text-xl font-bold">{scope.name}</h2>
           <p className="text-white/80 capitalize">{scope.type} Dashboard</p>

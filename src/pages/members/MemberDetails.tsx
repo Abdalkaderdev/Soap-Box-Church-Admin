@@ -99,39 +99,27 @@ export default function MemberDetails() {
     enabled: !!params.id,
   });
 
-  // Form state for editing
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    birthDate: "",
-    street: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    status: "",
-    notes: "",
+  // Form state for editing - initialize lazily to avoid effect-based setState
+  const getInitialFormData = () => ({
+    firstName: member?.firstName || "",
+    lastName: member?.lastName || "",
+    email: member?.email || "",
+    phone: member?.phone || "",
+    birthDate: member?.birthDate || "",
+    street: member?.address?.street || "",
+    city: member?.address?.city || "",
+    state: member?.address?.state || "",
+    zipCode: member?.address?.zipCode || "",
+    status: member?.status || "",
+    notes: member?.notes || "",
   });
 
-  // Update form when member data loads
-  useEffect(() => {
-    if (member) {
-      setFormData({
-        firstName: member.firstName,
-        lastName: member.lastName,
-        email: member.email,
-        phone: member.phone,
-        birthDate: member.birthDate || "",
-        street: member.address?.street || "",
-        city: member.address?.city || "",
-        state: member.address?.state || "",
-        zipCode: member.address?.zipCode || "",
-        status: member.status,
-        notes: member.notes || "",
-      });
-    }
-  }, [member]);
+  const [formData, setFormData] = useState(getInitialFormData);
+
+  // Reset form data when member changes (e.g., navigation to different member)
+  const resetFormData = () => {
+    setFormData(getInitialFormData());
+  };
 
   // Update member mutation
   const updateMemberMutation = useMutation({
@@ -202,21 +190,7 @@ export default function MemberDetails() {
   };
 
   const handleCancel = () => {
-    if (member) {
-      setFormData({
-        firstName: member.firstName,
-        lastName: member.lastName,
-        email: member.email,
-        phone: member.phone,
-        birthDate: member.birthDate || "",
-        street: member.address?.street || "",
-        city: member.address?.city || "",
-        state: member.address?.state || "",
-        zipCode: member.address?.zipCode || "",
-        status: member.status,
-        notes: member.notes || "",
-      });
-    }
+    resetFormData();
     setIsEditing(false);
   };
 
