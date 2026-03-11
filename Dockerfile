@@ -4,9 +4,9 @@ FROM node:20-alpine as builder
 WORKDIR /app
 
 # Build arguments for Vite environment variables
-ARG VITE_API_URL=https://app.soapboxsuperapp.com/api
-ARG VITE_SSO_LOGIN_URL=https://app.soapboxsuperapp.com/login
-ARG VITE_SSO_LOGOUT_URL=https://app.soapboxsuperapp.com/logout
+ARG VITE_API_URL=https://soapboxsuperapp.com/api
+ARG VITE_SSO_LOGIN_URL=https://soapboxsuperapp.com/login
+ARG VITE_SSO_LOGOUT_URL=https://soapboxsuperapp.com/logout
 
 # Set environment variables for build
 ENV VITE_API_URL=$VITE_API_URL
