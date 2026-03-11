@@ -24,7 +24,11 @@ spec:
             - containerPort: 80
           env:
             - name: VITE_API_URL
-              value: "https://app.soapboxsuperapp.com"
+              value: "https://app.soapboxsuperapp.com/api"
+            - name: VITE_SSO_LOGIN_URL
+              value: "https://app.soapboxsuperapp.com/login"
+            - name: VITE_SSO_LOGOUT_URL
+              value: "https://app.soapboxsuperapp.com/logout"
           resources:
             requests:
               memory: "64Mi"

@@ -97,7 +97,9 @@ jobs:
       - name: Build check
         run: npm run build
         env:
-          VITE_API_URL: https://app.soapboxsuperapp.com
+          VITE_API_URL: https://app.soapboxsuperapp.com/api
+          VITE_SSO_LOGIN_URL: https://app.soapboxsuperapp.com/login
+          VITE_SSO_LOGOUT_URL: https://app.soapboxsuperapp.com/logout
 
       - name: Test Summary
         if: always()
@@ -149,7 +151,9 @@ jobs:
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
           build-args: |
-            VITE_API_URL=https://app.soapboxsuperapp.com
+            VITE_API_URL=https://app.soapboxsuperapp.com/api
+            VITE_SSO_LOGIN_URL=https://app.soapboxsuperapp.com/login
+            VITE_SSO_LOGOUT_URL=https://app.soapboxsuperapp.com/logout
 
       - name: Summary
         run: |
