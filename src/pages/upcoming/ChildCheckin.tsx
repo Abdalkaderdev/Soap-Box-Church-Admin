@@ -33,11 +33,7 @@ import {
 } from "@/components/ui/table";
 import {
   Baby,
-  QrCode,
-  Shield,
   Printer,
-  Bell,
-  Users,
   AlertTriangle,
   CheckCircle2,
   Search,
@@ -149,7 +145,7 @@ export default function ChildCheckin() {
       refetchCheckIns();
       queryClient.invalidateQueries({ queryKey: ["childStats"] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to check in child");
     },
   });
@@ -171,7 +167,7 @@ export default function ChildCheckin() {
       refetchCheckIns();
       queryClient.invalidateQueries({ queryKey: ["childStats"] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Invalid security code or check-out failed");
     },
   });
@@ -193,7 +189,7 @@ export default function ChildCheckin() {
   const stats = statsData?.data;
   const checkIns = checkInsData?.data || [];
 
-  const filteredCheckIns = checkIns.filter((checkIn: any) => {
+  const filteredCheckIns = checkIns.filter((checkIn: { id: number; childName: string; status: string; checkedInAt: string }) => {
     if (!searchQuery) return true;
     const childName = `${checkIn.child?.firstName || ""} ${checkIn.child?.lastName || ""}`.toLowerCase();
     const parentName = `${checkIn.parent?.firstName || ""} ${checkIn.parent?.lastName || ""}`.toLowerCase();
@@ -413,7 +409,7 @@ export default function ChildCheckin() {
                 ) : services.length === 0 ? (
                   <SelectItem value="" disabled>No services today</SelectItem>
                 ) : (
-                  services.map((service: any) => (
+                  services.map((service: { id: number; name: string; serviceType: string }) => (
                     <SelectItem key={service.id} value={service.id.toString()}>
                       {service.name} - {format(new Date(service.serviceDate), "h:mm a")}
                       {service.status === "active" && (

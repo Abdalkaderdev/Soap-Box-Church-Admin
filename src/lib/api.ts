@@ -1423,7 +1423,7 @@ export interface Campus {
   primaryContactId?: string;
   capacity?: number;
   isActive: boolean;
-  settings?: any;
+  settings?: Record<string, unknown>;
   timeZone: string;
   createdAt: string;
   updatedAt?: string;
@@ -2994,7 +2994,7 @@ export interface FacilityReservation {
   setupTime?: number;
   teardownTime?: number;
   isRecurring: boolean;
-  recurrencePattern?: any;
+  recurrencePattern?: Record<string, unknown>;
   recurrenceEndDate?: string;
   expectedAttendance?: number;
   setupNeeds?: string;
@@ -3051,7 +3051,7 @@ export const facilityApi = {
     page?: number;
     limit?: number;
   }) =>
-    api.get<PaginatedResponse<{ reservation: FacilityReservation; facility: Facility; requester: any }>>(
+    api.get<PaginatedResponse<{ reservation: FacilityReservation; facility: Facility; requester: { id: string; firstName: string; lastName: string; email: string } }>>(
       `/church/${churchId}/reservations`,
       params
     ),
@@ -3805,7 +3805,7 @@ export interface BackgroundCheck {
   roleAppliedFor?: string;
   ministryArea?: string;
   notes?: string;
-  flaggedItems?: any;
+  flaggedItems?: Record<string, unknown>;
   reviewedBy?: string;
   reviewedAt?: string;
   reviewNotes?: string;
@@ -3902,7 +3902,7 @@ export const backgroundChecksApi = {
     ministryArea: string;
     externalId: string;
     reportUrl: string;
-    flaggedItems: any;
+    flaggedItems: Record<string, unknown>;
   }>) =>
     api.patch<{ success: boolean; data: BackgroundCheck }>(`/church/${churchId}/background-checks/${checkId}`, data),
 

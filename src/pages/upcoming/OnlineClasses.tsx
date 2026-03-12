@@ -41,20 +41,16 @@ import {
   Users,
   TrendingUp,
   Award,
-  Calendar,
   Clock,
-  Video,
   Search,
-  Play,
   CheckCircle2,
-  BarChart3,
   Eye,
   UserPlus,
   FileText,
   Star,
 } from "lucide-react";
 import { useChurch } from "@/hooks/useChurch";
-import { onlineClassesApi, membersApi, type DiscipleshipPlan, type DiscipleshipProgress, type DiscipleshipGroup } from "@/lib/api";
+import { onlineClassesApi, membersApi, type DiscipleshipPlan } from "@/lib/api";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
 
@@ -806,7 +802,7 @@ export default function OnlineClasses() {
                 <SelectValue placeholder="Choose a member" />
               </SelectTrigger>
               <SelectContent>
-                {(members.data || []).map((m: any) => (
+                {(members.data || []).map((m: { id: string; firstName: string; lastName: string; email: string }) => (
                   <SelectItem key={m.id} value={m.userId || m.id}>
                     {m.firstName} {m.lastName}
                   </SelectItem>

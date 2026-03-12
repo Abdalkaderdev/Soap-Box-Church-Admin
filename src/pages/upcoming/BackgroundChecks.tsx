@@ -38,22 +38,16 @@ import {
   Clock,
   AlertTriangle,
   FileText,
-  Users,
-  Send,
   CheckCircle2,
   XCircle,
   RefreshCw,
   Plus,
   Search,
-  Filter,
   MoreHorizontal,
   Mail,
-  Calendar,
   Eye,
   Trash2,
-  Bell,
   AlertCircle,
-  Settings,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -71,7 +65,7 @@ export default function BackgroundChecks() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [_statusFilter, _setStatusFilter] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedCheck, setSelectedCheck] = useState<BackgroundCheck | null>(null);
@@ -143,7 +137,7 @@ export default function BackgroundChecks() {
 
   // Update check mutation
   const updateCheckMutation = useMutation({
-    mutationFn: ({ checkId, data }: { checkId: string; data: any }) =>
+    mutationFn: ({ checkId, data }: { checkId: string; data: Record<string, unknown> }) =>
       backgroundChecksApi.update(churchId!, checkId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["background-checks"] });
@@ -309,7 +303,7 @@ export default function BackgroundChecks() {
                     <SelectValue placeholder="Choose a member..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {membersData?.map((member: any) => (
+                    {membersData?.map((member: { id: string; firstName: string; lastName: string; email: string }) => (
                       <SelectItem key={member.id} value={member.id}>
                         {member.firstName} {member.lastName} ({member.email})
                       </SelectItem>

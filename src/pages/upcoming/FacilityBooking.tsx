@@ -41,7 +41,6 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  AlertCircle,
   Plus,
   Edit,
   Trash2,
@@ -52,7 +51,7 @@ import {
   Car,
   Loader2,
 } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 
 type FacilityType = 'sanctuary' | 'fellowship_hall' | 'classroom' | 'gym' | 'kitchen' | 'office' | 'outdoor';
 
@@ -83,7 +82,7 @@ export default function FacilityBooking() {
   const [facilityDialogOpen, setFacilityDialogOpen] = useState(false);
   const [reservationDialogOpen, setReservationDialogOpen] = useState(false);
   const [editingFacility, setEditingFacility] = useState<Facility | null>(null);
-  const [selectedFacilityId, setSelectedFacilityId] = useState<string>("");
+  const [_selectedFacilityId, _setSelectedFacilityId] = useState<string>("");
 
   // Form states for facility
   const [facilityForm, setFacilityForm] = useState({

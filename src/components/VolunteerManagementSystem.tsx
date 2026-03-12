@@ -32,7 +32,6 @@ import {
   XCircle,
   Shield,
   AlertTriangle,
-  BarChart3,
   MoreVertical,
   Mail
 } from "lucide-react";

@@ -34,18 +34,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useChurch } from "@/hooks/use-church";
-import { volunteerSchedulingApi, volunteersApi, VolunteerRole, VolunteerAssignmentDetail, VolunteerSchedule } from "@/lib/api";
+import { volunteerSchedulingApi, volunteersApi, VolunteerRole } from "@/lib/api";
 import {
   Users,
   Calendar,
   Clock,
-  Bell,
-  RefreshCw,
   UserCheck,
   BarChart3,
   Heart,
   Plus,
-  CheckCircle2,
   AlertCircle,
   UserPlus,
   Loader2,
@@ -188,7 +185,7 @@ export default function VolunteerScheduling() {
   });
 
   const createScheduleMutation = useMutation({
-    mutationFn: (data: any) => volunteerSchedulingApi.createSchedule(churchId, data),
+    mutationFn: (data: Record<string, unknown>) => volunteerSchedulingApi.createSchedule(churchId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["volunteer-schedules", churchId] });
       queryClient.invalidateQueries({ queryKey: ["volunteer-scheduling-stats", churchId] });
@@ -895,7 +892,7 @@ export default function VolunteerScheduling() {
                         <SelectValue placeholder="Select a volunteer" />
                       </SelectTrigger>
                       <SelectContent>
-                        {volunteers.map((v: any) => (
+                        {volunteers.map((v: { id: string; firstName: string; lastName: string; email: string }) => (
                           <SelectItem key={v.id} value={v.id}>
                             {v.firstName} {v.lastName}
                           </SelectItem>

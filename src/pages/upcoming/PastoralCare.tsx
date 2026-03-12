@@ -37,7 +37,6 @@ import { useChurch } from "@/hooks/use-church";
 import { pastoralApi, PastoralVisit, CrisisAlert, CounselingRecord, membersApi } from "@/lib/api";
 import {
   HeartHandshake,
-  Calendar,
   Lock,
   Users,
   Bell,
@@ -53,12 +52,11 @@ import {
   Clock,
   UserPlus,
   Loader2,
-  Edit,
   Eye,
 } from "lucide-react";
 import { format } from "date-fns";
 
-const visitTypeLabels: Record<string, { label: string; icon: any }> = {
+const visitTypeLabels: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
   hospital: { label: "Hospital Visit", icon: Stethoscope },
   home: { label: "Home Visit", icon: Home },
   office: { label: "Office Visit", icon: Building },
@@ -369,7 +367,7 @@ export default function PastoralCare() {
   };
 
   const activeAlerts = crisisAlerts.filter((a) => ["new", "assigned", "in_progress"].includes(a.status));
-  const activeCases = counselingRecords.filter((c) => c.status === "active");
+  const _activeCases = counselingRecords.filter((c) => c.status === "active");
 
   if (!churchId) {
     return (
@@ -422,7 +420,7 @@ export default function PastoralCare() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">Not a member</SelectItem>
-                      {members.map((m: any) => (
+                      {members.map((m: { id: string; firstName: string; lastName: string; email: string }) => (
                         <SelectItem key={m.id} value={m.id}>
                           {m.firstName} {m.lastName}
                         </SelectItem>
@@ -585,7 +583,7 @@ export default function PastoralCare() {
                       <SelectValue placeholder="Select a member" />
                     </SelectTrigger>
                     <SelectContent>
-                      {members.map((m: any) => (
+                      {members.map((m: { id: string; firstName: string; lastName: string; email: string }) => (
                         <SelectItem key={m.id} value={m.id}>
                           {m.firstName} {m.lastName}
                         </SelectItem>
@@ -1055,7 +1053,7 @@ export default function PastoralCare() {
                         <SelectValue placeholder="Select a member" />
                       </SelectTrigger>
                       <SelectContent>
-                        {members.map((m: any) => (
+                        {members.map((m: { id: string; firstName: string; lastName: string; email: string }) => (
                           <SelectItem key={m.id} value={m.id}>
                             {m.firstName} {m.lastName}
                           </SelectItem>

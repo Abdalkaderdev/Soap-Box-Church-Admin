@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import {
   Megaphone,
@@ -40,7 +40,6 @@ import {
   Archive,
   Eye,
   Calendar,
-  Users,
   Mail,
   MessageSquare,
   Smartphone,
@@ -48,8 +47,6 @@ import {
   Search,
   Clock,
   CheckCircle2,
-  AlertCircle,
-  XCircle,
   BarChart3,
   Image,
   Video,
@@ -110,7 +107,7 @@ export default function Announcements() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [_statusFilter, _setStatusFilter] = useState<string>("all");
 
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -713,7 +710,7 @@ export default function Announcements() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">All Campuses</SelectItem>
-                    {campuses.map((c: any) => (
+                    {campuses.map((c: { id: number; name: string }) => (
                       <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
                     ))}
                   </SelectContent>

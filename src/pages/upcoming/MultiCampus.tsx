@@ -41,7 +41,6 @@ import {
   Settings,
   Users,
   Share2,
-  Calendar,
   Globe,
   Plus,
   Edit,
@@ -658,7 +657,7 @@ export default function MultiCampus() {
                           <SelectValue placeholder="Select a member" />
                         </SelectTrigger>
                         <SelectContent>
-                          {members.map((m: any) => (
+                          {members.map((m: { id: string; firstName: string; lastName: string; email: string }) => (
                             <SelectItem key={m.id} value={m.id}>
                               {m.firstName} {m.lastName}
                             </SelectItem>

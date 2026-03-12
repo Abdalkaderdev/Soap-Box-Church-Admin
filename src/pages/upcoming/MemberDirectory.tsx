@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +38,6 @@ import {
   Calendar,
   LayoutGrid,
   List,
-  User,
   UserCheck,
   UserX,
   Clock,
@@ -142,7 +141,7 @@ function MemberActivityTab({ memberId, churchId }: { memberId: string; churchId:
         <h4 className="text-sm font-medium text-muted-foreground mb-2">Recent Donations</h4>
         {donations.length > 0 ? (
           <div className="space-y-2">
-            {donations.slice(0, 5).map((donation: any) => (
+            {donations.slice(0, 5).map((donation: { id: number; amount: string; donationDate: string; method?: string; fund?: { name: string } }) => (
               <div key={donation.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
