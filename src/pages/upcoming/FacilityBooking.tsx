@@ -277,7 +277,7 @@ export default function FacilityBooking() {
       hasWifi: facilityForm.hasWifi,
       hasSoundSystem: facilityForm.hasSoundSystem,
       hasParking: facilityForm.hasParking,
-      hourlyRate: facilityForm.hourlyRate ? parseFloat(facilityForm.hourlyRate) : undefined,
+      hourlyRate: facilityForm.hourlyRate || undefined,
       rules: facilityForm.rules || undefined,
     };
 
@@ -289,21 +289,18 @@ export default function FacilityBooking() {
   };
 
   const handleCreateReservation = () => {
-    const data: Partial<FacilityReservation> = {
+    createReservationMutation.mutate({
       facilityId: parseInt(reservationForm.facilityId),
       eventName: reservationForm.eventName,
-      eventDescription: reservationForm.eventDescription || undefined,
-      startTime: new Date(reservationForm.startTime),
-      endTime: new Date(reservationForm.endTime),
+      eventType: 'meeting' as const,
+      startDate: reservationForm.startTime,
+      endDate: reservationForm.endTime,
       setupTime: reservationForm.setupTime ? parseInt(reservationForm.setupTime) : undefined,
-      cleanupTime: reservationForm.cleanupTime ? parseInt(reservationForm.cleanupTime) : undefined,
-      attendeeCount: reservationForm.attendeeCount ? parseInt(reservationForm.attendeeCount) : undefined,
-      needsAV: reservationForm.needsAV,
-      needsSoundSystem: reservationForm.needsSoundSystem,
-      specialRequests: reservationForm.specialRequests || undefined,
-    };
-
-    createReservationMutation.mutate(data);
+      teardownTime: reservationForm.cleanupTime ? parseInt(reservationForm.cleanupTime) : undefined,
+      expectedAttendance: reservationForm.attendeeCount ? parseInt(reservationForm.attendeeCount) : undefined,
+      avNeeds: reservationForm.needsAV ? "AV required" : undefined,
+      specialInstructions: reservationForm.specialRequests || undefined,
+    });
   };
 
   const pendingReservations = reservations.filter((r) => r.reservation.status === "pending");
@@ -798,47 +795,47 @@ export default function FacilityBooking() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {reservations.map((reservation) => {
-                      const facility = facilities.find((f) => f.id === reservation.facilityId);
+                    {reservations.map((item) => {
+                      const res = item.reservation;
                       return (
-                        <TableRow key={reservation.id}>
+                        <TableRow key={res.id}>
                           <TableCell>
                             <div>
-                              <div className="font-medium">{reservation.eventName}</div>
-                              {reservation.eventDescription && (
+                              <div className="font-medium">{res.eventName}</div>
+                              {res.specialInstructions && (
                                 <div className="text-sm text-muted-foreground line-clamp-1">
-                                  {reservation.eventDescription}
+                                  {res.specialInstructions}
                                 </div>
                               )}
                             </div>
                           </TableCell>
-                          <TableCell>{facility?.name || "Unknown"}</TableCell>
+                          <TableCell>{item.facility?.name || "Unknown"}</TableCell>
                           <TableCell>
                             <div className="text-sm">
-                              <div>{format(new Date(reservation.startTime), "MMM d, yyyy")}</div>
+                              <div>{format(new Date(res.startDate), "MMM d, yyyy")}</div>
                               <div className="text-muted-foreground">
-                                {format(new Date(reservation.startTime), "h:mm a")} -{" "}
-                                {format(new Date(reservation.endTime), "h:mm a")}
+                                {format(new Date(res.startDate), "h:mm a")} -{" "}
+                                {format(new Date(res.endDate), "h:mm a")}
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell>{reservation.attendeeCount || "-"}</TableCell>
+                          <TableCell>{res.expectedAttendance || "-"}</TableCell>
                           <TableCell>
                             <Badge
-                              className={`${statusColors[reservation.status]} text-white`}
+                              className={`${statusColors[res.status]} text-white`}
                             >
-                              {reservation.status}
+                              {res.status}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-1">
-                              {reservation.status === "pending" && (
+                              {res.status === "pending" && (
                                 <>
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     className="text-green-600"
-                                    onClick={() => approveReservationMutation.mutate(reservation.id.toString())}
+                                    onClick={() => approveReservationMutation.mutate(res.id.toString())}
                                     disabled={approveReservationMutation.isPending}
                                   >
                                     <CheckCircle2 className="h-4 w-4" />
@@ -851,7 +848,7 @@ export default function FacilityBooking() {
                                       const reason = prompt("Reason for denial:");
                                       if (reason) {
                                         denyReservationMutation.mutate({
-                                          id: reservation.id.toString(),
+                                          id: res.id.toString(),
                                           reason,
                                         });
                                       }
@@ -862,13 +859,13 @@ export default function FacilityBooking() {
                                   </Button>
                                 </>
                               )}
-                              {reservation.status === "approved" && (
+                              {res.status === "approved" && (
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => {
                                     if (confirm("Cancel this reservation?")) {
-                                      cancelReservationMutation.mutate(reservation.id.toString());
+                                      cancelReservationMutation.mutate(res.id.toString());
                                     }
                                   }}
                                   disabled={cancelReservationMutation.isPending}
