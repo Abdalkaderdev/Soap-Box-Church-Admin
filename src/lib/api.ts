@@ -3781,6 +3781,169 @@ export const serviceTimesApi = {
     api.delete<{ success: boolean }>(`/church/${churchId}/service-times/${serviceTimeId}`),
 };
 
+// ----------------------------------------------------------------------------
+// BACKGROUND CHECKS API
+// ----------------------------------------------------------------------------
+
+export interface BackgroundCheck {
+  id: number;
+  communityId: number;
+  userId: string;
+  providerId?: number;
+  checkType: 'basic' | 'standard' | 'enhanced' | 'motor_vehicle';
+  packageName?: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'expired' | 'action_required';
+  result?: 'clear' | 'consider' | 'adverse' | 'incomplete';
+  externalId?: string;
+  reportUrl?: string;
+  requestedAt: string;
+  requestedBy?: string;
+  submittedAt?: string;
+  completedAt?: string;
+  expiresAt?: string;
+  cost?: string;
+  roleAppliedFor?: string;
+  ministryArea?: string;
+  notes?: string;
+  flaggedItems?: any;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  reviewNotes?: string;
+  remindersSent: number;
+  lastReminderAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profileImageUrl?: string;
+    phone?: string;
+  };
+  documents?: BackgroundCheckDocument[];
+  reminders?: BackgroundCheckReminder[];
+}
+
+export interface BackgroundCheckDocument {
+  id: number;
+  backgroundCheckId: number;
+  documentType: 'consent_form' | 'id_document' | 'report' | 'other';
+  fileName: string;
+  fileUrl: string;
+  fileSize?: number;
+  mimeType?: string;
+  uploadedBy?: string;
+  createdAt: string;
+}
+
+export interface BackgroundCheckReminder {
+  id: number;
+  backgroundCheckId: number;
+  reminderType: 'submission_reminder' | 'expiration_warning' | 'action_required';
+  sentAt: string;
+  sentTo: string;
+  sentVia: 'email' | 'sms';
+  status: 'sent' | 'delivered' | 'bounced';
+}
+
+export interface BackgroundCheckRequirement {
+  id: number;
+  communityId: number;
+  roleName: string;
+  ministryArea?: string;
+  checkType: 'basic' | 'standard' | 'enhanced';
+  expirationMonths: number;
+  isRequired: boolean;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BackgroundCheckStats {
+  total: number;
+  pending: number;
+  inProgress: number;
+  completed: number;
+  cleared: number;
+  actionRequired: number;
+  expiringSoon: number;
+  expired: number;
+}
+
+export const backgroundChecksApi = {
+  // List all background checks
+  list: (churchId: string, params?: { status?: string; userId?: string; expiringWithin?: number }) =>
+    api.get<{ success: boolean; data: BackgroundCheck[] }>(`/church/${churchId}/background-checks`, params),
+
+  // Get a single background check
+  get: (churchId: string, checkId: string) =>
+    api.get<{ success: boolean; data: BackgroundCheck }>(`/church/${churchId}/background-checks/${checkId}`),
+
+  // Create a new background check request
+  create: (churchId: string, data: {
+    userId: string;
+    checkType: string;
+    packageName?: string;
+    roleAppliedFor?: string;
+    ministryArea?: string;
+    expirationMonths?: number;
+    notes?: string;
+  }) =>
+    api.post<{ success: boolean; data: BackgroundCheck }>(`/church/${churchId}/background-checks`, data),
+
+  // Update a background check
+  update: (churchId: string, checkId: string, data: Partial<{
+    status: string;
+    result: string;
+    notes: string;
+    reviewNotes: string;
+    roleAppliedFor: string;
+    ministryArea: string;
+    externalId: string;
+    reportUrl: string;
+    flaggedItems: any;
+  }>) =>
+    api.patch<{ success: boolean; data: BackgroundCheck }>(`/church/${churchId}/background-checks/${checkId}`, data),
+
+  // Delete a background check
+  delete: (churchId: string, checkId: string) =>
+    api.delete<{ success: boolean; message: string }>(`/church/${churchId}/background-checks/${checkId}`),
+
+  // Send a reminder
+  sendReminder: (churchId: string, checkId: string, data?: { reminderType?: string; message?: string }) =>
+    api.post<{ success: boolean; message: string }>(`/church/${churchId}/background-checks/${checkId}/send-reminder`, data || {}),
+
+  // Get expiring checks
+  getExpiring: (churchId: string, days?: number) =>
+    api.get<{ success: boolean; data: BackgroundCheck[] }>(`/church/${churchId}/background-checks/expiring`, { days }),
+
+  // Get checks for a specific member
+  getMemberChecks: (churchId: string, userId: string) =>
+    api.get<{ success: boolean; data: BackgroundCheck[] }>(`/church/${churchId}/members/${userId}/background-checks`),
+
+  // Get stats
+  getStats: (churchId: string) =>
+    api.get<{ success: boolean; data: BackgroundCheckStats }>(`/church/${churchId}/background-check-stats`),
+
+  // Requirements
+  listRequirements: (churchId: string) =>
+    api.get<{ success: boolean; data: BackgroundCheckRequirement[] }>(`/church/${churchId}/background-check-requirements`),
+
+  createRequirement: (churchId: string, data: {
+    roleName: string;
+    ministryArea?: string;
+    checkType: string;
+    expirationMonths?: number;
+    isRequired?: boolean;
+    description?: string;
+  }) =>
+    api.post<{ success: boolean; data: BackgroundCheckRequirement }>(`/church/${churchId}/background-check-requirements`, data),
+
+  deleteRequirement: (churchId: string, requirementId: string) =>
+    api.delete<{ success: boolean; message: string }>(`/church/${churchId}/background-check-requirements/${requirementId}`),
+};
+
 // ============================================================================
 // EXPORTS
 // ============================================================================
