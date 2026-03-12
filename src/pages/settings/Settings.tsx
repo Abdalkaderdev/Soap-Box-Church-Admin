@@ -390,6 +390,7 @@ export default function Settings() {
   // ===================================================================
 
   const [generalForm, setGeneralForm] = useState<Partial<GeneralSettings>>({});
+  const [brandingForm, setBrandingForm] = useState<{ primaryColor?: string; accentColor?: string }>({});
   const [saveSuccess, setSaveSuccess] = useState<Record<string, boolean>>({});
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1620,42 +1621,82 @@ export default function Settings() {
                 </div>
               </FormSection>
 
-              {/* Future Theme Features */}
+              {/* Custom Branding */}
               <FormSection
                 title="Custom Branding"
-                description="Customize your dashboard appearance (coming soon)."
+                description="Customize your dashboard colors and appearance."
                 icon={<Palette className="h-5 w-5" />}
+                onSave={() =>
+                  handleSaveSection("branding", async () => {
+                    await updateAppearanceMutation.mutateAsync({
+                      primaryColor: brandingForm.primaryColor || appearanceSettings?.primaryColor,
+                      accentColor: brandingForm.accentColor || appearanceSettings?.accentColor,
+                    });
+                  })
+                }
+                isSaving={updateAppearanceMutation.isPending}
+                saveSuccess={saveSuccess.branding}
               >
-                <div className="space-y-6 opacity-60">
+                <div className="space-y-6">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label className="font-medium">Primary Color</Label>
                       <div className="flex items-center gap-2">
-                        <div
-                          className="h-10 w-10 rounded-lg border border-border"
-                          style={{ backgroundColor: appearanceSettings?.primaryColor || "#723344" }}
+                        <input
+                          type="color"
+                          value={brandingForm.primaryColor || appearanceSettings?.primaryColor || "#723344"}
+                          onChange={(e) => setBrandingForm((prev) => ({ ...prev, primaryColor: e.target.value }))}
+                          className="h-10 w-10 rounded-lg border border-border cursor-pointer p-0.5"
+                          disabled={updateAppearanceMutation.isPending}
                         />
-                        <Input value={appearanceSettings?.primaryColor || "#723344"} disabled className="font-mono" />
+                        <Input
+                          value={brandingForm.primaryColor || appearanceSettings?.primaryColor || "#723344"}
+                          onChange={(e) => setBrandingForm((prev) => ({ ...prev, primaryColor: e.target.value }))}
+                          className="font-mono"
+                          placeholder="#723344"
+                          disabled={updateAppearanceMutation.isPending}
+                        />
                       </div>
+                      <p className="text-xs text-muted-foreground">Used for main buttons and active elements</p>
                     </div>
                     <div className="space-y-2">
                       <Label className="font-medium">Accent Color</Label>
                       <div className="flex items-center gap-2">
-                        <div
-                          className="h-10 w-10 rounded-lg border border-border"
-                          style={{ backgroundColor: appearanceSettings?.accentColor || "#4a7c59" }}
+                        <input
+                          type="color"
+                          value={brandingForm.accentColor || appearanceSettings?.accentColor || "#4a7c59"}
+                          onChange={(e) => setBrandingForm((prev) => ({ ...prev, accentColor: e.target.value }))}
+                          className="h-10 w-10 rounded-lg border border-border cursor-pointer p-0.5"
+                          disabled={updateAppearanceMutation.isPending}
                         />
-                        <Input value={appearanceSettings?.accentColor || "#4a7c59"} disabled className="font-mono" />
+                        <Input
+                          value={brandingForm.accentColor || appearanceSettings?.accentColor || "#4a7c59"}
+                          onChange={(e) => setBrandingForm((prev) => ({ ...prev, accentColor: e.target.value }))}
+                          className="font-mono"
+                          placeholder="#4a7c59"
+                          disabled={updateAppearanceMutation.isPending}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Used for highlights and success states</p>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-lg border border-border bg-muted/30">
+                    <p className="text-sm font-medium mb-2">Preview</p>
+                    <div className="flex gap-3">
+                      <div
+                        className="h-8 w-20 rounded flex items-center justify-center text-white text-xs font-medium"
+                        style={{ backgroundColor: brandingForm.primaryColor || appearanceSettings?.primaryColor || "#723344" }}
+                      >
+                        Primary
+                      </div>
+                      <div
+                        className="h-8 w-20 rounded flex items-center justify-center text-white text-xs font-medium"
+                        style={{ backgroundColor: brandingForm.accentColor || appearanceSettings?.accentColor || "#4a7c59" }}
+                      >
+                        Accent
                       </div>
                     </div>
                   </div>
-                  <Alert className="border-border bg-muted/50">
-                    <Palette className="h-4 w-4" />
-                    <AlertTitle>Coming Soon</AlertTitle>
-                    <AlertDescription>
-                      Custom branding options including colors, fonts, and logo placement will be available in a future update.
-                    </AlertDescription>
-                  </Alert>
                 </div>
               </FormSection>
 

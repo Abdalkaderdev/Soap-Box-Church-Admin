@@ -582,6 +582,54 @@ export default function ReadingPlansAdmin() {
       toast({ title: 'Failed to Delete Day', description: error.message, variant: 'destructive' }),
   });
 
+  // Swap days mutation - swaps the dayNumbers of two adjacent days
+  const swapDaysMutation = useMutation({
+    mutationFn: async ({ dayA, dayB }: { dayA: ReadingPlanDay; dayB: ReadingPlanDay }) => {
+      if (!selectedPlan) throw new Error('No plan selected');
+      // Send both days with swapped dayNumbers to the bulk upsert endpoint
+      return api.post(
+        `/church-admin/${churchId}/reading-plans/${selectedPlan.id}/days`,
+        {
+          days: [
+            {
+              dayNumber: dayB.dayNumber,
+              title: dayA.title,
+              scriptureReference: dayA.mainScripture?.reference || '',
+              scriptureText: dayA.mainScripture?.text || '',
+              devotionalContent: dayA.devotionalContent,
+              reflectionQuestion: dayA.reflectionQuestion,
+              prayerPrompt: dayA.prayerPrompt,
+            },
+            {
+              dayNumber: dayA.dayNumber,
+              title: dayB.title,
+              scriptureReference: dayB.mainScripture?.reference || '',
+              scriptureText: dayB.mainScripture?.text || '',
+              devotionalContent: dayB.devotionalContent,
+              reflectionQuestion: dayB.reflectionQuestion,
+              prayerPrompt: dayB.prayerPrompt,
+            },
+          ],
+        },
+      );
+    },
+    onSuccess: () => {
+      toast({ title: 'Days Reordered', description: 'The reading plan days have been reordered.', variant: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['reading-plan-days'] });
+    },
+    onError: (error: Error) =>
+      toast({ title: 'Failed to Reorder Days', description: error.message, variant: 'destructive' }),
+  });
+
+  // Handler to move a day up or down
+  const handleMoveDay = (day: ReadingPlanDay, direction: 'up' | 'down') => {
+    const currentIndex = days.findIndex((d) => d.id === day.id);
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= days.length) return;
+    const targetDay = days[targetIndex];
+    swapDaysMutation.mutate({ dayA: day, dayB: targetDay });
+  };
+
   // ========================================================================
   // HELPERS
   // ========================================================================
@@ -1291,13 +1339,9 @@ export default function ReadingPlansAdmin() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8"
-                                disabled={index === 0}
-                                onClick={() =>
-                                  toast({
-                                    title: 'Coming Soon',
-                                    description: 'Reordering will be available soon.',
-                                  })
-                                }
+                                disabled={index === 0 || swapDaysMutation.isPending}
+                                onClick={() => handleMoveDay(day, 'up')}
+                                title="Move up"
                               >
                                 <ArrowUp className="w-4 h-4" />
                               </Button>
@@ -1305,13 +1349,9 @@ export default function ReadingPlansAdmin() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8"
-                                disabled={index === days.length - 1}
-                                onClick={() =>
-                                  toast({
-                                    title: 'Coming Soon',
-                                    description: 'Reordering will be available soon.',
-                                  })
-                                }
+                                disabled={index === days.length - 1 || swapDaysMutation.isPending}
+                                onClick={() => handleMoveDay(day, 'down')}
+                                title="Move down"
                               >
                                 <ArrowDown className="w-4 h-4" />
                               </Button>
