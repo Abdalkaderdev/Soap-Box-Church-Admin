@@ -2937,11 +2937,14 @@ export interface Facility {
   hasProjector: boolean;
   hasSoundSystem: boolean;
   hasKitchenAccess: boolean;
+  hasWifi?: boolean;
+  hasParking?: boolean;
   isAccessible: boolean;
   amenities?: string[];
   photoUrl?: string;
   hourlyRate?: string;
   isAvailable: boolean;
+  rules?: string;
   notes?: string;
   createdAt: string;
   updatedAt: string;

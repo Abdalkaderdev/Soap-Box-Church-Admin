@@ -123,11 +123,12 @@ export default function FacilityBooking() {
     enabled: !!churchId,
   });
 
-  const { data: reservations = [], isLoading: loadingReservations } = useQuery({
+  const { data: reservationsResponse, isLoading: loadingReservations } = useQuery({
     queryKey: ["reservations", churchId],
     queryFn: () => facilityApi.listReservations(churchId),
     enabled: !!churchId,
   });
+  const reservations = reservationsResponse?.data || [];
 
   // Mutations for facilities
   const createFacilityMutation = useMutation({
@@ -305,8 +306,8 @@ export default function FacilityBooking() {
     createReservationMutation.mutate(data);
   };
 
-  const pendingReservations = reservations.filter((r) => r.status === "pending");
-  const approvedReservations = reservations.filter((r) => r.status === "approved");
+  const pendingReservations = reservations.filter((r) => r.reservation.status === "pending");
+  const approvedReservations = reservations.filter((r) => r.reservation.status === "approved");
 
   if (!churchId) {
     return (
