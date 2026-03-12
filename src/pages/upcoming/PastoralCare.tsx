@@ -367,7 +367,9 @@ export default function PastoralCare() {
   };
 
   const activeAlerts = crisisAlerts.filter((a) => ["new", "assigned", "in_progress"].includes(a.status));
-  const _activeCases = counselingRecords.filter((c) => c.status === "active");
+  // Active cases count for future dashboard
+  const activeCasesCount = counselingRecords.filter((c) => c.status === "active").length;
+  void activeCasesCount;
 
   if (!churchId) {
     return (

@@ -48,9 +48,8 @@ import {
   Loader2,
   LogIn,
   LogOut,
-  Edit,
 } from "lucide-react";
-import { format, addDays, startOfWeek, endOfWeek } from "date-fns";
+import { format, startOfWeek, endOfWeek } from "date-fns";
 
 const departmentColors: Record<string, string> = {
   worship: "bg-purple-500",

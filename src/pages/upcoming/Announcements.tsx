@@ -107,7 +107,9 @@ export default function Announcements() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [_statusFilter, _setStatusFilter] = useState<string>("all");
+  // Status filter for future use
+  const [statusFilter] = useState<string>("all");
+  void statusFilter; // Prevent unused variable warning
 
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);

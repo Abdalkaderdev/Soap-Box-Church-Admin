@@ -82,7 +82,9 @@ export default function FacilityBooking() {
   const [facilityDialogOpen, setFacilityDialogOpen] = useState(false);
   const [reservationDialogOpen, setReservationDialogOpen] = useState(false);
   const [editingFacility, setEditingFacility] = useState<Facility | null>(null);
-  const [_selectedFacilityId, _setSelectedFacilityId] = useState<string>("");
+  // Selected facility for future use
+  const [selectedFacilityId] = useState<string>("");
+  void selectedFacilityId;
 
   // Form states for facility
   const [facilityForm, setFacilityForm] = useState({

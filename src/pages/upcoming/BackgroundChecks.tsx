@@ -65,7 +65,9 @@ export default function BackgroundChecks() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [_statusFilter, _setStatusFilter] = useState<string>("all");
+  // Status filter for future use
+  const [statusFilter] = useState<string>("all");
+  void statusFilter;
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedCheck, setSelectedCheck] = useState<BackgroundCheck | null>(null);

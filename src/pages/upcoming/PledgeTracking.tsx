@@ -163,7 +163,7 @@ export default function PledgeTracking() {
     enabled: !!churchId,
   });
 
-  const { data: stats, isLoading: _loadingStats } = useQuery({
+  const { data: stats } = useQuery({
     queryKey: ['pledge-stats', churchId],
     queryFn: () => pledgeApi.getStats(churchId!),
     enabled: !!churchId,
