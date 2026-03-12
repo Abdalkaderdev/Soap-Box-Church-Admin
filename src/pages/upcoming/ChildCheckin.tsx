@@ -48,7 +48,7 @@ import { checkInApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
-interface LocalLocalChildCheckIn {
+interface LocalChildCheckIn {
   id: number;
   serviceId: number;
   childId: string;
@@ -116,7 +116,7 @@ export default function ChildCheckin() {
   // Fetch child check-ins for selected service
   const { data: checkInsData, isLoading: checkInsLoading, refetch: refetchCheckIns } = useQuery({
     queryKey: ["childCheckIns", church?.id, selectedService],
-    queryFn: () => checkInApi.getLocalChildCheckIns(church!.id.toString(), selectedService),
+    queryFn: () => checkInApi.getChildCheckIns(church!.id.toString(), selectedService),
     enabled: !!church?.id && !!selectedService,
   });
 
@@ -188,7 +188,8 @@ export default function ChildCheckin() {
 
   const services = servicesData || [];
   const stats = statsData;
-  const checkIns = checkInsData || [];
+  // Cast to local interface which has the properties we need
+  const checkIns = (checkInsData || []) as unknown as LocalChildCheckIn[];
 
   const filteredCheckIns = checkIns.filter((checkIn: LocalChildCheckIn) => {
     if (!searchQuery) return true;

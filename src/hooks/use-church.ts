@@ -8,7 +8,7 @@ import type { Church } from '../types';
 
 interface UseChurchResult {
   church: Church | null;
-  churchId: string | number | null;
+  churchId: string | null;
   isLoading: boolean;
 }
 
@@ -21,7 +21,8 @@ export function useChurch(): UseChurchResult {
 
   return {
     church,
-    churchId,
+    // Convert churchId to string for consistent API usage
+    churchId: churchId != null ? String(churchId) : null,
     isLoading,
   };
 }
