@@ -35,7 +35,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useChurch } from "@/hooks/use-church";
 import { facilityApi } from "@/lib/api";
-import type { Facility, FacilityReservation } from "@/lib/api";
+import type { Facility } from "@/lib/api";
 import {
   Building,
   Calendar,
@@ -172,7 +172,18 @@ export default function FacilityBooking() {
 
   // Mutations for reservations
   const createReservationMutation = useMutation({
-    mutationFn: (data: Partial<FacilityReservation>) =>
+    mutationFn: (data: {
+      facilityId: number;
+      eventName: string;
+      eventType?: string;
+      startDate: string;
+      endDate: string;
+      setupTime?: number;
+      teardownTime?: number;
+      expectedAttendance?: number;
+      avNeeds?: string;
+      specialInstructions?: string;
+    }) =>
       facilityApi.createReservation(churchId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reservations", churchId] });
