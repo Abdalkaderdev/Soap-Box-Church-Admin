@@ -803,7 +803,7 @@ export default function OnlineClasses() {
                 <SelectValue placeholder="Choose a member" />
               </SelectTrigger>
               <SelectContent>
-                {(members.data || []).map((m: { id: string; firstName: string; lastName: string; email: string }) => (
+                {(members.data || []).map((m: { id: string; firstName: string; lastName: string; email?: string }) => (
                   <SelectItem key={m.id} value={m.userId || m.id}>
                     {m.firstName} {m.lastName}
                   </SelectItem>

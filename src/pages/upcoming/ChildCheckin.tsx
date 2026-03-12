@@ -48,7 +48,7 @@ import { checkInApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
-interface ChildCheckIn {
+interface LocalLocalChildCheckIn {
   id: number;
   serviceId: number;
   childId: string;
@@ -84,7 +84,7 @@ export default function ChildCheckin() {
   const [selectedService, setSelectedService] = useState<string>("");
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
   const [checkOutDialogOpen, setCheckOutDialogOpen] = useState(false);
-  const [selectedCheckIn, setSelectedCheckIn] = useState<ChildCheckIn | null>(null);
+  const [selectedCheckIn, setSelectedCheckIn] = useState<LocalChildCheckIn | null>(null);
   const [checkOutCode, setCheckOutCode] = useState("");
 
   // Form state for new check-in
@@ -116,7 +116,7 @@ export default function ChildCheckin() {
   // Fetch child check-ins for selected service
   const { data: checkInsData, isLoading: checkInsLoading, refetch: refetchCheckIns } = useQuery({
     queryKey: ["childCheckIns", church?.id, selectedService],
-    queryFn: () => checkInApi.getChildCheckIns(church!.id.toString(), selectedService),
+    queryFn: () => checkInApi.getLocalChildCheckIns(church!.id.toString(), selectedService),
     enabled: !!church?.id && !!selectedService,
   });
 
@@ -186,19 +186,19 @@ export default function ChildCheckin() {
     },
   });
 
-  const services = servicesData?.data?.services || [];
-  const stats = statsData?.data;
-  const checkIns = checkInsData?.data || [];
+  const services = servicesData || [];
+  const stats = statsData;
+  const checkIns = checkInsData || [];
 
-  const filteredCheckIns = checkIns.filter((checkIn: { id: number; childName: string; status: string; checkedInAt: string }) => {
+  const filteredCheckIns = checkIns.filter((checkIn: LocalChildCheckIn) => {
     if (!searchQuery) return true;
     const childName = `${checkIn.child?.firstName || ""} ${checkIn.child?.lastName || ""}`.toLowerCase();
     const parentName = `${checkIn.parent?.firstName || ""} ${checkIn.parent?.lastName || ""}`.toLowerCase();
     return childName.includes(searchQuery.toLowerCase()) || parentName.includes(searchQuery.toLowerCase());
   });
 
-  const activeCheckIns = filteredCheckIns.filter((c: ChildCheckIn) => !c.checkedOutAt);
-  const completedCheckIns = filteredCheckIns.filter((c: ChildCheckIn) => c.checkedOutAt);
+  const activeCheckIns = filteredCheckIns.filter((c: LocalChildCheckIn) => !c.checkedOutAt);
+  const completedCheckIns = filteredCheckIns.filter((c: LocalChildCheckIn) => c.checkedOutAt);
 
   return (
     <div className="p-6 space-y-6">
@@ -410,9 +410,9 @@ export default function ChildCheckin() {
                 ) : services.length === 0 ? (
                   <SelectItem value="" disabled>No services today</SelectItem>
                 ) : (
-                  services.map((service: { id: number; name: string; serviceType: string }) => (
+                  services.map((service) => (
                     <SelectItem key={service.id} value={service.id.toString()}>
-                      {service.name} - {format(new Date(service.serviceDate), "h:mm a")}
+                      {service.name} - {format(new Date(service.scheduledDate), "h:mm a")}
                       {service.status === "active" && (
                         <Badge className="ml-2" variant="default">Active</Badge>
                       )}
@@ -479,7 +479,7 @@ export default function ChildCheckin() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      activeCheckIns.map((checkIn: ChildCheckIn) => (
+                      activeCheckIns.map((checkIn: LocalChildCheckIn) => (
                         <TableRow key={checkIn.id}>
                           <TableCell className="font-medium">
                             {checkIn.child?.firstName} {checkIn.child?.lastName}
@@ -570,7 +570,7 @@ export default function ChildCheckin() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      completedCheckIns.map((checkIn: ChildCheckIn) => {
+                      completedCheckIns.map((checkIn: LocalChildCheckIn) => {
                         const checkInTime = new Date(checkIn.checkedInAt);
                         const checkOutTime = new Date(checkIn.checkedOutAt!);
                         const duration = Math.round((checkOutTime.getTime() - checkInTime.getTime()) / 60000);

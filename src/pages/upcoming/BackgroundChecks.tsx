@@ -307,7 +307,7 @@ export default function BackgroundChecks() {
                     <SelectValue placeholder="Choose a member..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {membersData?.map((member: { id: string; firstName: string; lastName: string; email: string }) => (
+                    {membersData?.map((member: { id: string; firstName: string; lastName: string; email?: string }) => (
                       <SelectItem key={member.id} value={member.id}>
                         {member.firstName} {member.lastName} ({member.email})
                       </SelectItem>

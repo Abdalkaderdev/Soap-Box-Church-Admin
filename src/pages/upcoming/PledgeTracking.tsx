@@ -1067,7 +1067,7 @@ export default function PledgeTracking() {
                   <SelectValue placeholder="Select a member" />
                 </SelectTrigger>
                 <SelectContent>
-                  {members.map((m: { id: string; firstName: string; lastName: string; email: string }) => (
+                  {members.map((m: { id: string; firstName: string; lastName: string; email?: string }) => (
                     <SelectItem key={m.userId} value={m.userId}>
                       {m.user?.firstName} {m.user?.lastName}
                     </SelectItem>
