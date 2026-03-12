@@ -173,11 +173,12 @@ export default function OnlineClasses() {
     enabled: !!churchId,
   });
 
-  const { data: members = [] } = useQuery({
+  const { data: membersResponse } = useQuery({
     queryKey: ['members', churchId],
     queryFn: () => membersApi.list(churchId!),
     enabled: !!churchId && enrollDialogOpen,
   });
+  const members = membersResponse?.data || [];
 
   const plans = plansResponse?.data || [];
   const progress = progressResponse?.data || [];
@@ -803,8 +804,8 @@ export default function OnlineClasses() {
                 <SelectValue placeholder="Choose a member" />
               </SelectTrigger>
               <SelectContent>
-                {(members.data || []).map((m: { id: string; firstName: string; lastName: string; email?: string }) => (
-                  <SelectItem key={m.id} value={m.userId || m.id}>
+                {members.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
                     {m.firstName} {m.lastName}
                   </SelectItem>
                 ))}

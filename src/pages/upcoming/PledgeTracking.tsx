@@ -170,11 +170,12 @@ export default function PledgeTracking() {
     enabled: !!churchId,
   });
 
-  const { data: members = [] } = useQuery({
+  const { data: membersResponse } = useQuery({
     queryKey: ['members', churchId],
     queryFn: () => membersApi.list(churchId!),
     enabled: !!churchId,
   });
+  const members = membersResponse?.data || [];
 
   const { data: payments = [] } = useQuery({
     queryKey: ['pledge-payments', churchId, viewingPledge?.id],
@@ -1067,9 +1068,9 @@ export default function PledgeTracking() {
                   <SelectValue placeholder="Select a member" />
                 </SelectTrigger>
                 <SelectContent>
-                  {members.map((m: { id: string; firstName: string; lastName: string; email?: string }) => (
-                    <SelectItem key={m.userId} value={m.userId}>
-                      {m.user?.firstName} {m.user?.lastName}
+                  {members.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.firstName} {m.lastName}
                     </SelectItem>
                   ))}
                 </SelectContent>

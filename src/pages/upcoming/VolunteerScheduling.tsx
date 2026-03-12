@@ -185,7 +185,15 @@ export default function VolunteerScheduling() {
   });
 
   const createScheduleMutation = useMutation({
-    mutationFn: (data: Record<string, unknown>) => volunteerSchedulingApi.createSchedule(churchId, data),
+    mutationFn: (data: {
+      volunteerAssignmentId: number;
+      eventId?: number;
+      scheduledDate: string;
+      startTime: string;
+      endTime: string;
+      location?: string;
+      specialInstructions?: string;
+    }) => volunteerSchedulingApi.createSchedule(churchId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["volunteer-schedules", churchId] });
       queryClient.invalidateQueries({ queryKey: ["volunteer-scheduling-stats", churchId] });
@@ -892,9 +900,9 @@ export default function VolunteerScheduling() {
                         <SelectValue placeholder="Select a volunteer" />
                       </SelectTrigger>
                       <SelectContent>
-                        {volunteers.map((v: { id: string; firstName: string; lastName: string; email: string }) => (
+                        {volunteers.map((v) => (
                           <SelectItem key={v.id} value={v.id}>
-                            {v.firstName} {v.lastName}
+                            {v.member?.firstName} {v.member?.lastName}
                           </SelectItem>
                         ))}
                       </SelectContent>
