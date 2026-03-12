@@ -43,9 +43,13 @@ import {
   UserX,
   Clock,
   Eye,
+  DollarSign,
+  Heart,
+  TrendingUp,
+  RefreshCw,
 } from "lucide-react";
 import { useChurch } from "@/hooks/useChurch";
-import { membersApi } from "@/lib/api";
+import { membersApi, donationsApi } from "@/lib/api";
 import { format, parseISO } from "date-fns";
 import type { Member, MembershipStatus } from "@/types";
 
@@ -75,6 +79,120 @@ function getStatusBadge(status: MembershipStatus) {
 
 function getInitials(firstName: string, lastName: string): string {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+}
+
+// Member Activity Tab Component
+function MemberActivityTab({ memberId, churchId }: { memberId: string; churchId: string }) {
+  // Fetch member donations
+  const { data: donationsResponse, isLoading: donationsLoading } = useQuery({
+    queryKey: ['member-donations', churchId, memberId],
+    queryFn: () => donationsApi.list(churchId, { memberId, pageSize: 10 }),
+    enabled: !!churchId && !!memberId,
+  });
+
+  // Fetch donor details (includes giving summary)
+  const { data: donorDetails, isLoading: donorLoading } = useQuery({
+    queryKey: ['donor-details', churchId, memberId],
+    queryFn: () => donationsApi.getDonorDetails(churchId, memberId),
+    enabled: !!churchId && !!memberId,
+  });
+
+  const donations = donationsResponse?.data || [];
+  const isLoading = donationsLoading || donorLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Giving Summary */}
+      {donorDetails && (
+        <div className="grid grid-cols-3 gap-3">
+          <div className="p-3 rounded-lg bg-green-50 text-center">
+            <DollarSign className="h-5 w-5 mx-auto mb-1 text-green-600" />
+            <p className="text-lg font-bold text-green-700">
+              ${(donorDetails.totalGiven || 0).toLocaleString()}
+            </p>
+            <p className="text-xs text-green-600">Total Given</p>
+          </div>
+          <div className="p-3 rounded-lg bg-blue-50 text-center">
+            <Heart className="h-5 w-5 mx-auto mb-1 text-blue-600" />
+            <p className="text-lg font-bold text-blue-700">
+              {donorDetails.totalDonations || donations.length}
+            </p>
+            <p className="text-xs text-blue-600">Donations</p>
+          </div>
+          <div className="p-3 rounded-lg bg-purple-50 text-center">
+            <TrendingUp className="h-5 w-5 mx-auto mb-1 text-purple-600" />
+            <p className="text-lg font-bold text-purple-700">
+              ${(donorDetails.averageGift || 0).toLocaleString()}
+            </p>
+            <p className="text-xs text-purple-600">Avg Gift</p>
+          </div>
+        </div>
+      )}
+
+      {/* Recent Donations */}
+      <div>
+        <h4 className="text-sm font-medium text-muted-foreground mb-2">Recent Donations</h4>
+        {donations.length > 0 ? (
+          <div className="space-y-2">
+            {donations.slice(0, 5).map((donation: any) => (
+              <div key={donation.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                    <DollarSign className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">${parseFloat(donation.amount).toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {donation.fund?.name || 'General Fund'}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">
+                    {donation.donationDate ? format(parseISO(donation.donationDate), 'MMM d, yyyy') : 'N/A'}
+                  </p>
+                  <Badge variant="outline" className="text-xs capitalize">
+                    {donation.method?.replace(/_/g, ' ') || 'N/A'}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground text-center py-4">No donation history</p>
+        )}
+      </div>
+
+      {/* Event Attendance Placeholder */}
+      <div>
+        <h4 className="text-sm font-medium text-muted-foreground mb-2">Event Attendance</h4>
+        <div className="p-4 rounded-lg bg-muted/30 text-center">
+          <Calendar className="h-8 w-8 mx-auto mb-2 text-muted-foreground opacity-50" />
+          <p className="text-sm text-muted-foreground">
+            Event attendance tracking available in Check-in module
+          </p>
+        </div>
+      </div>
+
+      {/* Last Activity */}
+      {donorDetails?.lastDonationDate && (
+        <div className="p-3 rounded-lg border border-dashed">
+          <p className="text-xs text-muted-foreground">Last Activity</p>
+          <p className="font-medium">
+            Donation on {format(parseISO(donorDetails.lastDonationDate), 'MMMM d, yyyy')}
+          </p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function MemberDirectory() {
@@ -507,11 +625,7 @@ export default function MemberDirectory() {
                 </TabsContent>
 
                 <TabsContent value="activity" className="mt-4">
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>Activity history coming soon</p>
-                    <p className="text-sm">Event attendance, donations, and volunteer hours will appear here</p>
-                  </div>
+                  <MemberActivityTab memberId={selectedMember.id} churchId={churchId!} />
                 </TabsContent>
               </Tabs>
 
