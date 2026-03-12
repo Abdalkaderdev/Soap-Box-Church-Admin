@@ -1269,6 +1269,635 @@ export const volunteersApi = {
 };
 
 // ----------------------------------------------------------------------------
+// VOLUNTEER SCHEDULING API
+// ----------------------------------------------------------------------------
+
+export interface VolunteerRole {
+  id: number;
+  communityId: number;
+  name: string;
+  description?: string;
+  department?: string;
+  requirements?: string[];
+  timeCommitment?: string;
+  hoursPerWeek?: number;
+  isLeadershipRole: boolean;
+  backgroundCheckRequired: boolean;
+  minimumAge: number;
+  maximumVolunteers?: number;
+  currentVolunteers: number;
+  isActive: boolean;
+}
+
+export interface VolunteerAssignmentDetail {
+  id: number;
+  userId: string;
+  status: 'active' | 'inactive' | 'pending' | 'completed';
+  startDate: string;
+  endDate?: string;
+  trainingCompleted: boolean;
+  backgroundCheckCompleted: boolean;
+  performanceRating?: number;
+  totalHours?: string;
+  lastActiveDate?: string;
+  role: {
+    id: number;
+    name: string;
+    department?: string;
+  };
+  volunteer: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profileImageUrl?: string;
+  };
+}
+
+export interface VolunteerSchedule {
+  id: number;
+  scheduledDate: string;
+  startTime: string;
+  endTime: string;
+  location?: string;
+  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
+  specialInstructions?: string;
+  checkInTime?: string;
+  checkOutTime?: string;
+  actualHours?: string;
+  assignment: {
+    id: number;
+    userId: string;
+    status: string;
+  };
+  role: {
+    id: number;
+    name: string;
+    department?: string;
+  };
+}
+
+export interface VolunteerSchedulingStats {
+  activeVolunteers: number;
+  openPositions: number;
+  coverageRate: number;
+  upcomingShifts: number;
+  roles: {
+    id: number;
+    name: string;
+    department?: string;
+    current: number;
+    needed: number;
+  }[];
+}
+
+export const volunteerSchedulingApi = {
+  // Roles
+  listRoles: (churchId: string) =>
+    api.get<VolunteerRole[]>(`/church/${churchId}/volunteer-roles`),
+
+  createRole: (churchId: string, data: Partial<VolunteerRole>) =>
+    api.post<VolunteerRole>(`/church/${churchId}/volunteer-roles`, data),
+
+  // Assignments
+  listAssignments: (churchId: string, params?: { roleId?: string; status?: string }) =>
+    api.get<VolunteerAssignmentDetail[]>(`/church/${churchId}/volunteer-assignments`, params),
+
+  createAssignment: (churchId: string, data: {
+    volunteerRoleId: number;
+    userId: string;
+    startDate: string;
+    endDate?: string;
+    notes?: string;
+  }) =>
+    api.post<VolunteerAssignmentDetail>(`/church/${churchId}/volunteer-assignments`, data),
+
+  // Schedules
+  listSchedules: (churchId: string, params?: { startDate?: string; endDate?: string; roleId?: string }) =>
+    api.get<VolunteerSchedule[]>(`/church/${churchId}/volunteer-schedules`, params),
+
+  createSchedule: (churchId: string, data: {
+    volunteerAssignmentId: number;
+    eventId?: number;
+    scheduledDate: string;
+    startTime: string;
+    endTime: string;
+    location?: string;
+    specialInstructions?: string;
+  }) =>
+    api.post<VolunteerSchedule>(`/church/${churchId}/volunteer-schedules`, data),
+
+  updateSchedule: (churchId: string, scheduleId: string, data: Partial<VolunteerSchedule>) =>
+    api.patch<VolunteerSchedule>(`/church/${churchId}/volunteer-schedules/${scheduleId}`, data),
+
+  checkIn: (churchId: string, scheduleId: string) =>
+    api.post<VolunteerSchedule>(`/church/${churchId}/volunteer-schedules/${scheduleId}/check-in`),
+
+  checkOut: (churchId: string, scheduleId: string, feedback?: { supervisorNotes?: string; volunteerFeedback?: string }) =>
+    api.post<VolunteerSchedule>(`/church/${churchId}/volunteer-schedules/${scheduleId}/check-out`, feedback),
+
+  // Stats
+  getStats: (churchId: string) =>
+    api.get<VolunteerSchedulingStats>(`/church/${churchId}/volunteer-scheduling/stats`),
+};
+
+// ----------------------------------------------------------------------------
+// MULTI-CAMPUS API
+// ----------------------------------------------------------------------------
+
+export interface Campus {
+  id: number;
+  communityId: number;
+  name: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country: string;
+  phoneNumber?: string;
+  website?: string;
+  email?: string;
+  campusAdminName?: string;
+  campusAdminEmail?: string;
+  campusAdminMobile?: string;
+  primaryContactId?: string;
+  capacity?: number;
+  isActive: boolean;
+  settings?: any;
+  timeZone: string;
+  createdAt: string;
+  updatedAt?: string;
+  memberCount?: number;
+  adminCount?: number;
+}
+
+export interface CampusMember {
+  id: number;
+  userId: string;
+  isPrimaryCampus: boolean;
+  membershipStatus: string;
+  assignedAt: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profileImageUrl?: string;
+  };
+}
+
+export interface CampusAdmin {
+  id: number;
+  userId: string;
+  permissions: string[];
+  assignedAt: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profileImageUrl?: string;
+  };
+}
+
+export interface CampusStats {
+  totalCampuses: number;
+  totalMembers: number;
+  totalStaff: number;
+  totalCapacity: number;
+  campusBreakdown: {
+    id: number;
+    name: string;
+    memberCount: number;
+  }[];
+}
+
+export const campusApi = {
+  // Campuses
+  listCampuses: (churchId: string) =>
+    api.get<Campus[]>(`/church/${churchId}/campuses`),
+
+  getCampus: (churchId: string, campusId: string) =>
+    api.get<Campus>(`/church/${churchId}/campuses/${campusId}`),
+
+  createCampus: (churchId: string, data: Partial<Campus>) =>
+    api.post<Campus>(`/church/${churchId}/campuses`, data),
+
+  updateCampus: (churchId: string, campusId: string, data: Partial<Campus>) =>
+    api.patch<Campus>(`/church/${churchId}/campuses/${campusId}`, data),
+
+  deleteCampus: (churchId: string, campusId: string) =>
+    api.delete<void>(`/church/${churchId}/campuses/${campusId}`),
+
+  // Campus Members
+  listCampusMembers: (churchId: string, campusId: string) =>
+    api.get<CampusMember[]>(`/church/${churchId}/campuses/${campusId}/members`),
+
+  assignMemberToCampus: (churchId: string, campusId: string, data: { userId: string; isPrimaryCampus?: boolean; notes?: string }) =>
+    api.post<CampusMember>(`/church/${churchId}/campuses/${campusId}/members`, data),
+
+  // Campus Admins
+  listCampusAdmins: (churchId: string, campusId: string) =>
+    api.get<CampusAdmin[]>(`/church/${churchId}/campuses/${campusId}/admins`),
+
+  addCampusAdmin: (churchId: string, campusId: string, data: { userId: string; permissions?: string[] }) =>
+    api.post<CampusAdmin>(`/church/${churchId}/campuses/${campusId}/admins`, data),
+
+  // Stats
+  getStats: (churchId: string) =>
+    api.get<CampusStats>(`/church/${churchId}/campus-stats`),
+};
+
+// ----------------------------------------------------------------------------
+// PLEDGE TRACKING API
+// ----------------------------------------------------------------------------
+
+export interface PledgeCampaign {
+  id: number;
+  communityId: number;
+  name: string;
+  description?: string;
+  campaignType: 'annual_stewardship' | 'building_fund' | 'mission_support' | 'capital_campaign' | 'special_project' | 'other';
+  goalAmount: string;
+  currentAmount: string;
+  pledgedAmount: string;
+  startDate: string;
+  endDate?: string;
+  status: 'draft' | 'active' | 'paused' | 'completed' | 'cancelled';
+  isPublic: boolean;
+  allowOnlinePledges: boolean;
+  reminderFrequency?: string;
+  createdAt: string;
+  updatedAt: string;
+  pledgeCount?: number;
+  donorCount?: number;
+}
+
+export interface Pledge {
+  id: number;
+  campaignId: number;
+  userId: string;
+  householdId?: number;
+  totalAmount: string;
+  paidAmount: string;
+  frequency: 'one_time' | 'weekly' | 'bi_weekly' | 'monthly' | 'quarterly' | 'annually';
+  startDate: string;
+  endDate?: string;
+  status: 'active' | 'paused' | 'fulfilled' | 'cancelled' | 'defaulted';
+  notes?: string;
+  isAnonymous: boolean;
+  pledgedAt: string;
+  lastPaymentDate?: string;
+  nextPaymentDate?: string;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profileImageUrl?: string;
+  };
+  campaign?: PledgeCampaign;
+}
+
+export interface PledgePayment {
+  id: number;
+  pledgeId: number;
+  amount: string;
+  paymentMethod?: string;
+  transactionReference?: string;
+  paymentDate: string;
+  notes?: string;
+  recordedBy?: string;
+  createdAt: string;
+  pledge?: Pledge;
+}
+
+export interface PledgeStats {
+  totalCampaigns: number;
+  activeCampaigns: number;
+  totalPledged: number;
+  totalCollected: number;
+  fulfillmentRate: number;
+  activePledges: number;
+  campaignBreakdown: {
+    id: number;
+    name: string;
+    goal: number;
+    pledged: number;
+    collected: number;
+  }[];
+}
+
+export const pledgeApi = {
+  // Campaigns
+  listCampaigns: (churchId: string, status?: string) =>
+    api.get<PledgeCampaign[]>(`/church/${churchId}/pledge-campaigns`, status ? { status } : undefined),
+
+  getCampaign: (churchId: string, campaignId: string) =>
+    api.get<PledgeCampaign>(`/church/${churchId}/pledge-campaigns/${campaignId}`),
+
+  createCampaign: (churchId: string, data: Partial<PledgeCampaign>) =>
+    api.post<PledgeCampaign>(`/church/${churchId}/pledge-campaigns`, data),
+
+  updateCampaign: (churchId: string, campaignId: string, data: Partial<PledgeCampaign>) =>
+    api.patch<PledgeCampaign>(`/church/${churchId}/pledge-campaigns/${campaignId}`, data),
+
+  deleteCampaign: (churchId: string, campaignId: string) =>
+    api.delete<void>(`/church/${churchId}/pledge-campaigns/${campaignId}`),
+
+  // Pledges
+  listPledges: (churchId: string, params?: { campaignId?: string; userId?: string; status?: string }) =>
+    api.get<Pledge[]>(`/church/${churchId}/pledges`, params),
+
+  getPledge: (churchId: string, pledgeId: string) =>
+    api.get<Pledge>(`/church/${churchId}/pledges/${pledgeId}`),
+
+  createPledge: (churchId: string, data: Partial<Pledge>) =>
+    api.post<Pledge>(`/church/${churchId}/pledges`, data),
+
+  updatePledge: (churchId: string, pledgeId: string, data: Partial<Pledge>) =>
+    api.patch<Pledge>(`/church/${churchId}/pledges/${pledgeId}`, data),
+
+  deletePledge: (churchId: string, pledgeId: string) =>
+    api.delete<void>(`/church/${churchId}/pledges/${pledgeId}`),
+
+  // Payments
+  listPayments: (churchId: string, pledgeId: string) =>
+    api.get<PledgePayment[]>(`/church/${churchId}/pledges/${pledgeId}/payments`),
+
+  recordPayment: (churchId: string, pledgeId: string, data: { amount: string; paymentMethod?: string; transactionReference?: string; paymentDate?: string; notes?: string }) =>
+    api.post<PledgePayment>(`/church/${churchId}/pledges/${pledgeId}/payments`, data),
+
+  // Stats
+  getStats: (churchId: string) =>
+    api.get<PledgeStats>(`/church/${churchId}/pledge-stats`),
+};
+
+// ----------------------------------------------------------------------------
+// ANNOUNCEMENTS API
+// ----------------------------------------------------------------------------
+
+export interface Announcement {
+  id: number;
+  communityId: number;
+  title: string;
+  content: string;
+  excerpt?: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  attachments?: { name: string; url: string; type: string }[];
+  publishAt?: string;
+  expiresAt?: string;
+  status: 'draft' | 'scheduled' | 'published' | 'archived';
+  targetAudience: 'all' | 'members' | 'visitors' | 'leaders' | 'custom';
+  targetGroups?: string[];
+  targetCampusId?: number;
+  showOnApp: boolean;
+  sendEmail: boolean;
+  sendSms: boolean;
+  showOnWebsite: boolean;
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  isPinned: boolean;
+  pinnedUntil?: string;
+  viewCount: number;
+  clickCount: number;
+  authorId: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  author?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    profileImageUrl?: string;
+  };
+}
+
+export interface AnnouncementStats {
+  total: number;
+  draft: number;
+  scheduled: number;
+  published: number;
+  thisMonth: number;
+  totalViews: number;
+  totalClicks: number;
+}
+
+export const announcementsApi = {
+  list: (churchId: string, status?: string) =>
+    api.get<Announcement[]>(`/church/${churchId}/announcements`, status ? { status } : undefined),
+
+  get: (churchId: string, announcementId: string) =>
+    api.get<Announcement>(`/church/${churchId}/announcements/${announcementId}`),
+
+  create: (churchId: string, data: Partial<Announcement>) =>
+    api.post<Announcement>(`/church/${churchId}/announcements`, data),
+
+  update: (churchId: string, announcementId: string, data: Partial<Announcement>) =>
+    api.patch<Announcement>(`/church/${churchId}/announcements/${announcementId}`, data),
+
+  delete: (churchId: string, announcementId: string) =>
+    api.delete<void>(`/church/${churchId}/announcements/${announcementId}`),
+
+  publish: (churchId: string, announcementId: string) =>
+    api.post<Announcement>(`/church/${churchId}/announcements/${announcementId}/publish`),
+
+  archive: (churchId: string, announcementId: string) =>
+    api.post<Announcement>(`/church/${churchId}/announcements/${announcementId}/archive`),
+
+  getStats: (churchId: string) =>
+    api.get<AnnouncementStats>(`/church/${churchId}/announcement-stats`),
+};
+
+// ----------------------------------------------------------------------------
+// ONLINE CLASSES / DISCIPLESHIP API
+// ----------------------------------------------------------------------------
+
+export interface DiscipleshipPlan {
+  id: number;
+  communityId: number;
+  name: string;
+  description?: string;
+  category: 'doctrine' | 'conduct' | 'character' | 'service';
+  totalLessons: number;
+  estimatedDuration?: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  coverImageUrl?: string;
+  resources?: { type: string; url: string; title: string }[];
+  enrolledCount: number;
+  completedCount: number;
+  averageRating?: number;
+  status: 'draft' | 'active' | 'archived';
+  isPublic: boolean;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+  lessons?: DiscipleshipLesson[];
+}
+
+export interface DiscipleshipLesson {
+  id: number;
+  planId: number;
+  title: string;
+  description?: string;
+  content?: string;
+  orderIndex: number;
+  estimatedMinutes: number;
+  videoUrl?: string;
+  audioUrl?: string;
+  attachments?: { type: string; url: string; title: string }[];
+  scriptureReferences?: string[];
+  reflectionQuestions?: { question: string; type: string }[];
+  practiceActivities?: { title: string; description: string }[];
+  status: 'draft' | 'published';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DiscipleshipProgress {
+  id: number;
+  userId: string;
+  planId: number;
+  communityId: number;
+  currentLessonId?: number;
+  currentLessonIndex: number;
+  completedLessons: number;
+  progressPercentage: number;
+  completedLessonIds?: number[];
+  status: 'active' | 'completed' | 'paused' | 'dropped';
+  startedAt: string;
+  lastActivityAt: string;
+  completedAt?: string;
+  rating?: number;
+  feedback?: string;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    profileImageUrl?: string;
+  };
+  plan?: DiscipleshipPlan;
+}
+
+export interface DiscipleshipGroup {
+  id: number;
+  communityId: number;
+  planId?: number;
+  name: string;
+  description?: string;
+  leaderId?: string;
+  leaderName?: string;
+  meetingDay?: string;
+  meetingTime?: string;
+  meetingFrequency: 'weekly' | 'biweekly' | 'monthly';
+  meetingLocation?: string;
+  virtualMeetingUrl?: string;
+  locationType: 'in_person' | 'online' | 'hybrid';
+  memberCount: number;
+  maxMembers: number;
+  isAcceptingMembers: boolean;
+  currentLessonIndex: number;
+  groupProgressPercentage: number;
+  status: 'forming' | 'active' | 'completed' | 'archived';
+  seasonStart?: string;
+  seasonEnd?: string;
+  coverImageUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DiscipleshipCertificate {
+  id: number;
+  certificateNumber: string;
+  userId: string;
+  userName: string;
+  planId: number;
+  planName: string;
+  issuedAt: string;
+}
+
+export interface DiscipleshipStats {
+  overview: {
+    totalMembers: number;
+    enrolledInDiscipleship: number;
+    completedAtLeastOnePlan: number;
+    currentlyActive: number;
+  };
+  plans: {
+    totalPlans: number;
+    activePlans: number;
+    totalEnrollments: number;
+    completionRate: number;
+  };
+  groups: {
+    totalGroups: number;
+    activeGroups: number;
+    totalGroupMembers: number;
+    averageGroupSize: number;
+  };
+  certificates: {
+    totalIssued: number;
+    issuedThisMonth: number;
+    issuedThisYear: number;
+  };
+}
+
+export const onlineClassesApi = {
+  // Plans (Courses)
+  listPlans: (churchId: string, status?: string) =>
+    api.get<{ data: DiscipleshipPlan[] }>(`/church/${churchId}/discipleship/plans`, status ? { status } : undefined),
+
+  getPlan: (churchId: string, planId: string) =>
+    api.get<DiscipleshipPlan>(`/church/${churchId}/discipleship/plans/${planId}`),
+
+  createPlan: (churchId: string, data: Partial<DiscipleshipPlan>) =>
+    api.post<DiscipleshipPlan>(`/church/${churchId}/discipleship/plans`, data),
+
+  updatePlan: (churchId: string, planId: string, data: Partial<DiscipleshipPlan>) =>
+    api.patch<DiscipleshipPlan>(`/church/${churchId}/discipleship/plans/${planId}`, data),
+
+  deletePlan: (churchId: string, planId: string) =>
+    api.delete<void>(`/church/${churchId}/discipleship/plans/${planId}`),
+
+  // Lessons
+  createLesson: (churchId: string, data: Partial<DiscipleshipLesson>) =>
+    api.post<DiscipleshipLesson>(`/church/${churchId}/discipleship/lessons`, data),
+
+  updateLesson: (churchId: string, lessonId: string, data: Partial<DiscipleshipLesson>) =>
+    api.patch<DiscipleshipLesson>(`/church/${churchId}/discipleship/lessons/${lessonId}`, data),
+
+  deleteLesson: (churchId: string, lessonId: string) =>
+    api.delete<void>(`/church/${churchId}/discipleship/lessons/${lessonId}`),
+
+  // Progress & Enrollment
+  listProgress: (churchId: string, params?: { planId?: string; userId?: string; status?: string }) =>
+    api.get<{ data: DiscipleshipProgress[] }>(`/church/${churchId}/discipleship/progress`, params),
+
+  enrollUser: (churchId: string, data: { userId: string; planId: number }) =>
+    api.post<DiscipleshipProgress>(`/church/${churchId}/discipleship/progress/enroll`, data),
+
+  // Groups
+  listGroups: (churchId: string, status?: string) =>
+    api.get<{ data: DiscipleshipGroup[] }>(`/church/${churchId}/discipleship/groups`, status ? { status } : undefined),
+
+  // Certificates
+  listCertificates: (churchId: string) =>
+    api.get<DiscipleshipCertificate[]>(`/church/${churchId}/discipleship/certificates`),
+
+  issueCertificate: (churchId: string, data: { userId: string; planId: number }) =>
+    api.post<{ certificateNumber: string }>(`/church/${churchId}/discipleship/certificates/issue`, data),
+
+  // Stats
+  getStats: (churchId: string) =>
+    api.get<{ data: DiscipleshipStats }>(`/church/${churchId}/discipleship/stats`),
+};
+
+// ----------------------------------------------------------------------------
 // MINISTRY TEAMS API
 // ----------------------------------------------------------------------------
 
@@ -2241,6 +2870,18 @@ export const checkInApi = {
   getChildCheckIns: (churchId: string, serviceId: string) =>
     api.get<ChildCheckIn[]>(`/church/${churchId}/check-in/services/${serviceId}/children`),
 
+  getChildStats: (churchId: string) =>
+    api.get<{
+      totalCheckedIn: number;
+      totalCheckedOut: number;
+      currentlyPresent: number;
+      byAgeGroup: Record<string, number>;
+      byRoom: Record<string, number>;
+    }>(`/church/${churchId}/check-in/children/stats`),
+
+  printChildTag: (churchId: string, childCheckInId: string) =>
+    api.post<ChildCheckIn>(`/church/${churchId}/check-in/children/${childCheckInId}/print-tag`),
+
   // Kiosks
   listKiosks: (churchId: string) =>
     api.get<CheckInKiosk[]>(`/church/${churchId}/check-in/kiosks`),
@@ -2310,6 +2951,289 @@ export const checkInApi = {
 
 // ----------------------------------------------------------------------------
 // REPORTS API
+// ----------------------------------------------------------------------------
+
+// ============================================================================
+// FACILITY & ROOM BOOKING API
+// ============================================================================
+
+export interface Facility {
+  id: number;
+  communityId: number;
+  campusId?: number;
+  name: string;
+  description?: string;
+  facilityType: 'sanctuary' | 'fellowship_hall' | 'classroom' | 'gym' | 'kitchen' | 'office' | 'outdoor';
+  building?: string;
+  floor?: string;
+  roomNumber?: string;
+  capacity?: number;
+  hasAV: boolean;
+  hasProjector: boolean;
+  hasSoundSystem: boolean;
+  hasKitchenAccess: boolean;
+  isAccessible: boolean;
+  amenities?: string[];
+  photoUrl?: string;
+  hourlyRate?: string;
+  isAvailable: boolean;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FacilityReservation {
+  id: number;
+  facilityId: number;
+  communityId: number;
+  requestedBy: string;
+  eventName: string;
+  eventType?: 'ministry' | 'meeting' | 'service' | 'rental' | 'maintenance';
+  startDate: string;
+  endDate: string;
+  setupTime?: number;
+  teardownTime?: number;
+  isRecurring: boolean;
+  recurrencePattern?: any;
+  recurrenceEndDate?: string;
+  expectedAttendance?: number;
+  setupNeeds?: string;
+  avNeeds?: string;
+  cateringNeeds?: string;
+  specialInstructions?: string;
+  status: 'pending' | 'approved' | 'denied' | 'cancelled';
+  approvedBy?: string;
+  approvedAt?: string;
+  denialReason?: string;
+  isExternal: boolean;
+  rentalFee?: string;
+  depositAmount?: string;
+  depositPaid: boolean;
+  contactName?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  facility?: Facility;
+  requester?: { id: string; firstName: string; lastName: string; email: string };
+}
+
+export const facilityApi = {
+  // Facilities
+  listFacilities: (churchId: string, params?: { type?: string; available?: boolean }) =>
+    api.get<Facility[]>(`/church/${churchId}/facilities`, params),
+
+  getFacility: (churchId: string, facilityId: string) =>
+    api.get<Facility & { reservations: FacilityReservation[] }>(`/church/${churchId}/facilities/${facilityId}`),
+
+  createFacility: (churchId: string, data: Partial<Facility>) =>
+    api.post<Facility>(`/church/${churchId}/facilities`, data),
+
+  updateFacility: (churchId: string, facilityId: string, data: Partial<Facility>) =>
+    api.patch<Facility>(`/church/${churchId}/facilities/${facilityId}`, data),
+
+  deleteFacility: (churchId: string, facilityId: string) =>
+    api.delete<void>(`/church/${churchId}/facilities/${facilityId}`),
+
+  checkAvailability: (churchId: string, facilityId: string, startDate: string, endDate: string) =>
+    api.get<{ reservations: FacilityReservation[]; isAvailable: boolean }>(
+      `/church/${churchId}/facilities/${facilityId}/availability`,
+      { startDate, endDate }
+    ),
+
+  // Reservations
+  listReservations: (churchId: string, params?: {
+    facilityId?: string;
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+    page?: number;
+    limit?: number;
+  }) =>
+    api.get<PaginatedResponse<{ reservation: FacilityReservation; facility: Facility; requester: any }>>(
+      `/church/${churchId}/reservations`,
+      params
+    ),
+
+  createReservation: (churchId: string, data: {
+    facilityId: number;
+    eventName: string;
+    eventType?: string;
+    startDate: string;
+    endDate: string;
+    setupTime?: number;
+    teardownTime?: number;
+    expectedAttendance?: number;
+    setupNeeds?: string;
+    avNeeds?: string;
+    cateringNeeds?: string;
+    specialInstructions?: string;
+    isExternal?: boolean;
+    contactName?: string;
+    contactPhone?: string;
+    contactEmail?: string;
+    notes?: string;
+  }) =>
+    api.post<FacilityReservation>(`/church/${churchId}/reservations`, data),
+
+  updateReservation: (churchId: string, reservationId: string, data: Partial<FacilityReservation>) =>
+    api.patch<FacilityReservation>(`/church/${churchId}/reservations/${reservationId}`, data),
+
+  approveReservation: (churchId: string, reservationId: string) =>
+    api.post<FacilityReservation>(`/church/${churchId}/reservations/${reservationId}/approve`),
+
+  denyReservation: (churchId: string, reservationId: string, reason: string) =>
+    api.post<FacilityReservation>(`/church/${churchId}/reservations/${reservationId}/deny`, { reason }),
+
+  cancelReservation: (churchId: string, reservationId: string) =>
+    api.post<FacilityReservation>(`/church/${churchId}/reservations/${reservationId}/cancel`),
+};
+
+// ----------------------------------------------------------------------------
+// PASTORAL CARE
+// ----------------------------------------------------------------------------
+
+export interface PastoralVisit {
+  id: number;
+  communityId: number;
+  memberId: string;
+  pastorId: string;
+  visitType: 'hospital' | 'home' | 'office' | 'hospice' | 'prison' | 'phone' | 'video';
+  visitDate: string;
+  duration?: number;
+  location?: string;
+  purpose?: 'illness' | 'grief' | 'crisis' | 'encouragement' | 'discipleship' | 'reconciliation' | 'counseling';
+  summary?: string;
+  prayerPoints?: string;
+  scriptures?: string[];
+  communionGiven: boolean;
+  anointing: boolean;
+  followUpNeeded: boolean;
+  followUpDate?: string;
+  followUpNotes?: string;
+  isConfidential: boolean;
+  createdAt: string;
+  updatedAt: string;
+  member?: { id: string; firstName: string; lastName: string };
+  pastor?: { id: string; firstName: string; lastName: string };
+}
+
+export interface CrisisAlert {
+  id: number;
+  communityId: number;
+  memberId?: string;
+  memberName?: string;
+  alertType: 'hospitalization' | 'death' | 'accident' | 'family_emergency' | 'spiritual_crisis' | 'financial_crisis' | 'other';
+  severity: 'critical' | 'urgent' | 'moderate' | 'low';
+  title: string;
+  description?: string;
+  location?: string;
+  contactPerson?: string;
+  contactPhone?: string;
+  reportedBy: string;
+  assignedTo?: string;
+  status: 'new' | 'assigned' | 'in_progress' | 'resolved' | 'closed';
+  responseStarted?: string;
+  resolvedAt?: string;
+  resolution?: string;
+  notifyPastors: boolean;
+  notifyPrayerTeam: boolean;
+  notifyDeacons: boolean;
+  createdAt: string;
+  updatedAt: string;
+  reporter?: { id: string; firstName: string; lastName: string };
+  assignee?: { id: string; firstName: string; lastName: string };
+  member?: { id: string; firstName: string; lastName: string };
+}
+
+export interface CounselingRecord {
+  id: number;
+  communityId: number;
+  memberId: string;
+  counselorId: string;
+  caseNumber?: string;
+  caseType?: 'premarital' | 'marital' | 'grief' | 'addiction' | 'depression' | 'anxiety' | 'family' | 'spiritual';
+  startDate: string;
+  endDate?: string;
+  status: 'active' | 'on_hold' | 'completed' | 'referred';
+  sessionCount: number;
+  lastSessionDate?: string;
+  nextSessionDate?: string;
+  presentingIssue?: string;
+  goals?: string;
+  progress?: string;
+  referredTo?: string;
+  referralReason?: string;
+  isConfidential: boolean;
+  createdAt: string;
+  updatedAt: string;
+  member?: { id: string; firstName: string; lastName: string };
+  counselor?: { id: string; firstName: string; lastName: string };
+}
+
+export interface PastoralStats {
+  visitsThisMonth: number;
+  pendingFollowUps: number;
+  activeAlerts: number;
+  activeCounseling: number;
+  visitsByType: Record<string, number>;
+}
+
+export const pastoralApi = {
+  // Pastoral Visits
+  listVisits: (churchId: string, params?: { memberId?: string; pastorId?: string; startDate?: string; endDate?: string }) =>
+    api.get<PastoralVisit[]>(`/church/${churchId}/pastoral/visits`, params),
+
+  getVisit: (churchId: string, visitId: string) =>
+    api.get<PastoralVisit>(`/church/${churchId}/pastoral/visits/${visitId}`),
+
+  createVisit: (churchId: string, data: Partial<PastoralVisit>) =>
+    api.post<PastoralVisit>(`/church/${churchId}/pastoral/visits`, data),
+
+  updateVisit: (churchId: string, visitId: string, data: Partial<PastoralVisit>) =>
+    api.patch<PastoralVisit>(`/church/${churchId}/pastoral/visits/${visitId}`, data),
+
+  deleteVisit: (churchId: string, visitId: string) =>
+    api.delete<void>(`/church/${churchId}/pastoral/visits/${visitId}`),
+
+  // Pastoral Stats
+  getStats: (churchId: string) =>
+    api.get<PastoralStats>(`/church/${churchId}/pastoral/stats`),
+
+  // Crisis Alerts
+  listCrisisAlerts: (churchId: string, params?: { status?: string }) =>
+    api.get<CrisisAlert[]>(`/church/${churchId}/pastoral/crisis-alerts`, params),
+
+  createCrisisAlert: (churchId: string, data: Partial<CrisisAlert>) =>
+    api.post<CrisisAlert>(`/church/${churchId}/pastoral/crisis-alerts`, data),
+
+  updateCrisisAlert: (churchId: string, alertId: string, data: Partial<CrisisAlert>) =>
+    api.patch<CrisisAlert>(`/church/${churchId}/pastoral/crisis-alerts/${alertId}`, data),
+
+  assignCrisisAlert: (churchId: string, alertId: string, assignedTo: string) =>
+    api.post<CrisisAlert>(`/church/${churchId}/pastoral/crisis-alerts/${alertId}/assign`, { assignedTo }),
+
+  resolveCrisisAlert: (churchId: string, alertId: string, resolution: string) =>
+    api.post<CrisisAlert>(`/church/${churchId}/pastoral/crisis-alerts/${alertId}/resolve`, { resolution }),
+
+  // Counseling Records
+  listCounselingRecords: (churchId: string, params?: { status?: string; memberId?: string }) =>
+    api.get<CounselingRecord[]>(`/church/${churchId}/pastoral/counseling`, params),
+
+  createCounselingRecord: (churchId: string, data: Partial<CounselingRecord>) =>
+    api.post<CounselingRecord>(`/church/${churchId}/pastoral/counseling`, data),
+
+  updateCounselingRecord: (churchId: string, recordId: string, data: Partial<CounselingRecord>) =>
+    api.patch<CounselingRecord>(`/church/${churchId}/pastoral/counseling/${recordId}`, data),
+
+  logCounselingSession: (churchId: string, recordId: string, notes: string, nextSessionDate?: string) =>
+    api.post<CounselingRecord>(`/church/${churchId}/pastoral/counseling/${recordId}/session`, { notes, nextSessionDate }),
+
+  closeCounselingCase: (churchId: string, recordId: string, outcome: string, referredTo?: string, referralReason?: string) =>
+    api.post<CounselingRecord>(`/church/${churchId}/pastoral/counseling/${recordId}/close`, { outcome, referredTo, referralReason }),
+};
+
 // ----------------------------------------------------------------------------
 
 export interface ReportFilters extends ReportParams {
