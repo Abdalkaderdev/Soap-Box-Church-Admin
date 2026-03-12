@@ -101,6 +101,7 @@ const Landing = lazy(() => import("./pages/Landing"));
 const Features = lazy(() => import("./pages/Features"));
 const AboutUs = lazy(() => import("./pages/AboutUs"));
 const Contact = lazy(() => import("./pages/Contact"));
+const HelpCenter = lazy(() => import("./pages/HelpCenter"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 
@@ -122,6 +123,7 @@ export const routes = {
   features: "/features",
   about: "/about",
   contact: "/contact",
+  helpCenter: "/help",
   privacy: "/privacy",
   terms: "/terms",
   dashboard: "/dashboard",
@@ -255,6 +257,9 @@ export function AppRoutes() {
 
         {/* Contact */}
         <Route path="/contact" component={Contact} />
+
+        {/* Help Center */}
+        <Route path="/help" component={HelpCenter} />
 
         {/* Privacy */}
         <Route path="/privacy" component={Privacy} />

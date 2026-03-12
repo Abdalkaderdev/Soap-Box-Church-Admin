@@ -247,15 +247,15 @@ export default function Contact() {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-100 group-hover:bg-purple-50 transition-colors duration-300">
+                <Link href="/help" className="flex items-start gap-3 p-3 rounded-xl bg-gray-100 group-hover:bg-purple-50 transition-colors duration-300 cursor-pointer hover:ring-2 hover:ring-purple-300">
                   <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
                     <BookOpen className="w-4 h-4 text-purple-600" />
                   </div>
                   <div>
                     <div className="font-semibold text-sm">Help Center</div>
-                    <span className="text-gray-500 text-xs">Coming Soon</span>
+                    <span className="text-purple-600 text-xs hover:underline">Browse FAQs & guides</span>
                   </div>
-                </div>
+                </Link>
               </div>
             </div>
 

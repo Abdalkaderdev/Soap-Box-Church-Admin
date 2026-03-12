@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/ta
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { formatEngagementCount } from "../../utils/displayName";
+import { api } from "@/lib/api";
 import {
   BarChart3,
   TrendingUp,
@@ -72,28 +73,40 @@ export default function EngagementAnalytics() {
 
   // Fetch engagement metrics with error handling
   const { data: metrics, isLoading: metricsLoading, isError: metricsError } = useQuery<EngagementMetrics>({
-    queryKey: [`/api/engagement/metrics?range=${timeRange}&platform=${selectedPlatform}&type=${contentType}`],
+    queryKey: ['engagement-metrics', timeRange, selectedPlatform, contentType],
+    queryFn: async () => {
+      return api.get<EngagementMetrics>(`/engagement/metrics?range=${timeRange}&platform=${selectedPlatform}&type=${contentType}`);
+    },
     retry: false,
     refetchOnWindowFocus: false
   });
 
   // Fetch platform statistics with error handling
   const { data: platformStats, isLoading: statsLoading, isError: statsError } = useQuery<PlatformStats[]>({
-    queryKey: [`/api/engagement/platform-stats?range=${timeRange}`],
+    queryKey: ['engagement-platform-stats', timeRange],
+    queryFn: async () => {
+      return api.get<PlatformStats[]>(`/engagement/platform-stats?range=${timeRange}`);
+    },
     retry: false,
     refetchOnWindowFocus: false
   });
 
   // Fetch sentiment analysis with error handling
   const { data: sentiment, isLoading: sentimentLoading, isError: sentimentError } = useQuery<SentimentAnalysis>({
-    queryKey: [`/api/engagement/sentiment?range=${timeRange}`],
+    queryKey: ['engagement-sentiment', timeRange],
+    queryFn: async () => {
+      return api.get<SentimentAnalysis>(`/engagement/sentiment?range=${timeRange}`);
+    },
     retry: false,
     refetchOnWindowFocus: false
   });
 
   // Fetch AI insights with error handling
   useQuery<{ insights: string[] }>({
-    queryKey: [`/api/engagement/ai-insights?range=${timeRange}`],
+    queryKey: ['engagement-ai-insights', timeRange],
+    queryFn: async () => {
+      return api.get<{ insights: string[] }>(`/engagement/ai-insights?range=${timeRange}`);
+    },
     retry: false,
     refetchOnWindowFocus: false
   });
