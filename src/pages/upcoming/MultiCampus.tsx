@@ -33,7 +33,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useChurch } from "@/hooks/use-church";
-import { campusApi, Campus, membersApi } from "@/lib/api";
+import { campusApi, membersApi } from "@/lib/api";
+import type { Campus } from "@/lib/api";
 import {
   Building2,
   MapPin,
@@ -113,7 +114,7 @@ export default function MultiCampus() {
   const { data: members = [] } = useQuery({
     queryKey: ["members-simple", churchId],
     queryFn: async () => {
-      const result = await membersApi.getMembers(churchId, { pageSize: 500 });
+      const result = await membersApi.list(churchId!, { pageSize: 500 });
       return result.data || [];
     },
     enabled: !!churchId,

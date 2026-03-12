@@ -34,7 +34,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useChurch } from "@/hooks/use-church";
-import { pastoralApi, PastoralVisit, CrisisAlert, CounselingRecord, membersApi } from "@/lib/api";
+import { pastoralApi, membersApi } from "@/lib/api";
+import type { PastoralVisit, CrisisAlert, CounselingRecord } from "@/lib/api";
 import {
   HeartHandshake,
   Lock,
@@ -196,7 +197,7 @@ export default function PastoralCare() {
   const { data: members = [] } = useQuery({
     queryKey: ["members-simple", churchId],
     queryFn: async () => {
-      const result = await membersApi.getMembers(churchId, { pageSize: 500 });
+      const result = await membersApi.list(churchId!, { pageSize: 500 });
       return result.data || [];
     },
     enabled: !!churchId,

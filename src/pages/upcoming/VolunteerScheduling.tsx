@@ -34,7 +34,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useChurch } from "@/hooks/use-church";
-import { volunteerSchedulingApi, volunteersApi, VolunteerRole } from "@/lib/api";
+import { volunteerSchedulingApi, volunteersApi } from "@/lib/api";
+import type { VolunteerRole } from "@/lib/api";
 import {
   Users,
   Calendar,

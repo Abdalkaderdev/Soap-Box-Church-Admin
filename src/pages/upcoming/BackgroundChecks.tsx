@@ -56,13 +56,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useChurch } from "@/hooks/useChurch";
-import { backgroundChecksApi, membersApi, BackgroundCheck, BackgroundCheckStats } from "@/lib/api";
-import { toast } from "sonner";
+import { backgroundChecksApi, membersApi } from "@/lib/api";
+import type { BackgroundCheck, BackgroundCheckStats } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 import { format, formatDistanceToNow, differenceInDays } from "date-fns";
 
 export default function BackgroundChecks() {
   const { churchId } = useChurch();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   // Status filter for future use
@@ -130,10 +132,10 @@ export default function BackgroundChecks() {
       queryClient.invalidateQueries({ queryKey: ["background-check-stats"] });
       setIsCreateDialogOpen(false);
       setNewCheck({ userId: "", checkType: "standard", roleAppliedFor: "", ministryArea: "", notes: "" });
-      toast.success("Background check request created");
+      toast({ title: "Background check request created" });
     },
     onError: () => {
-      toast.error("Failed to create background check request");
+      toast({ title: "Failed to create background check request", variant: "destructive" });
     },
   });
 
@@ -144,10 +146,10 @@ export default function BackgroundChecks() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["background-checks"] });
       queryClient.invalidateQueries({ queryKey: ["background-check-stats"] });
-      toast.success("Background check updated");
+      toast({ title: "Background check updated" });
     },
     onError: () => {
-      toast.error("Failed to update background check");
+      toast({ title: "Failed to update background check", variant: "destructive" });
     },
   });
 
@@ -156,10 +158,10 @@ export default function BackgroundChecks() {
     mutationFn: (checkId: string) => backgroundChecksApi.sendReminder(churchId!, checkId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["background-checks"] });
-      toast.success("Reminder sent successfully");
+      toast({ title: "Reminder sent successfully" });
     },
     onError: () => {
-      toast.error("Failed to send reminder");
+      toast({ title: "Failed to send reminder", variant: "destructive" });
     },
   });
 
@@ -170,10 +172,10 @@ export default function BackgroundChecks() {
       queryClient.invalidateQueries({ queryKey: ["background-checks"] });
       queryClient.invalidateQueries({ queryKey: ["background-check-stats"] });
       setIsDetailDialogOpen(false);
-      toast.success("Background check deleted");
+      toast({ title: "Background check deleted" });
     },
     onError: () => {
-      toast.error("Failed to delete background check");
+      toast({ title: "Failed to delete background check", variant: "destructive" });
     },
   });
 
@@ -256,7 +258,7 @@ export default function BackgroundChecks() {
       setSelectedCheck(response.data);
       setIsDetailDialogOpen(true);
     } catch {
-      toast.error("Failed to load background check details");
+      toast({ title: "Failed to load background check details", variant: "destructive" });
     }
   };
 

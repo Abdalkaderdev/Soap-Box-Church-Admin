@@ -45,7 +45,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { checkInApi } from "@/lib/api";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
 interface ChildCheckIn {
@@ -79,6 +79,7 @@ interface ChildCheckIn {
 export default function ChildCheckin() {
   const { church } = useAuth();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedService, setSelectedService] = useState<string>("");
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
@@ -131,7 +132,7 @@ export default function ChildCheckin() {
         specialNotes: data.specialNotes,
       }),
     onSuccess: () => {
-      toast.success("Child checked in successfully!");
+      toast({ title: "Child checked in successfully!" });
       setCheckInDialogOpen(false);
       setNewCheckIn({
         childName: "",
@@ -146,7 +147,7 @@ export default function ChildCheckin() {
       queryClient.invalidateQueries({ queryKey: ["childStats"] });
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to check in child");
+      toast({ title: error.message || "Failed to check in child", variant: "destructive" });
     },
   });
 
@@ -160,7 +161,7 @@ export default function ChildCheckin() {
         { securityCode: checkOutCode }
       ),
     onSuccess: () => {
-      toast.success("Child checked out successfully!");
+      toast({ title: "Child checked out successfully!" });
       setCheckOutDialogOpen(false);
       setSelectedCheckIn(null);
       setCheckOutCode("");
@@ -168,7 +169,7 @@ export default function ChildCheckin() {
       queryClient.invalidateQueries({ queryKey: ["childStats"] });
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Invalid security code or check-out failed");
+      toast({ title: error.message || "Invalid security code or check-out failed", variant: "destructive" });
     },
   });
 
@@ -177,11 +178,11 @@ export default function ChildCheckin() {
     mutationFn: (childCheckInId: string) =>
       checkInApi.printChildTag(church!.id.toString(), childCheckInId),
     onSuccess: () => {
-      toast.success("Name tag marked as printed");
+      toast({ title: "Name tag marked as printed" });
       refetchCheckIns();
     },
     onError: () => {
-      toast.error("Failed to mark tag as printed");
+      toast({ title: "Failed to mark tag as printed", variant: "destructive" });
     },
   });
 

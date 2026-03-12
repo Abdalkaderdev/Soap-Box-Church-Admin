@@ -2194,41 +2194,6 @@ export const templatesApi = {
 // DISCIPLESHIP API
 // ----------------------------------------------------------------------------
 
-export interface DiscipleshipPlan {
-  id: string | number;
-  name: string;
-  description: string;
-  category: 'doctrine' | 'conduct' | 'character' | 'service';
-  totalLessons: number;
-  estimatedDuration?: string;
-  difficulty?: 'beginner' | 'intermediate' | 'advanced';
-  coverImageUrl?: string;
-  enrolledCount: number;
-  completedCount: number;
-  averageRating?: number;
-  status: 'draft' | 'active' | 'archived';
-  isPublic: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface DiscipleshipLesson {
-  id: string | number;
-  planId: number;
-  title: string;
-  description?: string;
-  content?: string;
-  orderIndex: number;
-  estimatedMinutes?: number;
-  videoUrl?: string;
-  audioUrl?: string;
-  scriptureReferences?: string[];
-  reflectionQuestions?: { question: string; type?: string }[];
-  status: 'draft' | 'published';
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface DiscipleProgress {
   id: string | number;
   memberId: string;

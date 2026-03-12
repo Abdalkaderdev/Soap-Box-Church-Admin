@@ -52,7 +52,7 @@ import {
 } from "lucide-react";
 import { useChurch } from "@/hooks/useChurch";
 import { pledgeApi, membersApi, type PledgeCampaign, type Pledge, type PledgePayment } from "@/lib/api";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 
 const CAMPAIGN_TYPES = [
@@ -100,6 +100,7 @@ function getStatusBadge(status: string) {
 export default function PledgeTracking() {
   const { churchId } = useChurch();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -187,11 +188,11 @@ export default function PledgeTracking() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pledge-campaigns', churchId] });
       queryClient.invalidateQueries({ queryKey: ['pledge-stats', churchId] });
-      toast.success("Campaign created successfully");
+      toast({ title: "Campaign created successfully" });
       setCampaignDialogOpen(false);
       resetCampaignForm();
     },
-    onError: () => toast.error("Failed to create campaign"),
+    onError: () => toast({ title: "Failed to create campaign", variant: "destructive" }),
   });
 
   const updateCampaignMutation = useMutation({
@@ -200,11 +201,11 @@ export default function PledgeTracking() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pledge-campaigns', churchId] });
       queryClient.invalidateQueries({ queryKey: ['pledge-stats', churchId] });
-      toast.success("Campaign updated successfully");
+      toast({ title: "Campaign updated successfully" });
       setCampaignDialogOpen(false);
       resetCampaignForm();
     },
-    onError: () => toast.error("Failed to update campaign"),
+    onError: () => toast({ title: "Failed to update campaign", variant: "destructive" }),
   });
 
   const deleteCampaignMutation = useMutation({
@@ -212,9 +213,9 @@ export default function PledgeTracking() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pledge-campaigns', churchId] });
       queryClient.invalidateQueries({ queryKey: ['pledge-stats', churchId] });
-      toast.success("Campaign deleted successfully");
+      toast({ title: "Campaign deleted successfully" });
     },
-    onError: () => toast.error("Failed to delete campaign"),
+    onError: () => toast({ title: "Failed to delete campaign", variant: "destructive" }),
   });
 
   const createPledgeMutation = useMutation({
@@ -223,11 +224,11 @@ export default function PledgeTracking() {
       queryClient.invalidateQueries({ queryKey: ['pledges', churchId] });
       queryClient.invalidateQueries({ queryKey: ['pledge-stats', churchId] });
       queryClient.invalidateQueries({ queryKey: ['pledge-campaigns', churchId] });
-      toast.success("Pledge recorded successfully");
+      toast({ title: "Pledge recorded successfully" });
       setPledgeDialogOpen(false);
       resetPledgeForm();
     },
-    onError: () => toast.error("Failed to record pledge"),
+    onError: () => toast({ title: "Failed to record pledge", variant: "destructive" }),
   });
 
   const updatePledgeMutation = useMutation({
@@ -236,11 +237,11 @@ export default function PledgeTracking() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pledges', churchId] });
       queryClient.invalidateQueries({ queryKey: ['pledge-stats', churchId] });
-      toast.success("Pledge updated successfully");
+      toast({ title: "Pledge updated successfully" });
       setPledgeDialogOpen(false);
       resetPledgeForm();
     },
-    onError: () => toast.error("Failed to update pledge"),
+    onError: () => toast({ title: "Failed to update pledge", variant: "destructive" }),
   });
 
   const deletePledgeMutation = useMutation({
@@ -248,9 +249,9 @@ export default function PledgeTracking() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pledges', churchId] });
       queryClient.invalidateQueries({ queryKey: ['pledge-stats', churchId] });
-      toast.success("Pledge deleted successfully");
+      toast({ title: "Pledge deleted successfully" });
     },
-    onError: () => toast.error("Failed to delete pledge"),
+    onError: () => toast({ title: "Failed to delete pledge", variant: "destructive" }),
   });
 
   const recordPaymentMutation = useMutation({
@@ -260,11 +261,11 @@ export default function PledgeTracking() {
       queryClient.invalidateQueries({ queryKey: ['pledges', churchId] });
       queryClient.invalidateQueries({ queryKey: ['pledge-stats', churchId] });
       queryClient.invalidateQueries({ queryKey: ['pledge-payments', churchId] });
-      toast.success("Payment recorded successfully");
+      toast({ title: "Payment recorded successfully" });
       setPaymentDialogOpen(false);
       resetPaymentForm();
     },
-    onError: () => toast.error("Failed to record payment"),
+    onError: () => toast({ title: "Failed to record payment", variant: "destructive" }),
   });
 
   // Form handlers

@@ -55,7 +55,7 @@ import {
 } from "lucide-react";
 import { useChurch } from "@/hooks/useChurch";
 import { announcementsApi, campusApi, type Announcement } from "@/lib/api";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 
 const PRIORITY_OPTIONS = [
@@ -105,6 +105,7 @@ function getPriorityBadge(priority: string) {
 export default function Announcements() {
   const { churchId } = useChurch();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   // Status filter for future use
@@ -163,11 +164,11 @@ export default function Announcements() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['announcements', churchId] });
       queryClient.invalidateQueries({ queryKey: ['announcement-stats', churchId] });
-      toast.success("Announcement created successfully");
+      toast({ title: "Announcement created successfully", variant: "success" });
       setDialogOpen(false);
       resetForm();
     },
-    onError: () => toast.error("Failed to create announcement"),
+    onError: () => toast({ title: "Failed to create announcement", variant: "destructive" }),
   });
 
   const updateMutation = useMutation({
@@ -176,11 +177,11 @@ export default function Announcements() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['announcements', churchId] });
       queryClient.invalidateQueries({ queryKey: ['announcement-stats', churchId] });
-      toast.success("Announcement updated successfully");
+      toast({ title: "Announcement updated successfully", variant: "success" });
       setDialogOpen(false);
       resetForm();
     },
-    onError: () => toast.error("Failed to update announcement"),
+    onError: () => toast({ title: "Failed to update announcement", variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
@@ -188,9 +189,9 @@ export default function Announcements() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['announcements', churchId] });
       queryClient.invalidateQueries({ queryKey: ['announcement-stats', churchId] });
-      toast.success("Announcement deleted successfully");
+      toast({ title: "Announcement deleted successfully", variant: "success" });
     },
-    onError: () => toast.error("Failed to delete announcement"),
+    onError: () => toast({ title: "Failed to delete announcement", variant: "destructive" }),
   });
 
   const publishMutation = useMutation({
@@ -198,9 +199,9 @@ export default function Announcements() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['announcements', churchId] });
       queryClient.invalidateQueries({ queryKey: ['announcement-stats', churchId] });
-      toast.success("Announcement published successfully");
+      toast({ title: "Announcement published successfully", variant: "success" });
     },
-    onError: () => toast.error("Failed to publish announcement"),
+    onError: () => toast({ title: "Failed to publish announcement", variant: "destructive" }),
   });
 
   const archiveMutation = useMutation({
@@ -208,9 +209,9 @@ export default function Announcements() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['announcements', churchId] });
       queryClient.invalidateQueries({ queryKey: ['announcement-stats', churchId] });
-      toast.success("Announcement archived successfully");
+      toast({ title: "Announcement archived successfully", variant: "success" });
     },
-    onError: () => toast.error("Failed to archive announcement"),
+    onError: () => toast({ title: "Failed to archive announcement", variant: "destructive" }),
   });
 
   // Form handlers

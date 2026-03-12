@@ -51,7 +51,7 @@ import {
 } from "lucide-react";
 import { useChurch } from "@/hooks/useChurch";
 import { onlineClassesApi, membersApi, type DiscipleshipPlan } from "@/lib/api";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 
 const CATEGORY_OPTIONS = [
@@ -112,6 +112,7 @@ function getCategoryBadge(category: string) {
 }
 
 export default function OnlineClasses() {
+  const { toast } = useToast();
   const { churchId } = useChurch();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("courses");
@@ -189,11 +190,11 @@ export default function OnlineClasses() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['discipleship-plans', churchId] });
       queryClient.invalidateQueries({ queryKey: ['discipleship-stats', churchId] });
-      toast.success("Course created successfully");
+      toast({ title: "Course created successfully" });
       setCourseDialogOpen(false);
       resetCourseForm();
     },
-    onError: () => toast.error("Failed to create course"),
+    onError: () => toast({ title: "Failed to create course", variant: "destructive" }),
   });
 
   const updateCourseMutation = useMutation({
@@ -202,11 +203,11 @@ export default function OnlineClasses() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['discipleship-plans', churchId] });
       queryClient.invalidateQueries({ queryKey: ['discipleship-stats', churchId] });
-      toast.success("Course updated successfully");
+      toast({ title: "Course updated successfully" });
       setCourseDialogOpen(false);
       resetCourseForm();
     },
-    onError: () => toast.error("Failed to update course"),
+    onError: () => toast({ title: "Failed to update course", variant: "destructive" }),
   });
 
   const deleteCourseMutation = useMutation({
@@ -214,9 +215,9 @@ export default function OnlineClasses() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['discipleship-plans', churchId] });
       queryClient.invalidateQueries({ queryKey: ['discipleship-stats', churchId] });
-      toast.success("Course deleted successfully");
+      toast({ title: "Course deleted successfully" });
     },
-    onError: () => toast.error("Failed to delete course"),
+    onError: () => toast({ title: "Failed to delete course", variant: "destructive" }),
   });
 
   const enrollMutation = useMutation({
@@ -225,12 +226,12 @@ export default function OnlineClasses() {
       queryClient.invalidateQueries({ queryKey: ['discipleship-progress', churchId] });
       queryClient.invalidateQueries({ queryKey: ['discipleship-plans', churchId] });
       queryClient.invalidateQueries({ queryKey: ['discipleship-stats', churchId] });
-      toast.success("Member enrolled successfully");
+      toast({ title: "Member enrolled successfully" });
       setEnrollDialogOpen(false);
       setSelectedCourseForEnroll(null);
       setEnrollUserId("");
     },
-    onError: () => toast.error("Failed to enroll member"),
+    onError: () => toast({ title: "Failed to enroll member", variant: "destructive" }),
   });
 
   // Form handlers
